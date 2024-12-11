@@ -1,1 +1,1 @@
-Tetris game by zhongren
+Tetris game by ZX
