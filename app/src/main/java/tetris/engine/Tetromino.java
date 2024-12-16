@@ -11,4 +11,9 @@ public class Tetromino {
     final int order = 4;
     Point2D centre;
     List<Mino> components;
+    Mino[] children;
+
+    public Tetromino() {
+        children = new Mino[order];
+    }
 }
