@@ -1,11 +1,11 @@
-package tetris.engine;
+ package tetris.engine;
 
 import java.util.List;
 import javafx.geometry.Dimension2D;
 
 public class Board {
     private Dimension2D size;
-    List<Tetromino> allTetromino;
+    List<Mino> allMinos;
 
     public Board(double width, double height) {
         this.size = new Dimension2D(width, height);
