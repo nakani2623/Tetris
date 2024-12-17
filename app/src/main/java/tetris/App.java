@@ -10,14 +10,15 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import tetris.engine.Board;
+import tetris.engine.GameEngine;
 import tetris.graphics.GameWindow;
 
 public class App extends Application {
 
     @Override
     public void start(Stage stage) {
-        Board gameboard = new Board(10, 20);
-        GameWindow gameWindow = new GameWindow(gameboard);
+        GameEngine gameEngine = new GameEngine();
+        GameWindow gameWindow = new GameWindow(gameEngine.getBoard());
 
         Scene scene = new Scene(gameWindow.getRoot(), 640, 480);
         stage.setScene(scene);
