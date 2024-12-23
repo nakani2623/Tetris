@@ -6,10 +6,13 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import tetris.engine.Board;
 
+import javafx.beans.binding.Bindings;
+
 /**
  * Manages In-Game contents, including a gameboard
  */
 public class GameWindow {
+    static final int minoLength = 20;
     Pane root;
     Board board;
 
@@ -40,11 +43,12 @@ public class GameWindow {
     
     private Node createBoardBorder(Board board) {
         Rectangle boardBorder = new Rectangle(
-            board.getWidth(), 
-            board.getHeight()
+            board.getWidth() * minoLength, 
+            board.getHeight() * minoLength
         );
         boardBorder.setFill(Color.TRANSPARENT);
         boardBorder.setStroke(Color.BLACK);
+        centerRectangle(boardBorder, root);
 
         return boardBorder;
     }
@@ -55,4 +59,16 @@ public class GameWindow {
         // TODO: implementation incomplete
         return new Rectangle();
     }
+
+    /**
+     *  Bind the rectangle x and y properties to center it within the root
+     * Copilot implementation
+     * @param rectangle
+     * @param root
+     */
+    private void centerRectangle(Rectangle rectangle, Pane root) {
+        rectangle.xProperty().bind(Bindings.subtract(root.widthProperty().divide(2), rectangle.widthProperty().divide(2)));
+        rectangle.yProperty().bind(Bindings.subtract(root.heightProperty().divide(2), rectangle.heightProperty().divide(2)));
+    }
+
 }
