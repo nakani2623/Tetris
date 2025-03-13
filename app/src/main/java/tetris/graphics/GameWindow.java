@@ -2,17 +2,17 @@ package tetris.graphics;
 
 import javafx.scene.Node;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import tetris.engine.Board;
-
 import javafx.beans.binding.Bindings;
 
 /**
  * Manages In-Game contents, including a gameboard
  */
 public class GameWindow {
-    static final int minoLength = 20;
+    static final int MINO_SIZE = 20;
     Pane root;
     Board board;
 
@@ -35,7 +35,7 @@ public class GameWindow {
         Pane boardGraphics = new Pane();
 
         Node boardBorder = createBoardBorder(board);
-        Node boardGrid = createBoardGrid(board);
+        GridPane boardGrid = createBoardGrid(board);
         boardGraphics.getChildren().addAll(boardBorder, boardGrid);
 
         return boardGraphics;
@@ -43,8 +43,8 @@ public class GameWindow {
     
     private Node createBoardBorder(Board board) {
         Rectangle boardBorder = new Rectangle(
-            board.getWidth() * minoLength, 
-            board.getHeight() * minoLength
+            board.getWidth() * MINO_SIZE, 
+            board.getHeight() * MINO_SIZE
         );
         boardBorder.setFill(Color.TRANSPARENT);
         boardBorder.setStroke(Color.BLACK);
@@ -53,11 +53,26 @@ public class GameWindow {
         return boardBorder;
     }
     /**
-     * creates graphics for game board, grid 
+     * creates graphics for grid of squares
      */
-    private Node createBoardGrid(Board board) {
+    private GridPane createBoardGrid(Board board) {
         // TODO: implementation incomplete
-        return new Rectangle();
+
+        // init a grid with Rectangles (Width * Height)
+        GridPane gridPane = new GridPane();
+
+        // grid border style
+        gridPane.setStyle("-fx-border-color: black; -fx-border-width: 3px; -fx-background-color: white;");
+
+        for (int i = 0; i < board.getWidth(); i++)
+            for (int j = 0; j < board.getHeight(); j++) {
+                Rectangle square = new Rectangle(MINO_SIZE, MINO_SIZE, Color.LIGHTGRAY);
+                square.setStroke(Color.BLACK);
+                gridPane.add(square, i, j);
+            }
+            centerGridPane(gridPane, root);
+
+        return gridPane;
     }
 
     /**
@@ -70,5 +85,20 @@ public class GameWindow {
         rectangle.xProperty().bind(Bindings.subtract(root.widthProperty().divide(2), rectangle.widthProperty().divide(2)));
         rectangle.yProperty().bind(Bindings.subtract(root.heightProperty().divide(2), rectangle.heightProperty().divide(2)));
     }
+
+    /**
+     * centering GridPane
+     * @param gridPane
+     * @param root
+     */
+    private void centerGridPane(GridPane gridPane, Pane root) {
+        gridPane.layoutXProperty().bind(
+            Bindings.subtract(root.widthProperty().divide(2), gridPane.widthProperty().divide(2))
+        );
+        gridPane.layoutYProperty().bind(
+            Bindings.subtract(root.heightProperty().divide(2), gridPane.heightProperty().divide(2))
+        );
+    }
+    
 
 }
