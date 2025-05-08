@@ -16,11 +16,8 @@ public class App extends Application {
         GameWindow gameWindow = new GameWindow(gameEngine.getBoard());
 
         // game start
-        gameEngine.start();
-        gameWindow.drawCurrent();
-        Scene scene = new Scene(gameWindow.getRoot(), 640, 480);
-        stage.setScene(scene);
-        stage.show();
+        // gameWindow.drawCurrent();
+        gameWindow.execute(stage);
     }
 
     public static void main(String[] args) {
