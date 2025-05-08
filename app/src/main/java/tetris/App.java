@@ -4,7 +4,6 @@
 package tetris;
 
 import javafx.application.Application;
-import javafx.scene.Scene;
 import javafx.stage.Stage;
 import tetris.engine.GameEngine;
 import tetris.graphics.GameWindow;
@@ -16,9 +15,7 @@ public class App extends Application {
         GameEngine gameEngine = new GameEngine();
         GameWindow gameWindow = new GameWindow(gameEngine.getBoard());
 
-        Scene scene = new Scene(gameWindow.getRoot(), 640, 480);
-        stage.setScene(scene);
-        stage.show();
+        gameWindow.execute(stage);
     }
 
     public static void main(String[] args) {

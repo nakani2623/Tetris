@@ -1,6 +1,8 @@
 package tetris.graphics;
 
 import javafx.scene.Node;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
@@ -20,6 +22,12 @@ public class GameWindow {
         root = new Pane();
         Pane boardGraphics = createBoardGraphics(board);
         root.getChildren().add(boardGraphics);
+    }
+
+    public void execute(Stage stage) {
+        Scene scene = new Scene(root, 640, 480);
+        stage.setScene(scene);
+        stage.show();
     }
 
     public Pane getRoot() {
