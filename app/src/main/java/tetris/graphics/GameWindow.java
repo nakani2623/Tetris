@@ -1,5 +1,6 @@
 package tetris.graphics;
 
+import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
@@ -9,6 +10,9 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import tetris.engine.Board;
 import javafx.beans.binding.Bindings;
+import tetris.engine.Mino;
+import tetris.engine.Tetromino;
+import tetris.engine.type.TetrominoType;
 
 /**
  * Manages In-Game contents, including a gameboard
@@ -17,8 +21,12 @@ public class GameWindow {
     static final int MINO_SIZE = 20;
     Pane root;
     Board board;
+    Rectangle[][] grid;
+    Set<Rectangle> updatingSquares;
 
     public GameWindow(Board board) {
+        this.board = board;
+        grid = new Rectangle[(int)board.getWidth()][(int)board.getHeight()];
         root = new Pane();
         Pane boardGraphics = createBoardGraphics(board);
         root.getChildren().add(boardGraphics);
@@ -77,10 +85,46 @@ public class GameWindow {
                 Rectangle square = new Rectangle(MINO_SIZE, MINO_SIZE, Color.LIGHTGRAY);
                 square.setStroke(Color.BLACK);
                 gridPane.add(square, i, j);
+                grid[i][j] = square;
             }
-            centerGridPane(gridPane, root);
-
+        centerGridPane(gridPane, root);
         return gridPane;
+    }
+
+//    public void drawT(Point2D centre) {
+//        grid[0][0].setFill(Color.PURPLE);
+//        grid[0][1].setFill(Color.PURPLE);
+//        grid[0][2].setFill(Color.PURPLE);
+//        grid[1][1].setFill(Color.PURPLE);
+//    }
+//
+//    public void drawI() {
+//        grid[0][0].setFill(Color.AQUA);
+//        grid[0][1].setFill(Color.AQUA);
+//        grid[0][2].setFill(Color.AQUA);
+//        grid[0][3].setFill(Color.AQUA);
+//    }
+
+    public void drawCurrent() {
+        Color c = switch (board.currentTetromino.type) {
+            case O -> Color.YELLOW;
+            case I -> Color.AQUA;
+            case T -> Color.PURPLE;
+            case S -> Color.GREEN;
+            case Z -> Color.RED;
+            case J -> Color.BLUE;
+            case L -> Color.ORANGE;
+            default -> Color.GREY;
+        };
+
+        int x = (int)board.currentTetromino.centre.getX();
+        int y = (int)board.currentTetromino.centre.getY();
+        for (Mino m : board.currentTetromino.children) {
+            grid
+                    [(int)m.getPosition().getX()]
+                    [(int)m.getPosition().getY()]
+                        .setFill(c);
+        }
     }
 
     /**

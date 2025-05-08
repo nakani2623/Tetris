@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javafx.geometry.Point2D;
+import tetris.engine.type.TetrominoType;
 
 
 /**
@@ -11,12 +12,33 @@ import javafx.geometry.Point2D;
  */
 public class Tetromino {
     final int order = 4;
-    Point2D centre;
-    List<Mino> children;
+    public Point2D centre;
+    public List<Mino> children;
+    public TetrominoType type;
 //    Mino[] children;
 
-    public Tetromino(List<Mino> children) {
-        this.children = children;
+    public Tetromino(Point2D centre, TetrominoType type) {
+        this();
+        this.centre = centre;
+        this.type = type;
+        children = new ArrayList<>();
+
+        int x = (int)centre.getX();
+        int y = (int)centre.getY();
+//        if (type == TetrominoType.T) {
+//            children.add(new Mino(x-1, y-1));
+//            children.add(new Mino(x, y));
+//            children.add(new Mino(x+1, y));
+//            children.add(new Mino(x-1, y+1));
+//        }
+
+        children.add(new Mino(x-1, y-1));
+        children.add(new Mino(x, y));
+        children.add(new Mino(x+1, y));
+        children.add(new Mino(x-1, y+1));
+    }
+    public Tetromino() {
+
     }
 
 //    /**

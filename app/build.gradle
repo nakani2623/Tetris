@@ -28,9 +28,9 @@ dependencies {
 application {
     // Define the main class for the application.
     mainClass = 'tetris.App'
-    applicationDefaultJvmArgs = [
-        '-XstartOnFirstThread'
-    ]
+    // applicationDefaultJvmArgs = [
+    //     '-XstartOnFirstThread'
+    // ]
 }
 
 javafx {

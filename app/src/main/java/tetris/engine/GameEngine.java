@@ -39,4 +39,10 @@ public class GameEngine implements Observable {
     public Board getBoard() {
         return board;
     }
+
+//    public void place() {
+//        Tetromino tm = generator.run();
+//        board.allTetrominos.add(tm);
+//    }
 }
+
