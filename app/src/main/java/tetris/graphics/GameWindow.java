@@ -22,7 +22,7 @@ public class GameWindow {
     Pane root;
     Board board;
     Rectangle[][] grid;
-    Set<Rectangle> updatingSquares;
+    // Set<Rectangle> updatingSquares;
 
     public GameWindow(Board board) {
         this.board = board;
