@@ -14,9 +14,8 @@ public class App extends Application {
     public void start(Stage stage) {
         GameEngine gameEngine = new GameEngine();
         GameWindow gameWindow = new GameWindow(gameEngine.getBoard());
-
-        // game start
-        // gameWindow.drawCurrent();
+        
+        gameEngine.loop();
         gameWindow.execute(stage);
     }
 

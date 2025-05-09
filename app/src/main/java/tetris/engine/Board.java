@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import javafx.geometry.Dimension2D;
+import javafx.geometry.Point2D;
 
 public class Board {
     private Dimension2D size;
@@ -45,5 +46,10 @@ public class Board {
 
     public double getHeight() {
         return size.getHeight();
+    }
+
+    public Point2D centreTopPoint() {
+
+        return new Point2D(getWidth()/2, getHeight());
     }
 }

@@ -18,9 +18,8 @@ public class Tetromino {
 //    Mino[] children;
 
     public Tetromino(Point2D centre, TetrominoType type) {
-        this();
+        this(type);
         this.centre = centre;
-        this.type = type;
         children = new ArrayList<>();
 
         int x = (int)centre.getX();
@@ -37,8 +36,9 @@ public class Tetromino {
         children.add(new Mino(x+1, y));
         children.add(new Mino(x-1, y+1));
     }
-    public Tetromino() {
 
+    public Tetromino(TetrominoType type) {
+        this.type = type;
     }
 
 //    /**

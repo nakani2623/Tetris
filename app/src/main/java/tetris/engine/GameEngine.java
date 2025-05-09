@@ -10,13 +10,26 @@ import java.util.List;
 public class GameEngine implements Observable {
     private Board board;
     private List<Tetromino> tetrominos;
+    public Tetromino currentTetromino;
+
+
     private TetrominoGenerator tetrominoGenerator;
     private lockStrategy lockStrategy;
     private List<Observer> observers;
     public GameEngine() {
         board = new Board();
         tetrominos = new ArrayList<>();
+        currentTetromino = null;
+
         observers = new ArrayList<>();
+    }
+
+    public void loop() {
+        while (currentTetromino != null) {
+            
+    	    currentTetromino = new Tetromino(board.centreTopPoint(), null);
+            
+        }
     }
 
     @Override
