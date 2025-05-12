@@ -24,17 +24,12 @@ public class Tetromino {
 
         int x = (int)centre.getX();
         int y = (int)centre.getY();
-//        if (type == TetrominoType.T) {
-//            children.add(new Mino(x-1, y-1));
-//            children.add(new Mino(x, y));
-//            children.add(new Mino(x+1, y));
-//            children.add(new Mino(x-1, y+1));
-//        }
-
-        children.add(new Mino(x-1, y-1));
-        children.add(new Mino(x, y));
-        children.add(new Mino(x+1, y));
-        children.add(new Mino(x-1, y+1));
+        if (type == TetrominoType.T) {
+           children.add(new Mino(x, y-1));
+           children.add(new Mino(x-1, y));
+           children.add(new Mino(x, y));
+           children.add(new Mino(x+1, y));
+        }
     }
 
     public Tetromino(TetrominoType type) {
