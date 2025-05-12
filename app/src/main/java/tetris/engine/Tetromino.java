@@ -3,7 +3,8 @@ package tetris.engine;
 import java.util.ArrayList;
 import java.util.List;
 
-import javafx.geometry.Point2D;
+import tetris.utils.Point;
+
 import tetris.engine.type.TetrominoType;
 
 
@@ -12,12 +13,12 @@ import tetris.engine.type.TetrominoType;
  */
 public class Tetromino {
     final int order = 4;
-    public Point2D centre;
+    public Point centre;
     public List<Mino> children;
     public TetrominoType type;
 //    Mino[] children;
 
-    public Tetromino(Point2D centre, TetrominoType type) {
+    public Tetromino(Point centre, TetrominoType type) {
         this(type);
         this.centre = centre;
         children = new ArrayList<>();

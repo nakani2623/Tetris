@@ -3,8 +3,7 @@
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import javafx.geometry.Dimension2D;
-import javafx.geometry.Point2D;
+import tetris.utils.Point;
 
 public class Board {
     private int width;
@@ -50,7 +49,7 @@ public class Board {
         return this.height;
     }
 
-    public Point2D centreTopPoint() {
-        return new Point2D((this.width/2)-1, 1);
+    public Point centreTopPoint() {
+        return new Point((this.width/2)-1, 1);
     }
 }

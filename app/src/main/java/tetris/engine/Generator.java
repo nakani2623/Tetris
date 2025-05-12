@@ -1,6 +1,5 @@
 package tetris.engine;
 
-import javafx.geometry.Point2D;
 import tetris.engine.type.TetrominoType;
 
 import java.util.ArrayList;

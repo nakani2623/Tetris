@@ -1,22 +1,22 @@
 package tetris.engine;
 
-import javafx.geometry.Point2D;
+import tetris.utils.Point;
 
 /*
  * square component of Polyominoes
  */
 public class Mino {
-    private Point2D position;
+    private Point position;
 
     public Mino(int x, int y) {
-        this.position = new Point2D(x, y);
+        this.position = new Point(x, y);
     }
 
-    public void setPosition(Point2D position) {
+    public void setPosition(Point position) {
         this.position = position;
     }
 
-    public Point2D getPosition() {
+    public Point getPosition() {
         return position;
     }
 }
