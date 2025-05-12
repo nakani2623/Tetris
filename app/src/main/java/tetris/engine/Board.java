@@ -7,7 +7,8 @@ import javafx.geometry.Dimension2D;
 import javafx.geometry.Point2D;
 
 public class Board {
-    private Dimension2D size;
+    private int width;
+    private int height;
     public List<Tetromino> allTetrominos;
     public List<Tetromino> upcomingTetrominos;
     public Tetromino currentTetromino;
@@ -21,18 +22,19 @@ public class Board {
      * @param width
      * @param height
      */
-    public Board(double width, double height) {
-        this();
-        this.size = new Dimension2D(width, height);
+    public Board(int width, int height) {
+        this.height = height;
+        this.width = width;
+
+        allTetrominos = new ArrayList<Tetromino>();
+        upcomingTetrominos = new LinkedList<>();
     }
 
     /**
      * Constructs default game board 10x20 dimension
      */
     public Board() {
-        this.size = new Dimension2D(10, 20);
-        allTetrominos = new ArrayList<Tetromino>();
-        upcomingTetrominos = new LinkedList<>();
+        this(10, 20);
     }
 
     public void populateUpcoming(List<Tetromino> newTetrominos) {
@@ -41,15 +43,14 @@ public class Board {
     }
 
     public double getWidth() {
-        return size.getWidth();
+        return this.width;
     }
 
     public double getHeight() {
-        return size.getHeight();
+        return this.height;
     }
 
     public Point2D centreTopPoint() {
-
-        return new Point2D(getWidth()/2, getHeight());
+        return new Point2D((this.width/2)-1, 1);
     }
 }
