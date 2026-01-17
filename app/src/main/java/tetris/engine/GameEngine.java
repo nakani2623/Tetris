@@ -14,7 +14,7 @@ public class GameEngine implements Observable {
 
 
     private TetrominoGenerator tetrominoGenerator;
-    private lockStrategy lockStrategy;
+    private LockStrategy lockStrategy;
     private List<Observer> observers;
     public GameEngine() {
         board = new Board();

@@ -1,6 +1,6 @@
 package tetris.engine;
 
-public interface lockStrategy {
+public interface LockStrategy {
     /**
      * this method is called when the location of controlling tetromino changes,
      * it checks whether the controlling tetromino should be locked
