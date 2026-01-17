@@ -4,6 +4,7 @@
 # Ignore Gradle build output directory
 build
 **/build/
+**/bin/
 !src/**/build/
 
 # Ignore Gradle GUI config
