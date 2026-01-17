@@ -1,5 +1,8 @@
 package tetris.graphics;
 
+import tetris.engine.GameEngine;
+import tetris.engine.observers.ScoreDisplay;
+
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -20,16 +23,23 @@ import tetris.engine.type.TetrominoType;
 public class GameWindow {
     static final int MINO_SIZE = 20;
     Pane root;
+    GameEngine engine;
     Board board;
     Rectangle[][] grid;
     // Set<Rectangle> updatingSquares;
 
-    public GameWindow(Board board) {
-        this.board = board;
+    public GameWindow(GameEngine gameEngine) {
+        this.engine = gameEngine;
+        this.board = engine.getBoard();
+
         grid = new Rectangle[(int)board.getWidth()][(int)board.getHeight()];
         root = new Pane();
         Pane boardGraphics = createBoardGraphics(board);
         root.getChildren().add(boardGraphics);
+
+        ScorePane scorePanel = new ScorePane();
+        root.getChildren().add(scorePanel);
+        new ScoreDisplay(engine.getScore(), scorePanel);
     }
 
     public void execute(Stage stage) {
@@ -91,21 +101,8 @@ public class GameWindow {
         return gridPane;
     }
 
-//    public void drawT(Point2D centre) {
-//        grid[0][0].setFill(Color.PURPLE);
-//        grid[0][1].setFill(Color.PURPLE);
-//        grid[0][2].setFill(Color.PURPLE);
-//        grid[1][1].setFill(Color.PURPLE);
-//    }
-//
-//    public void drawI() {
-//        grid[0][0].setFill(Color.AQUA);
-//        grid[0][1].setFill(Color.AQUA);
-//        grid[0][2].setFill(Color.AQUA);
-//        grid[0][3].setFill(Color.AQUA);
-//    }
+    public void drawCurrentPiece() {
 
-    public void drawCurrent() {
         Color c = switch (board.currentTetromino.type) {
             case O -> Color.YELLOW;
             case I -> Color.AQUA;

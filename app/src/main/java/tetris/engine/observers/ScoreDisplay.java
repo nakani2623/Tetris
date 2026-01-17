@@ -1,21 +1,39 @@
 package tetris.engine.observers;
 
-import tetris.engine.GameEngine;
+
+import javafx.application.Platform;
+import tetris.engine.Score;
+import tetris.graphics.ScorePane;
 
 public class ScoreDisplay implements Observer {
-    private Observable observable = null;
+    private final Observable observable;
+    private final ScorePane panel;
 
-    public ScoreDisplay(Observable observable) {
+
+    public  ScoreDisplay(Observable observable, ScorePane panel) {
         this.observable = observable;
+        this.panel = panel;
         observable.addObserver(this);
+        // score UI rarely needs 60Hz; consider 100–500ms
     }
 
     @Override
     public void update() {
-        if (!(observable instanceof GameEngine)) {
-            return;
-        }
-        GameEngine gameEngine = (GameEngine) observable;
-        // todo: update data for rendering scores
+        if (!(observable instanceof Score score)) return;
+
+        // Read engine state (must be thread-safe!)
+        double elapsed = score.getElapsedTime();
+        double points = score.getScore();
+        double pps = score.getPiecesPerSecond();
+
+        System.out.println("time: " + elapsed);
+        // Update UI on JavaFX thread
+        Platform.runLater(() -> {
+            panel.updateTime(elapsed);
+            panel.updateScore(points);
+            panel.updatePPS(pps);
+        });
+
     }
 }
+

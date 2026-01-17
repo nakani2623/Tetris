@@ -13,9 +13,9 @@ public class App extends Application {
     @Override
     public void start(Stage stage) {
         GameEngine gameEngine = new GameEngine();
-        GameWindow gameWindow = new GameWindow(gameEngine.getBoard());
+        GameWindow gameWindow = new GameWindow(gameEngine);
         
-        gameEngine.loop();
+        // gameEngine.loop();
         gameWindow.execute(stage);
     }
 
