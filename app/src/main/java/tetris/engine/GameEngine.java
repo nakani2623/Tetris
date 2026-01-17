@@ -12,12 +12,14 @@ public class GameEngine implements Observable {
     private List<Tetromino> tetrominos;
     public Tetromino currentTetromino;
 
+    private Score score;
 
     private TetrominoGenerator tetrominoGenerator;
     private LockStrategy lockStrategy;
     private List<Observer> observers;
     public GameEngine() {
         board = new Board();
+        score = new Score();
         tetrominos = new ArrayList<>();
         currentTetromino = null;
 
@@ -51,6 +53,10 @@ public class GameEngine implements Observable {
 
     public Board getBoard() {
         return board;
+    }
+
+    public Score getScore() {
+        return score;
     }
 
 //    public void place() {
