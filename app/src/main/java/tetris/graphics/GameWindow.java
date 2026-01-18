@@ -1,7 +1,7 @@
 package tetris.graphics;
 
 import tetris.engine.GameEngine;
-import tetris.engine.observers.ScoreDisplay;
+import tetris.engine.observers.ScoreDisplayManager;
 
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
@@ -39,7 +39,7 @@ public class GameWindow {
 
         ScorePane scorePanel = new ScorePane();
         root.getChildren().add(scorePanel);
-        new ScoreDisplay(engine.getScore(), scorePanel);
+        new ScoreDisplayManager(engine.getScore(), scorePanel);
     }
 
     public void execute(Stage stage) {

@@ -2,10 +2,10 @@ package tetris.engine.observers;
 
 import tetris.engine.GameEngine;
 
-public class BoardDisplay implements Observer {
+public class BoardDisplayManager implements Observer {
     private Observable observable = null;
 
-    public BoardDisplay(Observable observable) {
+    public BoardDisplayManager(Observable observable) {
         this.observable = observable;
         observable.addObserver(this);
     }

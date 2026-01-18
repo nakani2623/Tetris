@@ -5,12 +5,12 @@ import javafx.application.Platform;
 import tetris.engine.Score;
 import tetris.graphics.ScorePane;
 
-public class ScoreDisplay implements Observer {
+public class ScoreDisplayManager implements Observer {
     private final Observable observable;
     private final ScorePane panel;
 
 
-    public  ScoreDisplay(Observable observable, ScorePane panel) {
+    public  ScoreDisplayManager(Observable observable, ScorePane panel) {
         this.observable = observable;
         this.panel = panel;
         observable.addObserver(this);
