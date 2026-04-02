@@ -45,8 +45,6 @@ public class Score implements Observable{
             this.piecesPerSecond = piecesPlaced / elapsedTime;
             this.attackPerMinute = (piecesPlaced / elapsedTime) * 60;
         }
-        System.out.println("Elapsed Time: " + elapsedTime + "s, PPS: " + piecesPerSecond + ", APM: " + attackPerMinute);
-        System.out.println(this.observers.size());
         notifyObservers();
     }
 

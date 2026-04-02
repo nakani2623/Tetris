@@ -26,7 +26,6 @@ public class ScoreDisplayManager implements Observer {
         double points = score.getScore();
         double pps = score.getPiecesPerSecond();
 
-        System.out.println("time: " + elapsed);
         // Update UI on JavaFX thread
         Platform.runLater(() -> {
             panel.updateTime(elapsed);

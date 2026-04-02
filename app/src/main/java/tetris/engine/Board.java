@@ -31,6 +31,7 @@ public class Board implements Observable{
 
         allTetrominos = new ArrayList<Tetromino>();
         // upcomingTetrominos = new LinkedList<>();
+        observers = new ArrayList<Observer>();
     }
 
     /**

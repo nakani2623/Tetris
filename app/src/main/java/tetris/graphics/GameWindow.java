@@ -26,9 +26,9 @@ public class GameWindow {
         this.board = engine.getBoard();
         root = new HBox();
 
-        BoardPane boardPane = new BoardPane(gameEngine.getBoard());
+        BoardPane boardPane = new BoardPane(engine.getBoard());
         root.getChildren().add(boardPane);
-        new BoardDisplayManager(gameEngine, boardPane);
+        new BoardDisplayManager(engine.getBoard(), boardPane);
 
         ScorePane scorePanel = new ScorePane();
         root.getChildren().add(scorePanel);

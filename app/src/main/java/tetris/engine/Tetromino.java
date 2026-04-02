@@ -23,13 +23,51 @@ public class Tetromino {
         this.centre = centre;
         children = new ArrayList<>();
 
-        int x = (int)centre.getX();
-        int y = (int)centre.getY();
+        double x = centre.getX();
+        double y = centre.getY();
+        if (type == TetrominoType.I) {
+            x += 0.5;
+            y += 0.5;
+        } else if (type == TetrominoType.O) {
+            x += 0.5;
+            y -= 0.5;
+        }
+
         if (type == TetrominoType.T) {
-           children.add(new Mino(x, y-1));
-           children.add(new Mino(x-1, y));
-           children.add(new Mino(x, y));
-           children.add(new Mino(x+1, y));
+           children.add(new Mino((int)x, (int)y-1));
+           children.add(new Mino((int)x-1, (int)y));
+           children.add(new Mino((int)x, (int)y));
+           children.add(new Mino((int)x+1, (int)y));
+        } else if (type == TetrominoType.I) {
+            children.add(new Mino((int)(x-1.5), (int)(y-0.5)));
+            children.add(new Mino((int)(x-0.5), (int)(y-0.5)));
+            children.add(new Mino((int)(x+0.5), (int)(y-0.5)));
+            children.add(new Mino((int)(x+1.5), (int)(y-0.5)));
+        } else if (type == TetrominoType.O) {
+            children.add(new Mino((int)(x-0.5), (int)(y-0.5)));
+            children.add(new Mino((int)(x+0.5), (int)(y-0.5)));
+            children.add(new Mino((int)(x-0.5), (int)(y+0.5)));
+            children.add(new Mino((int)(x+0.5), (int)(y+0.5)));
+        } else if (type == TetrominoType.L) {
+            children.add(new Mino((int)x, (int)y));
+            children.add(new Mino((int)(x-1), (int)y));
+            children.add(new Mino((int)(x+1), (int)y));
+            children.add(new Mino((int)(x+1), (int)(y-1)));
+        } else if (type == TetrominoType.J) {
+            children.add(new Mino((int)x, (int)y));
+            children.add(new Mino((int)(x-1), (int)y));
+            children.add(new Mino((int)(x+1), (int)y));
+            children.add(new Mino((int)(x-1), (int)(y-1)));
+        } else if (type == TetrominoType.S) {
+            children.add(new Mino((int)x, (int)y));
+            children.add(new Mino((int)(x-1), (int)y));
+            children.add(new Mino((int)x, (int)(y-1)));
+            children.add(new Mino((int)(x+1), (int)(y-1)));
+        } else if (type == TetrominoType.Z) {
+            children.add(new Mino((int)x, (int)y));
+            children.add(new Mino((int)(x+1), (int)y));
+            children.add(new Mino((int)x, (int)(y-1)));
+            children.add(new Mino((int)(x-1), (int)(y-1)));
         }
     }
 

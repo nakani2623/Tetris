@@ -11,6 +11,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
+import javafx.animation.PauseTransition;
+import javafx.util.Duration;
+
 public class GameEngine implements Observable {
     private Board board;
     // private List<Tetromino> tetrominos;
@@ -34,6 +37,7 @@ public class GameEngine implements Observable {
     }
 
     public void start() {
+        System.out.println("engine started to execute");
         // populate next queue
         // TODO: auto generate and populate on condition: few elements
         nextQueue.addAll(tetrominoGenerator.generateTetrominos());
@@ -44,7 +48,9 @@ public class GameEngine implements Observable {
 
         // place the piece onto the board
         board.initialiseTetromino(currentTetromino);
+        System.out.println("T init'd");
 
+        
     }
 
     @Override

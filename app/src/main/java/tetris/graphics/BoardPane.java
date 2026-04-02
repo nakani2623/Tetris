@@ -24,4 +24,18 @@ public class BoardPane extends GridPane {
             }
         }
     }
+
+    public void reset() {
+        for (int i = 0; i < board.getWidth(); i++) {
+            for (int j = 0; j < board.getHeight(); j++) {
+                Rectangle r = grid[i][j];
+                r.setFill(Color.WHITE);    
+            }
+        }
+    }
+
+    public void fill(int x, int y, Color color) {
+        grid[x][y].setFill(color);
+        System.out.println("Set a cell, color: " + color);
+    }
 }

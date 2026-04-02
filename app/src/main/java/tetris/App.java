@@ -17,6 +17,7 @@ public class App extends Application {
         
         // gameEngine.loop();
         gameWindow.execute(stage);
+        gameEngine.start();
     }
 
     public static void main(String[] args) {
