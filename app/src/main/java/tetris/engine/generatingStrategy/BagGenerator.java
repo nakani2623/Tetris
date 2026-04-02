@@ -1,5 +1,6 @@
-package tetris.engine;
+package tetris.engine.generatingStrategy;
 
+import tetris.engine.Tetromino;
 import tetris.engine.type.TetrominoType;
 
 import java.util.ArrayList;
@@ -9,7 +10,7 @@ import java.util.List;
 /**
  * Tetromino generator
  */
-public class Generator {
+public class BagGenerator implements TetrominoGenerator {
 
 //    public Tetromino run() {
 //        return i();
@@ -19,12 +20,11 @@ public class Generator {
      * Generates 1 bag of Tetrominos
      * @return A List of 7 Tetrominos
      */
-    public List<Tetromino> bag7() {
-        //TODO: impl
-        List<Tetromino> tetrominos = new ArrayList<>();
+    public List<TetrominoType> generateTetrominos() {
+        List<TetrominoType> tetrominos = new ArrayList<>();
         for (TetrominoType type : TetrominoType.values()) {
-            Tetromino t = new Tetromino(type);
-            tetrominos.add(t);
+            // Tetromino t = new Tetromino(type);
+            tetrominos.add(type);
         }
 
         Collections.shuffle(tetrominos);

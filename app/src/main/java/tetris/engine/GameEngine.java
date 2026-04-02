@@ -1,18 +1,23 @@
 package tetris.engine;
 
+import tetris.engine.generatingStrategy.BagGenerator;
 import tetris.engine.generatingStrategy.TetrominoGenerator;
 import tetris.engine.observers.Observable;
 import tetris.engine.observers.Observer;
+import tetris.engine.type.TetrominoType;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 
 public class GameEngine implements Observable {
     private Board board;
-    private List<Tetromino> tetrominos;
+    // private List<Tetromino> tetrominos;
     public Tetromino currentTetromino;
 
     private Score score;
+    private Queue<TetrominoType> nextQueue;
 
     private TetrominoGenerator tetrominoGenerator;
     private LockStrategy lockStrategy;
@@ -20,18 +25,26 @@ public class GameEngine implements Observable {
     public GameEngine() {
         board = new Board();
         score = new Score();
-        tetrominos = new ArrayList<>();
+        tetrominoGenerator = new BagGenerator();
+        nextQueue = new LinkedList<TetrominoType>();
+        // tetrominos = new ArrayList<>();
         currentTetromino = null;
 
         observers = new ArrayList<>();
     }
 
-    public void loop() {
-        while (currentTetromino != null) {
-            
-    	    currentTetromino = new Tetromino(board.centreTopPoint(), null);
-            
-        }
+    public void start() {
+        // populate next queue
+        // TODO: auto generate and populate on condition: few elements
+        nextQueue.addAll(tetrominoGenerator.generateTetrominos());
+    
+        //spawn a piece
+        TetrominoType currentTetrominoType = nextQueue.remove();
+        currentTetromino = new Tetromino(board.centreTopPoint(), currentTetrominoType);
+
+        // place the piece onto the board
+        board.initialiseTetromino(currentTetromino);
+
     }
 
     @Override
@@ -58,10 +71,5 @@ public class GameEngine implements Observable {
     public Score getScore() {
         return score;
     }
-
-//    public void place() {
-//        Tetromino tm = generator.run();
-//        board.allTetrominos.add(tm);
-//    }
 }
 
