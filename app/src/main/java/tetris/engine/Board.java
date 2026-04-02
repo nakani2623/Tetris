@@ -1,11 +1,11 @@
- package tetris.engine;
+package tetris.engine;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 import tetris.engine.observers.Observable;
 import tetris.engine.observers.Observer;
+import tetris.engine.type.TetrominoType;
 import tetris.utils.Point;
 
 public class Board implements Observable{
@@ -13,7 +13,7 @@ public class Board implements Observable{
     private int height;
     public List<Tetromino> allTetrominos;
     // public List<Tetromino> upcomingTetrominos;
-    // public Tetromino currentTetromino;
+    public Tetromino currentTetromino;
     private Mino[][] allMinos;
     List<Observer> observers;
 
@@ -46,8 +46,9 @@ public class Board implements Observable{
     //     upcomingTetrominos.addAll(newTetrominos);
     // }
 
-    public void initialiseTetromino(Tetromino t) {
-        allTetrominos.add(t);
+    public void spawn(TetrominoType type) {
+        currentTetromino = new Tetromino(centreTopPoint(), type);
+        allTetrominos.add(currentTetromino);
         notifyObservers();
     }
 

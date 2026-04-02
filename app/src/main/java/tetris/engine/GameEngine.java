@@ -14,14 +14,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
-import javafx.animation.PauseTransition;
-import javafx.util.Duration;
-
 public class GameEngine implements Observable {
     private Board board;
-    // private List<Tetromino> tetrominos;
-    public Tetromino currentTetromino;
-
     private Score score;
     private Queue<TetrominoType> nextQueue;
 
@@ -33,17 +27,17 @@ public class GameEngine implements Observable {
         board = new Board();
         score = new Score();
         nextQueue = new LinkedList<TetrominoType>();
-        // tetrominos = new ArrayList<>();
-        currentTetromino = null;
         observers = new ArrayList<>();
 
         // configure game, todo: create and use initEngine(JSON? configFile) instead below
         tetrominoGenerator = new BagGenerator();
         rotationStrategy = new classicRotation();
     }
+
     public void rotate(Rotation rotation) {
-        rotationStrategy.rotate(board, currentTetromino, rotation);
+        rotationStrategy.rotate(board, board.currentTetromino, rotation);
     }
+
     public void start() {
         System.out.println("engine started to execute");
         // populate next queue
@@ -52,13 +46,7 @@ public class GameEngine implements Observable {
     
         //spawn a piece
         TetrominoType currentTetrominoType = nextQueue.remove();
-        currentTetromino = new Tetromino(board.centreTopPoint(), currentTetrominoType);
-
-        // place the piece onto the board
-        board.initialiseTetromino(currentTetromino);
-        System.out.println("T init'd");
-
-        
+        board.spawn(currentTetrominoType);
     }
 
     @Override
