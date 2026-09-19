@@ -61,11 +61,11 @@ class TetrominoTest {
         double originalCentreY = t.centre.getY();
 
         //Act
-        t.moveRight();
+        t.moveLeft();
 
         //Assert
-        assertEquals(originalCentreX, t.centre.getX() - 1);
-        assertEquals(originalCentreY, t.centre.getY() - 1);
+        assertEquals(originalCentreX - 1, t.centre.getX());
+        assertEquals(originalCentreY, t.centre.getY());
     };
 
     @Test 
@@ -79,7 +79,7 @@ class TetrominoTest {
         t.moveRight();
 
         //Assert
-        assertEquals(originalCentreX, t.centre.getX() + 1);
-        assertEquals(originalCentreY, t.centre.getY() + 1);
+        assertEquals(originalCentreX + 1, t.centre.getX());
+        assertEquals(originalCentreY, t.centre.getY());
     };
 }
