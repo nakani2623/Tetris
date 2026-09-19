@@ -75,6 +75,20 @@ public class Tetromino {
         this.type = type;
     }
 
+    public void moveLeft() {
+        for (Mino m : children) {
+            double x = m.getPosition().getX();
+            m.getPosition().setX(x-1);
+        }
+    }
+
+    public void moveRight() {
+        for (Mino m : children) {
+            double x = m.getPosition().getX();
+            m.getPosition().setX(x+1);
+        }
+    }
+
 //    /**
 //     * Moves the tetromino a number of unit spaces
 //     * @param direction
