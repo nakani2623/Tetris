@@ -76,6 +76,9 @@ public class Tetromino {
     }
 
     public void moveLeft() {
+        double originalX = this.centre.getX();
+        this.centre.setX(originalX - 1);
+
         for (Mino m : children) {
             double x = m.getPosition().getX();
             m.getPosition().setX(x-1);
@@ -83,6 +86,9 @@ public class Tetromino {
     }
 
     public void moveRight() {
+        double originalX = this.centre.getX();
+        this.centre.setX(originalX + 1);
+
         for (Mino m : children) {
             double x = m.getPosition().getX();
             m.getPosition().setX(x+1);
