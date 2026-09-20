@@ -5,6 +5,7 @@ import java.util.List;
 
 import tetris.engine.observers.Observable;
 import tetris.engine.observers.Observer;
+import tetris.engine.type.Direction;
 import tetris.engine.type.TetrominoType;
 import tetris.utils.Point;
 
@@ -52,6 +53,14 @@ public class Board implements Observable{
         notifyObservers();
     }
 
+    public void moveCurrent(Direction d) {
+        switch (d) {
+            case LEFT -> currentTetromino.moveLeft();
+            case RIGHT -> currentTetromino.moveRight();
+        }
+        notifyObservers();
+    }
+
     public double getWidth() {
         return this.width;
     }
@@ -76,6 +85,7 @@ public class Board implements Observable{
 
     @Override
     public void notifyObservers() {
+        System.out.println("Notifying observers");
         for (Observer observer : observers) {
             observer.update();
         }

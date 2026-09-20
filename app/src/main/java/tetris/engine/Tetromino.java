@@ -75,6 +75,26 @@ public class Tetromino {
         this.type = type;
     }
 
+    public void moveLeft() {
+        double originalX = this.centre.getX();
+        this.centre.setX(originalX - 1);
+
+        for (Mino m : children) {
+            double x = m.getPosition().getX();
+            m.getPosition().setX(x-1);
+        }
+    }
+
+    public void moveRight() {
+        double originalX = this.centre.getX();
+        this.centre.setX(originalX + 1);
+
+        for (Mino m : children) {
+            double x = m.getPosition().getX();
+            m.getPosition().setX(x+1);
+        }
+    }
+
 //    /**
 //     * Moves the tetromino a number of unit spaces
 //     * @param direction
