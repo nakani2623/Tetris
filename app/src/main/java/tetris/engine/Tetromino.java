@@ -143,17 +143,4 @@ public class Tetromino {
             p.setY(newY);
         }
     }
-
-//    /**
-//     * Moves the tetromino a number of unit spaces
-//     * @param direction
-//     * @param distance
-//     */
-//    abstract public void move(int distance, Direction direction);
-//
-//    /**
-//     * Rotates the tetromino
-//     * @param rotation
-//     */
-//    abstract public void rotate(Rotation rotation);
 }

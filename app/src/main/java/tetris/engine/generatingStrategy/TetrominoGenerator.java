@@ -2,7 +2,6 @@ package tetris.engine.generatingStrategy;
 
 import java.util.List;
 
-import tetris.engine.Tetromino;
 import tetris.engine.type.TetrominoType;
 
 public interface TetrominoGenerator {

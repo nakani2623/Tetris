@@ -6,7 +6,6 @@ import tetris.engine.observers.ScoreDisplayManager;
 import tetris.engine.type.Direction;
 import tetris.engine.type.Rotation;
 import javafx.scene.Scene;
-import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
 import javafx.scene.layout.Pane;
