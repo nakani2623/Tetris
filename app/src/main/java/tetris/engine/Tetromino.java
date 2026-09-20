@@ -95,6 +95,55 @@ public class Tetromino {
         }
     }
 
+    /**
+    * rotates the tetromino clockwise / right
+    */
+    public void rotateCounterClockwise() {
+        for (Mino m : children) {
+            Point p = m.getPosition();
+            double distanceToCentreX = p.getX() - centre.getX();
+            double distanceToCentreY = p.getY() - centre.getY();
+
+            double newX = distanceToCentreY + centre.getX();
+            double newY = -distanceToCentreX + centre.getY();
+            p.setX(newX);
+            p.setY(newY);
+
+        }
+    }
+
+    /**
+    * rotates the tetromino counterclockwise / left
+    */
+    public void rotateClockwise() {
+        for (Mino m : children) {
+            Point p = m.getPosition();
+            double distanceToCentreX = p.getX() - centre.getX();
+            double distanceToCentreY = p.getY() - centre.getY();
+
+            double newX = -distanceToCentreY + centre.getX();
+            double newY = distanceToCentreX + centre.getY();
+            p.setX(newX);
+            p.setY(newY);
+        }
+    }
+
+    /**
+    * rotates the tetromino 180 degree
+    */
+    public void rotate180() {
+        for (Mino m : children) {
+            Point p = m.getPosition();
+            double distanceToCentreX = p.getX() - centre.getX();
+            double distanceToCentreY = p.getY() - centre.getY();
+
+            double newX = -distanceToCentreX + centre.getX();
+            double newY = -distanceToCentreY + centre.getY();
+            p.setX(newX);
+            p.setY(newY);
+        }
+    }
+
 //    /**
 //     * Moves the tetromino a number of unit spaces
 //     * @param direction

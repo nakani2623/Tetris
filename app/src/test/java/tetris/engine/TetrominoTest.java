@@ -82,4 +82,99 @@ class TetrominoTest {
         assertEquals(originalCentreX + 1, t.centre.getX());
         assertEquals(originalCentreY, t.centre.getY());
     };
+
+    /**
+     * Z with centre (2,1) rotate clockwise:                  
+     *                                    *---*
+     *                                    |3,0|
+     *    *---*---*                   *---*---*
+     *    |1,0|2,0|        ->         |2,1|3,1|
+     *    *---*---*---*               *---*---*
+     *        |2,1|3,1|               |2,2|
+     *        *---*---*               *---*
+     * 
+     * 2, 1 -> 2, 1
+     * 3, 1 -> 2, 2
+     * 2, 0 -> 3, 1
+     * 1, 0 -> 3, 0
+     */
+    @Test
+    void rotateClockwiseTest() {
+        // Arrange
+        Tetromino t = new Tetromino(new Point(2, 1), TetrominoType.Z);
+
+        // Act
+        t.rotateClockwise();
+
+        // Assert
+        assertPoint(2, 1, t.children.get(0).getPosition());
+        assertPoint(2, 2, t.children.get(1).getPosition());
+        assertPoint(3, 1, t.children.get(2).getPosition());
+        assertPoint(3, 0, t.children.get(3).getPosition());
+    }
+
+    /**
+     * J with centre (6, 1) rotate counter-clockwise:
+     *                   
+     *    *---*                         *---*
+     *    |5,0|                         |6,0|
+     *    *---*---*---*                 *---*
+     *    |5,1|6,1|7,1|    ->           |6,1|
+     *    *---*---*---*             *---*---*
+     *                              |5,2|6,2|
+     *                              *---*---*
+     * 6, 1 -> 6, 1
+     * 5, 1 -> 6, 2
+     * 7, 1 -> 6, 0
+     * 5, 0 -> 5, 2
+     */
+    @Test
+    void rotateCounterClockwiseTest() {
+        // Arrange
+        Tetromino t = new Tetromino(new Point(6, 1), TetrominoType.J);
+
+        // Act
+        t.rotateCounterClockwise();
+
+        // Assert
+        assertPoint(6, 1, t.children.get(0).getPosition());
+        assertPoint(6, 2, t.children.get(1).getPosition());
+        assertPoint(6, 0, t.children.get(2).getPosition());
+        assertPoint(5, 2, t.children.get(3).getPosition());
+    }
+
+    /**
+     * T with centre (5, 4) rotate counter-clockwise:
+     *                   
+     *        *---*                    
+     *        |5,3|                     
+     *    *---*---*---*             *---*---*---*
+     *    |4,4|5,4|6,4|    ->       |4,4|5,4|6,4|
+     *    *---*---*---*             *---*---*---*
+     *                                  |5,5|
+     *                                  *---*
+     * 5, 3 -> 5, 5
+     * 4, 4 -> 6, 4
+     * 5, 4 -> 5, 4
+     * 6, 4 -> 4, 4
+     */
+    @Test
+    void rotateR180Test() {
+        // Arrange
+        Tetromino t = new Tetromino(new Point(5, 4), TetrominoType.T);
+
+        // Act
+        t.rotate180();
+
+        // Assert
+        assertPoint(5, 5, t.children.get(0).getPosition());
+        assertPoint(6, 4, t.children.get(1).getPosition());
+        assertPoint(5, 4, t.children.get(2).getPosition());
+        assertPoint(4, 4, t.children.get(3).getPosition());
+    }
+    
+    private void assertPoint(double expectedX, double expectedY, Point actualPoint) {
+        assertEquals(expectedX, actualPoint.getX());
+        assertEquals(expectedY, actualPoint.getY());
+    }
 }
