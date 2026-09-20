@@ -39,7 +39,6 @@ public class GameEngine implements Observable {
     }
 
     public void start() {
-        System.out.println("engine started to execute");
         // populate next queue
         // TODO: auto generate and populate on condition: few elements
         nextQueue.addAll(tetrominoGenerator.generateTetrominos());

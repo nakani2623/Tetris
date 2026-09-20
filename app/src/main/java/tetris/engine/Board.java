@@ -95,7 +95,6 @@ public class Board implements Observable{
 
     @Override
     public void notifyObservers() {
-        System.out.println("Notifying observers");
         for (Observer observer : observers) {
             observer.update();
         }
