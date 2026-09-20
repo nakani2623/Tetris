@@ -36,6 +36,5 @@ public class BoardPane extends GridPane {
 
     public void fill(int x, int y, Color color) {
         grid[x][y].setFill(color);
-        System.out.println("Set a cell, color: " + color);
     }
 }

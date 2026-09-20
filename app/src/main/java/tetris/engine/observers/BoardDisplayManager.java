@@ -19,7 +19,6 @@ public class BoardDisplayManager implements Observer {
 
     @Override
     public void update() {
-        System.out.println("Board mngr notified");
         if (!(observable instanceof Board)) {
             return;
         }
