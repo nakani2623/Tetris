@@ -3,8 +3,10 @@ package tetris.graphics;
 import tetris.engine.GameEngine;
 import tetris.engine.observers.BoardDisplayManager;
 import tetris.engine.observers.ScoreDisplayManager;
-
+import tetris.engine.type.Direction;
 import javafx.scene.Scene;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.HBox;
@@ -37,6 +39,15 @@ public class GameWindow {
 
     public void execute(Stage stage) {
         Scene scene = new Scene(root, 640, 480);
+
+        // keyboard controller, triggers tetromino movement functions
+        scene.addEventHandler(KeyEvent.KEY_PRESSED, event -> {
+            switch (event.getCode()) {
+                case LEFT -> board.moveCurrent(Direction.LEFT);
+                case RIGHT -> board.moveCurrent(Direction.RIGHT);
+            }
+        });
+        
         stage.setScene(scene);
         stage.show();
     }
