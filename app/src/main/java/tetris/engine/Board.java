@@ -6,6 +6,7 @@ import java.util.List;
 import tetris.engine.observers.Observable;
 import tetris.engine.observers.Observer;
 import tetris.engine.type.Direction;
+import tetris.engine.type.Rotation;
 import tetris.engine.type.TetrominoType;
 import tetris.utils.Point;
 
@@ -57,6 +58,15 @@ public class Board implements Observable{
         switch (d) {
             case LEFT -> currentTetromino.moveLeft();
             case RIGHT -> currentTetromino.moveRight();
+        }
+        notifyObservers();
+    }
+
+    public void rotateCurrent(Rotation r) {
+        switch (r) {
+            case CLOCKWISE -> currentTetromino.rotateClockwise();
+            case COUNTER_CLOCKWISE -> currentTetromino.rotateCounterClockwise();
+            case R_180 -> currentTetromino.rotate180();
         }
         notifyObservers();
     }

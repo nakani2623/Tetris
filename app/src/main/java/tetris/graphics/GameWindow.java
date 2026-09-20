@@ -4,6 +4,7 @@ import tetris.engine.GameEngine;
 import tetris.engine.observers.BoardDisplayManager;
 import tetris.engine.observers.ScoreDisplayManager;
 import tetris.engine.type.Direction;
+import tetris.engine.type.Rotation;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -43,8 +44,11 @@ public class GameWindow {
         // keyboard controller, triggers tetromino movement functions
         scene.addEventHandler(KeyEvent.KEY_PRESSED, event -> {
             switch (event.getCode()) {
-                case LEFT -> board.moveCurrent(Direction.LEFT);
-                case RIGHT -> board.moveCurrent(Direction.RIGHT);
+                case J -> board.moveCurrent(Direction.LEFT);
+                case L -> board.moveCurrent(Direction.RIGHT);
+                case A -> board.rotateCurrent(Rotation.COUNTER_CLOCKWISE);
+                case D -> board.rotateCurrent(Rotation.CLOCKWISE);
+                case SEMICOLON -> board.rotateCurrent(Rotation.R_180);
             }
         });
         
