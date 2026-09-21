@@ -75,6 +75,20 @@ public class Tetromino {
         this.type = type;
     }
 
+    /**
+     * duplicates a Tetromino (deep copy)
+     * @param t
+     */
+    public Tetromino(Tetromino t) {
+        this.centre = new Point(t.centre);
+        this.children = new ArrayList<Mino>();
+        for (Mino m : t.children) {
+            this.children.add(new Mino(m));
+        }
+
+        this.type = t.type;
+    }
+
     public void moveLeft() {
         double originalX = this.centre.getX();
         this.centre.setX(originalX - 1);
@@ -143,4 +157,16 @@ public class Tetromino {
             p.setY(newY);
         }
     }
+
+    public boolean collidesWith(Tetromino t) {
+        for (Mino thisM : children) {
+            for (Mino tM : t.children) {
+                if (thisM.equals(tM)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+    
 }

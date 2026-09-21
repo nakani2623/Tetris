@@ -5,6 +5,12 @@ import java.util.List;
 
 import tetris.engine.observers.Observable;
 import tetris.engine.observers.Observer;
+import tetris.engine.operator.MoveLeftOperator;
+import tetris.engine.operator.MoveRightOperator;
+import tetris.engine.operator.Operator;
+import tetris.engine.operator.RotateClockwiseOperator;
+import tetris.engine.operator.RotateCounterClockwiseOperator;
+import tetris.engine.operator.RotateR180Operator;
 import tetris.engine.type.Direction;
 import tetris.engine.type.Rotation;
 import tetris.engine.type.TetrominoType;
@@ -19,8 +25,7 @@ public class Board implements Observable{
     private Mino[][] allMinos;
     List<Observer> observers;
 
-
-
+    public Operator op;
     
     /**
      * Constructs game bord with specific dimension
@@ -56,19 +61,74 @@ public class Board implements Observable{
 
     public void moveCurrent(Direction d) {
         switch (d) {
-            case LEFT -> currentTetromino.moveLeft();
-            case RIGHT -> currentTetromino.moveRight();
+            case LEFT -> op = new MoveLeftOperator();
+            case RIGHT -> op = new MoveRightOperator();
         }
-        notifyObservers();
+        // create a clone that simulates the result of movement, move the real piece if
+        // there is no collision 
+        Tetromino clone = new Tetromino(currentTetromino);
+        op.operate(clone);
+
+        if (!hasCollision(clone)) {
+            op.operate(currentTetromino);
+            notifyObservers();
+        }
     }
 
     public void rotateCurrent(Rotation r) {
         switch (r) {
-            case CLOCKWISE -> currentTetromino.rotateClockwise();
-            case COUNTER_CLOCKWISE -> currentTetromino.rotateCounterClockwise();
-            case R_180 -> currentTetromino.rotate180();
+            case CLOCKWISE -> op = new RotateClockwiseOperator();
+            case COUNTER_CLOCKWISE -> op = new RotateCounterClockwiseOperator();
+            case R_180 -> op = new RotateR180Operator();
         }
-        notifyObservers();
+        // create a clone that simulates the result of movement, move the real piece if
+        // there is no collision 
+        Tetromino clone = new Tetromino(currentTetromino);
+        op.operate(clone);
+
+        if (!hasCollision(clone)) {
+            op.operate(currentTetromino);
+            notifyObservers();
+        }
+    }
+
+    /**
+     * check if the tetromino collide with other objects on the board
+     * @param m
+     * @return
+     */
+    public boolean hasCollision(Tetromino t) {
+        for (Tetromino other : allTetrominos) {
+            if (other.equals(currentTetromino))
+                continue;
+
+            if (other.collidesWith(t)) {
+                return true;
+            }
+        }
+
+        if (hasWallCollision(t)) {
+            return true;
+        }
+       
+        return false;
+    }
+
+    protected boolean hasWallCollision(Tetromino t) {
+        for (Mino m : t.children) {
+            double x = m.getPosition().getX();
+            double y = m.getPosition().getY();
+
+            // side walls
+            if (x < 0 || x > width - 1) { 
+                return true;
+            }
+            // bottom wall
+            if (y > height - 1) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public double getWidth() {
