@@ -85,6 +85,28 @@ public class Board implements Observable{
                 return true;
             }
         }
+        
+        if (hasWallCollision(t)) {
+            return true;
+        }
+       
+        return false;
+    }
+
+    protected boolean hasWallCollision(Tetromino t) {
+        for (Mino m : t.children) {
+            double x = m.getPosition().getX();
+            double y = m.getPosition().getY();
+
+            // side walls
+            if (x < 0 || x > width - 1) { 
+                return true;
+            }
+            // bottom wall
+            if (y > height - 1) {
+                return true;
+            }
+        }
         return false;
     }
 
