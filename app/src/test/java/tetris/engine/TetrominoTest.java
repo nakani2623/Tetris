@@ -173,6 +173,63 @@ class TetrominoTest {
         assertPoint(4, 4, t.children.get(3).getPosition());
     }
     
+    /**
+     * Testing a collision between
+     * T with centre (5, 4), initial rotation
+     * S with centre (7, 4), R180 rotated
+     *                 
+     *          *---*                    
+     *  T ->    |5,3|                   
+     *      *---*---*---*---*       
+     *      |4,4|5,4|col|7,4|
+     *      *---*---*---*---*---*   <- S     
+     *                  |8,4|9,5|
+     *                  *---*---*
+     * expect: collision true
+     */
+    @Test 
+    void collisionWithTetrominoTrueTest() {
+        // Arrange
+        Tetromino t = new Tetromino(new Point(5, 4), TetrominoType.T);
+        Tetromino s = new Tetromino(new Point(7, 4), TetrominoType.S);
+        s.rotate180();
+
+        // Act
+        boolean actual = t.collidesWith(t);
+
+        // Assert
+        assertEquals(true, actual);
+    }
+
+        /**
+     * Testing a collision between
+     * T with centre (5, 4), initial rotation
+     * L with centre (6, 5), initial rotation
+     *                 
+     *          *---*                    
+     *  T ->    |5,3|                   
+     *      *---*---*---*---*       
+     *      |4,4|5,4|6,4|7,4|
+     *      *---*---*---*---*   <- L     
+     *          |5,5|6,5|7,5|
+     *          *---*---*---*
+     * expect: collision true
+     */
+    @Test 
+    void collisionWithTetrominoFalseTest() {
+        // Arrange
+        Tetromino t = new Tetromino(new Point(5, 4), TetrominoType.T);
+        Tetromino l = new Tetromino(new Point(6, 5), TetrominoType.L);
+
+        // Act
+        boolean actual = t.collidesWith(l);
+
+        // Assert
+        assertEquals(false, actual);
+    }
+
+
+    
     private void assertPoint(double expectedX, double expectedY, Point actualPoint) {
         assertEquals(expectedX, actualPoint.getX());
         assertEquals(expectedY, actualPoint.getY());
