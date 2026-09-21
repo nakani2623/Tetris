@@ -71,6 +71,23 @@ public class Board implements Observable{
         notifyObservers();
     }
 
+    /**
+     * check if the tetromino collide with other objects on the board
+     * @param m
+     * @return
+     */
+    public boolean hasCollision(Tetromino t) {
+        for (Tetromino other : allTetrominos) {
+            if (other.equals(currentTetromino))
+                continue;
+
+            if (other.collidesWith(t)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public double getWidth() {
         return this.width;
     }
