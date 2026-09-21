@@ -12,6 +12,14 @@ public class Mino {
         this.position = new Point(x, y);
     }
 
+    /**
+     * duplicates a Mino (deep copy)
+     * @param position
+     */
+    public Mino(Mino m) {
+        this.position = new Point(m.position);
+    }
+
     public void setPosition(Point position) {
         this.position = position;
     }

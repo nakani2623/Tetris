@@ -9,6 +9,15 @@ public class Point {
         this.y = y;
     }
 
+    /**
+     * duplicates a Point
+     * @param val
+     */
+    public Point(Point p) {
+        this.x = p.x;
+        this.y = p.y;
+    }
+
     public double getX() {
         return x;
     }
