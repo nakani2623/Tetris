@@ -157,4 +157,16 @@ public class Tetromino {
             p.setY(newY);
         }
     }
+
+    public boolean collidesWith(Tetromino t) {
+        for (Mino thisM : children) {
+            for (Mino tM : t.children) {
+                if (thisM.equals(tM)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+    
 }
