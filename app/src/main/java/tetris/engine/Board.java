@@ -5,6 +5,7 @@ import java.util.List;
 
 import tetris.engine.observers.Observable;
 import tetris.engine.observers.Observer;
+import tetris.engine.operator.MoveDownOperator;
 import tetris.engine.operator.MoveLeftOperator;
 import tetris.engine.operator.MoveRightOperator;
 import tetris.engine.operator.Operator;
@@ -26,6 +27,7 @@ public class Board implements Observable{
     List<Observer> observers;
 
     public Operator op;
+    public GameEngine engine;
     
     /**
      * Constructs game bord with specific dimension
@@ -92,6 +94,28 @@ public class Board implements Observable{
         }
     }
 
+    public void hardDrop() {
+        op = new MoveDownOperator();
+
+        Tetromino clone = new Tetromino(currentTetromino);
+        while (true) {
+            op.operate(clone);
+
+            if (!hasCollision(clone)) {
+                op.operate(currentTetromino);
+            }
+
+            else {
+                break;
+            }
+        }
+
+        //spawn a new tetromino
+        engine.spawn();
+        notifyObservers();
+
+    }
+
     /**
      * check if the tetromino collide with other objects on the board
      * @param m
@@ -99,7 +123,7 @@ public class Board implements Observable{
      */
     public boolean hasCollision(Tetromino t) {
         for (Tetromino other : allTetrominos) {
-            if (other.equals(currentTetromino))
+            if (other == t || other == currentTetromino)
                 continue;
 
             if (other.collidesWith(t)) {

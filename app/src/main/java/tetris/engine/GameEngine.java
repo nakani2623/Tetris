@@ -25,6 +25,7 @@ public class GameEngine implements Observable {
     private RotationStrategy rotationStrategy;
     public GameEngine() {
         board = new Board();
+        board.engine = this;
         score = new Score();
         nextQueue = new LinkedList<TetrominoType>();
         observers = new ArrayList<>();
@@ -39,10 +40,15 @@ public class GameEngine implements Observable {
     }
 
     public void start() {
+        spawn();
+    }
+
+    public void spawn() {
         // populate next queue
-        // TODO: auto generate and populate on condition: few elements
-        nextQueue.addAll(tetrominoGenerator.generateTetrominos());
-    
+        while (nextQueue.size() < 7) {
+            nextQueue.addAll(tetrominoGenerator.generateTetrominos());
+        }
+
         //spawn a piece
         TetrominoType currentTetrominoType = nextQueue.remove();
         board.spawn(currentTetrominoType);
@@ -72,6 +78,7 @@ public class GameEngine implements Observable {
     public Score getScore() {
         return score;
     }
+    
     public void setRotationStrategy(RotationStrategy rotationStrategy) {
         this.rotationStrategy = rotationStrategy;
     }

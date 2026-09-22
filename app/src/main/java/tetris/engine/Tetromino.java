@@ -109,6 +109,16 @@ public class Tetromino {
         }
     }
 
+    public void moveDown() {
+        double originalY = this.centre.getY();
+        this.centre.setY(originalY + 1);
+
+        for (Mino m : children) {
+            double y = m.getPosition().getY();
+            m.getPosition().setY(y + 1);
+        }
+    }
+
     /**
     * rotates the tetromino clockwise / right
     */
