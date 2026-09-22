@@ -19,6 +19,7 @@ import tetris.engine.operator.RotateClockwiseOperator;
 import tetris.engine.operator.RotateCounterClockwiseOperator;
 import tetris.engine.operator.RotateR180Operator;
 import tetris.engine.type.Direction;
+import tetris.engine.type.GameState;
 import tetris.engine.type.Rotation;
 import tetris.engine.type.TetrominoType;
 import tetris.utils.Point;
@@ -62,7 +63,15 @@ public class Board implements Observable{
     // }
 
     public void spawn(TetrominoType type) {
-        currentTetromino = new Tetromino(centreTopPoint(), type);
+        Tetromino t = new Tetromino(centreTopPoint(), type);
+        currentTetromino = null;
+        if (hasCollision(t)) {
+            engine.setGameState(GameState.ended);
+            return;
+
+        }
+
+        currentTetromino = t;
         allTetrominos.add(currentTetromino);
         notifyObservers();
     }
