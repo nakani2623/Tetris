@@ -165,28 +165,42 @@ public class Board implements Observable{
         return false;
     }
 
-    private void clearLines(ArrayList<Integer> toClear, ArrayList<Tetromino> relatedTetrominos) { 
+    private int clearLines(ArrayList<Integer> toClear, ArrayList<Tetromino> relatedTetrominos) { 
         /**
          * clear specified lines, update board
          * @param toClear: heights of lines to clear, e.g to clear bot 4 lines, to clear = [16, 17, 18, 19]
          * @param relatedTetrominos: all possible tetrominos to clear
+         * 
+         * @ret int: lines cleared
          */
-        // remove lines 
+
         for (Tetromino t : relatedTetrominos) {
             Iterator<Mino> iterator = t.children.iterator();
 
             while (iterator.hasNext()) {
                 Mino mino = iterator.next();
-
-                if (toClear.contains((int) mino.getPosition().getY())) {
+                int minoHeight = (int) mino.getPosition().getY();
+                // remove lines 
+                if (toClear.contains(minoHeight)) {
                     iterator.remove();
                 }
+
+                // shift after-clear residual position
+                else {
+                    int numToShift = 0;
+                    for (int lineCleared : toClear) {
+                        if (minoHeight < lineCleared) {
+                            numToShift++;
+                        }
+                    }
+                    mino.getPosition().setY(minoHeight + numToShift);
+                }
+
             }
         }
 
-        // update after-clear residual position
 
-        return ;
+        return toClear.size();
     }
     private String relatedSectionToString(boolean[][] relatedSection) {
     if (relatedSection == null || relatedSection.length == 0) {
@@ -273,9 +287,14 @@ public class Board implements Observable{
         }
         // lower: no change
         // around: clear + move down
-        clearLines(findLinesToClear(around, lastLockedHeights), around);
+        int cleared = clearLines(findLinesToClear(around, lastLockedHeights), around);
 
-        // upper: move down
+        // upper: shift minos
+        for (Tetromino tetromino : upper) {
+            for (Mino mino : tetromino.children) {
+                mino.getPosition().setY(mino.getPosition().getY() + cleared);
+            }
+        }
     }
     public double getWidth() {
         return this.width;
