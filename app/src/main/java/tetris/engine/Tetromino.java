@@ -23,15 +23,18 @@ public class Tetromino {
         this.centre = centre;
         children = new ArrayList<>();
 
+        if (type == TetrominoType.I) {
+            centre.setX(centre.getX() + 0.5);
+            centre.setY(centre.getY() + 0.5);
+
+        } else if (type == TetrominoType.O) {
+            centre.setX(centre.getX() + 0.5);
+            centre.setY(centre.getY() - 0.5);
+        }
+
         double x = centre.getX();
         double y = centre.getY();
-        if (type == TetrominoType.I) {
-            x += 0.5;
-            y += 0.5;
-        } else if (type == TetrominoType.O) {
-            x += 0.5;
-            y -= 0.5;
-        }
+
 
         if (type == TetrominoType.T) {
            children.add(new Mino((int)x, (int)y-1));
