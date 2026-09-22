@@ -176,13 +176,13 @@ class TetrominoTest {
     /**
      * Testing a collision between
      * T with centre (5, 4), initial rotation
-     * S with centre (7, 4), R180 rotated
+     * Z with centre (7, 4), R180 rotated
      *                 
      *          *---*                    
      *  T ->    |5,3|                   
      *      *---*---*---*---*       
      *      |4,4|5,4|col|7,4|
-     *      *---*---*---*---*---*   <- S     
+     *      *---*---*---*---*---*   <- Z     
      *                  |8,4|9,5|
      *                  *---*---*
      * expect: collision true
@@ -191,11 +191,11 @@ class TetrominoTest {
     void collisionWithTetrominoTrueTest() {
         // Arrange
         Tetromino t = new Tetromino(new Point(5, 4), TetrominoType.T);
-        Tetromino s = new Tetromino(new Point(7, 4), TetrominoType.S);
-        s.rotate180();
+        Tetromino z = new Tetromino(new Point(7, 4), TetrominoType.Z);
+        z.rotate180();
 
         // Act
-        boolean actual = t.collidesWith(t);
+        boolean actual = t.collidesWith(z);
 
         // Assert
         assertEquals(true, actual);
