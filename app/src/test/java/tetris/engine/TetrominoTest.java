@@ -114,6 +114,68 @@ class TetrominoTest {
     }
 
     /**
+     * O with centre (1,2), after alt (1.5, 1.5) rotate clockwise:                  
+     * 
+     *      *---*---*                   *---*---*
+     *      |1,1|2,1|                   |1,1|2,1|
+     *      *---*---*        ->         *---*---*
+     *      |1,2|2,2|                   |1,2|2,2|
+     *      *---*---*                   *---*---*
+     * 
+     * 1, 1 -> 2, 1
+     * 2, 1 -> 2, 2
+     * 1, 2 -> 1, 1
+     * 2, 2 -> 1, 2
+     */
+    @Test
+    void rotateClockwiseSRSPlusTestO() {
+        // Arrange
+        Tetromino t = new Tetromino(new Point(1, 2), TetrominoType.O);
+
+        // Act
+        t.rotateClockwise();
+
+        // Assert
+        assertPoint(2, 1, t.children.get(0).getPosition());
+        assertPoint(2, 2, t.children.get(1).getPosition());
+        assertPoint(1, 1, t.children.get(2).getPosition());
+        assertPoint(1, 2, t.children.get(3).getPosition());
+    }
+
+        /**
+     * O with centre (2,1), altered into (2.5, 1.5) rotate clockwise:                  
+     * 
+     *                                  *---*
+     *                                  |3,0|
+     *      *---*---*---*---*           *---*
+     *      |1,1|2,1|3,1|4,1|    ->     |3,1|
+     *      *---*---*---*---*           *---*
+     *                                  |3,2|
+     *                                  *---*
+     *                                  |3,3|
+     *                                  *---*
+     * 
+     * 1, 1 -> 3, 0
+     * 2, 1 -> 3, 1
+     * 3, 2 -> 3, 2
+     * 4, 1 -> 3, 3
+     */
+    @Test
+    void rotateClockwiseSRSPlusTestI() {
+        // Arrange
+        Tetromino t = new Tetromino(new Point(2, 1), TetrominoType.I);
+
+        // Act
+        t.rotateClockwise();
+
+        // Assert
+        assertPoint(3, 0, t.children.get(0).getPosition());
+        assertPoint(3, 1, t.children.get(1).getPosition());
+        assertPoint(3, 2, t.children.get(2).getPosition());
+        assertPoint(3, 3, t.children.get(3).getPosition());
+    }
+
+    /**
      * J with centre (6, 1) rotate counter-clockwise:
      *                   
      *    *---*                         *---*
