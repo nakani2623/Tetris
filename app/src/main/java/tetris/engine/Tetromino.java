@@ -178,5 +178,9 @@ public class Tetromino {
         }
         return false;
     }
+
+    public int getOrder() {
+        return this.order;
+    }
     
 }
