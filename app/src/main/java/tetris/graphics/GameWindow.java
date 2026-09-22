@@ -4,6 +4,7 @@ import tetris.engine.GameEngine;
 import tetris.engine.observers.BoardDisplayManager;
 import tetris.engine.observers.ScoreDisplayManager;
 import tetris.engine.type.Direction;
+import tetris.engine.type.GameState;
 import tetris.engine.type.Rotation;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyEvent;
@@ -17,6 +18,7 @@ import tetris.engine.Board;
  */
 public class GameWindow {
     static final int MINO_SIZE = 20;
+    Scene scene;
     Pane root;
     GameEngine engine;
     Board board;
@@ -27,6 +29,7 @@ public class GameWindow {
         this.engine = gameEngine;
         this.board = engine.getBoard();
         root = new HBox();
+        scene = new Scene(root, 640, 480);
 
         BoardPane boardPane = new BoardPane(engine.getBoard());
         root.getChildren().add(boardPane);
@@ -38,10 +41,12 @@ public class GameWindow {
     }
 
     public void execute(Stage stage) {
-        Scene scene = new Scene(root, 640, 480);
-
         // keyboard controller, triggers tetromino movement functions
         scene.addEventHandler(KeyEvent.KEY_PRESSED, event -> {
+            if (engine.getGameState() != GameState.active) {
+                return;
+            }
+
             switch (event.getCode()) {
                 case J -> board.moveCurrent(Direction.LEFT);
                 case L -> board.moveCurrent(Direction.RIGHT);

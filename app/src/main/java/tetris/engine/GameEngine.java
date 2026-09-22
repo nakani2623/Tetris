@@ -6,6 +6,7 @@ import tetris.engine.observers.Observable;
 import tetris.engine.observers.Observer;
 import tetris.engine.rotationStrategy.RotationStrategy;
 import tetris.engine.rotationStrategy.classicRotation;
+import tetris.engine.type.GameState;
 import tetris.engine.type.Rotation;
 import tetris.engine.type.TetrominoType;
 
@@ -23,6 +24,8 @@ public class GameEngine implements Observable {
     private LockStrategy lockStrategy;
     private List<Observer> observers;
     private RotationStrategy rotationStrategy;
+    private GameState gameState;
+
     public GameEngine() {
         board = new Board();
         board.engine = this;
@@ -40,6 +43,7 @@ public class GameEngine implements Observable {
     }
 
     public void start() {
+        gameState = GameState.active;
         spawn();
     }
 
@@ -77,6 +81,14 @@ public class GameEngine implements Observable {
 
     public Score getScore() {
         return score;
+    }
+
+    public GameState getGameState() {
+        return gameState;
+    }
+
+    public void setGameState(GameState state) {
+        this.gameState = state;
     }
     
     public void setRotationStrategy(RotationStrategy rotationStrategy) {
