@@ -45,6 +45,7 @@ public class GameWindow {
             switch (event.getCode()) {
                 case J -> board.moveCurrent(Direction.LEFT);
                 case L -> board.moveCurrent(Direction.RIGHT);
+                case F -> board.hardDrop();
                 case A -> board.rotateCurrent(Rotation.COUNTER_CLOCKWISE);
                 case D -> board.rotateCurrent(Rotation.CLOCKWISE);
                 case SEMICOLON -> board.rotateCurrent(Rotation.R_180);
