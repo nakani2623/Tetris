@@ -33,4 +33,19 @@ public class Point {
     public void setY(double val) {
         y = val;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+
+        if (!(obj instanceof Point)) {
+            return false;
+        }
+
+        Point p = (Point) obj;
+
+        return this.x == p.getX() && this.y == p.getY();
+    }
 }
