@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Iterator;
 
 import tetris.engine.observers.Observable;
 import tetris.engine.observers.Observer;
@@ -164,14 +165,23 @@ public class Board implements Observable{
         return false;
     }
 
-    private void clearLines(ArrayList<Integer> toClear) { 
+    private void clearLines(ArrayList<Integer> toClear, ArrayList<Tetromino> relatedTetrominos) { 
         /**
          * clear specified lines, update board
-         * @param toClear heights of lines to clear, e.g to clear bot 4 lines, to clear = [16, 17, 18, 19]
+         * @param toClear: heights of lines to clear, e.g to clear bot 4 lines, to clear = [16, 17, 18, 19]
+         * @param relatedTetrominos: all possible tetrominos to clear
          */
         // remove lines 
-        for (int lineNum: toClear) {  
-            
+        for (Tetromino t : relatedTetrominos) {
+            Iterator<Mino> iterator = t.children.iterator();
+
+            while (iterator.hasNext()) {
+                Mino mino = iterator.next();
+
+                if (toClear.contains((int) mino.getPosition().getY())) {
+                    iterator.remove();
+                }
+            }
         }
 
         // update after-clear residual position
@@ -263,7 +273,7 @@ public class Board implements Observable{
         }
         // lower: no change
         // around: clear + move down
-        findLinesToClear(around, lastLockedHeights);
+        clearLines(findLinesToClear(around, lastLockedHeights), around);
 
         // upper: move down
     }
