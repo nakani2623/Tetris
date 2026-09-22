@@ -161,7 +161,7 @@ public class Tetromino {
     public boolean collidesWith(Tetromino t) {
         for (Mino thisM : children) {
             for (Mino tM : t.children) {
-                if (thisM.equals(tM)) {
+                if (thisM.getPosition().equals(tM.getPosition())) {
                     return true;
                 }
             }
