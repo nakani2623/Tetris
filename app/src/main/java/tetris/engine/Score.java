@@ -8,11 +8,13 @@ import java.util.ArrayList;
 
 import tetris.engine.observers.Observable;
 import tetris.engine.observers.Observer;
+import tetris.engine.type.GameState;
 
 public class Score implements Observable{
     // score tracking
 
     private static final int refreshRate_Hz = 30;
+    public GameEngine engine;
     private int score;
     private int linesCleared;
     private int piecesPlaced;
@@ -26,7 +28,7 @@ public class Score implements Observable{
 
     private List<Observer> observers;
 
-    public Score() {
+    public Score(GameEngine engine) {
         this.score = 0;
         this.linesCleared = 0;
         this.piecesPlaced = 0;
@@ -37,9 +39,28 @@ public class Score implements Observable{
 
         exec.scheduleAtFixedRate(this::updateStats, 0, 1000 / refreshRate_Hz, TimeUnit.MILLISECONDS);
         this.observers = new ArrayList<>();
+        this.engine = engine;
+    }
+
+    /**
+     * set the score into initial state
+     */
+    public void reset() {
+        this.score = 0;
+        this.linesCleared = 0;
+        this.piecesPlaced = 0;
+        this.startTime = System.currentTimeMillis();
+        this.elapsedTime = 0;
+        this.piecesPerSecond = 0;
+        this.attackPerMinute = 0;
+
     }
     
     public void updateStats() {
+        if (engine.getGameState() == GameState.ended) {
+            return;
+        }
+
         this.elapsedTime = (System.currentTimeMillis() - startTime) / 1000.0; // in seconds
         if (elapsedTime > 0) {
             this.piecesPerSecond = piecesPlaced / elapsedTime;
