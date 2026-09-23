@@ -1,7 +1,13 @@
 package tetris.engine;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Iterator;
 
 import tetris.engine.observers.Observable;
 import tetris.engine.observers.Observer;
@@ -109,10 +115,14 @@ public class Board implements Observable{
                 break;
             }
         }
+        // because hard drop LOCK a piece, check for clear
+        checkCompletedLines(currentTetromino);
 
         //spawn a new tetromino
         engine.spawn();
         notifyObservers();
+
+        
 
     }
 
@@ -155,6 +165,137 @@ public class Board implements Observable{
         return false;
     }
 
+    private int clearLines(ArrayList<Integer> toClear, ArrayList<Tetromino> relatedTetrominos) { 
+        /**
+         * clear specified lines, update board
+         * @param toClear: heights of lines to clear, e.g to clear bot 4 lines, to clear = [16, 17, 18, 19]
+         * @param relatedTetrominos: all possible tetrominos to clear
+         * 
+         * @ret int: lines cleared
+         */
+
+        for (Tetromino t : relatedTetrominos) {
+            Iterator<Mino> iterator = t.children.iterator();
+
+            while (iterator.hasNext()) {
+                Mino mino = iterator.next();
+                int minoHeight = (int) mino.getPosition().getY();
+                // remove lines 
+                if (toClear.contains(minoHeight)) {
+                    iterator.remove();
+                }
+
+                // shift after-clear residual position
+                else {
+                    int numToShift = 0;
+                    for (int lineCleared : toClear) {
+                        if (minoHeight < lineCleared) {
+                            numToShift++;
+                        }
+                    }
+                    mino.getPosition().setY(minoHeight + numToShift);
+                }
+
+            }
+        }
+
+
+        return toClear.size();
+    }
+    private String relatedSectionToString(boolean[][] relatedSection) {
+    if (relatedSection == null || relatedSection.length == 0) {
+            return "";
+        }
+
+        int width = relatedSection.length;
+        int height = relatedSection[0].length;
+
+        StringBuilder result = new StringBuilder();
+
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                result.append(relatedSection[x][y] ? "■ " : "· ");
+            }
+            result.append('\n');
+        }
+
+        return result.toString();
+    }
+    private ArrayList<Integer> findLinesToClear(ArrayList<Tetromino> relatedTetrominos, HashSet<Double> relatedHeights) {
+        ArrayList<Integer> linesToClear = new ArrayList<Integer>();
+        boolean[][] related_section = new boolean[this.width][relatedHeights.size()]; // true for mino exist, false for empty
+        int minHeight = Collections.min(relatedHeights).intValue();
+        for (Tetromino t: relatedTetrominos) {
+            for (Mino mino: t.children) {
+                int x = (int) mino.getPosition().getX();
+                int y = (int) mino.getPosition().getY(); 
+                
+                int relativeY = y - minHeight;
+                if (relativeY < 0 || relativeY >= relatedHeights.size()) {
+                    continue;
+                }
+                related_section[x][relativeY] = true;
+            }
+        }
+        // System.out.println(relatedSectionToString(related_section));
+        for (int y = 0; y < related_section[0].length; y++) {
+            boolean completed = true;
+
+            for (int x = 0; x < related_section.length; x++) {
+                if (!related_section[x][y]) {
+                    completed = false;
+                    break;
+                }
+            }
+            if (completed) {
+                linesToClear.add(y + minHeight);
+            }
+        }
+        return linesToClear;
+    }
+    private HashSet<Double> calcSetOfRelatedHeights(Tetromino t) {
+        HashSet<Double> related_heights = new HashSet<Double>();
+        for (Mino mino: t.children) {
+            related_heights.add(mino.getPosition().getY());
+        }
+        return related_heights;
+    }
+    public void checkCompletedLines(Tetromino lastLocked) {
+        /**
+         * lock tetromino trigger this, check for any lines to clear, if exist then clear.
+         * @param lastLocked, the tetromino just locked, possible line clears should related with position of it
+         */
+        //
+        // group to lower/around/upper
+        HashSet<Double> lastLockedHeights = calcSetOfRelatedHeights(lastLocked);
+        //System.out.println("lock heights: "+lastLockedHeights);
+        ArrayList<Tetromino> lower = new ArrayList<Tetromino>();
+        ArrayList<Tetromino> around = new ArrayList<Tetromino>();
+        ArrayList<Tetromino> upper = new ArrayList<Tetromino>();
+        for (Tetromino t : allTetrominos) {
+            if (t.children.isEmpty()) {continue;}
+            HashSet<Double> tHeights = calcSetOfRelatedHeights(t);
+            if (!Collections.disjoint(lastLockedHeights, tHeights)) {
+                around.add(t);
+            }
+            else if (lastLockedHeights.iterator().next() < tHeights.iterator().next()) {
+                lower.add(t);
+            }
+            else {
+                upper.add(t);
+            }
+        }
+        // lower: no change
+        // around: clear + move down
+        int cleared = clearLines(findLinesToClear(around, lastLockedHeights), around);
+
+        // upper: shift minos
+        for (Tetromino tetromino : upper) {
+            for (Mino mino : tetromino.children) {
+                mino.getPosition().setY(mino.getPosition().getY() + cleared);
+            }
+        }
+    }
     public double getWidth() {
         return this.width;
     }
