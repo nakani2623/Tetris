@@ -62,6 +62,16 @@ public class Board implements Observable{
     //     upcomingTetrominos.addAll(newTetrominos);
     // }
 
+    /**
+     * Reset the board state into initial
+     */
+    public void reset() {
+        allTetrominos = new ArrayList<Tetromino>();
+        currentTetromino = null;
+        op = null;
+        notifyObservers();
+    }
+
     public void spawn(TetrominoType type) {
         Tetromino t = new Tetromino(centreTopPoint(), type);
         currentTetromino = null;

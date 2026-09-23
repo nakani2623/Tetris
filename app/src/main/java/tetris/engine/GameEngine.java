@@ -29,7 +29,7 @@ public class GameEngine implements Observable {
     public GameEngine() {
         board = new Board();
         board.engine = this;
-        score = new Score();
+        score = new Score(this);
         nextQueue = new LinkedList<TetrominoType>();
         observers = new ArrayList<>();
 
@@ -45,6 +45,12 @@ public class GameEngine implements Observable {
     public void start() {
         gameState = GameState.active;
         spawn();
+    }
+
+    public void reset() {
+        board.reset();
+        score.reset();
+        nextQueue = new LinkedList<TetrominoType>();
     }
 
     public void spawn() {

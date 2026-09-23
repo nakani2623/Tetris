@@ -7,6 +7,7 @@ import tetris.engine.type.Direction;
 import tetris.engine.type.GameState;
 import tetris.engine.type.Rotation;
 import javafx.scene.Scene;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
 import javafx.scene.layout.Pane;
@@ -43,18 +44,24 @@ public class GameWindow {
     public void execute(Stage stage) {
         // keyboard controller, triggers tetromino movement functions
         scene.addEventHandler(KeyEvent.KEY_PRESSED, event -> {
-            if (engine.getGameState() != GameState.active) {
-                return;
+            if (engine.getGameState() == GameState.ended) {
+                if (event.getCode() == KeyCode.R) {
+                    engine.reset();
+                    engine.start();
+                }
             }
 
-            switch (event.getCode()) {
-                case J -> board.moveCurrent(Direction.LEFT);
-                case L -> board.moveCurrent(Direction.RIGHT);
-                case F -> board.hardDrop();
-                case A -> board.rotateCurrent(Rotation.COUNTER_CLOCKWISE);
-                case D -> board.rotateCurrent(Rotation.CLOCKWISE);
-                case SEMICOLON -> board.rotateCurrent(Rotation.R_180);
+            if (engine.getGameState() == GameState.active) {              
+                switch (event.getCode()) {
+                    case J -> board.moveCurrent(Direction.LEFT);
+                    case L -> board.moveCurrent(Direction.RIGHT);
+                    case F -> board.hardDrop();
+                    case A -> board.rotateCurrent(Rotation.COUNTER_CLOCKWISE);
+                    case D -> board.rotateCurrent(Rotation.CLOCKWISE);
+                    case SEMICOLON -> board.rotateCurrent(Rotation.R_180);
+                }
             }
+
         });
         
         stage.setScene(scene);
