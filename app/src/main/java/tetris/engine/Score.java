@@ -13,6 +13,7 @@ public class Score implements Observable{
     // score tracking
 
     private static final int refreshRate_Hz = 30;
+    public GameEngine engine;
     private int score;
     private int linesCleared;
     private int piecesPlaced;
@@ -26,7 +27,7 @@ public class Score implements Observable{
 
     private List<Observer> observers;
 
-    public Score() {
+    public Score(GameEngine engine) {
         this.score = 0;
         this.linesCleared = 0;
         this.piecesPlaced = 0;
@@ -37,6 +38,21 @@ public class Score implements Observable{
 
         exec.scheduleAtFixedRate(this::updateStats, 0, 1000 / refreshRate_Hz, TimeUnit.MILLISECONDS);
         this.observers = new ArrayList<>();
+this.engine = engine;
+    }
+
+    /**
+     * set the score into initial state
+     */
+    public void reset() {
+        this.score = 0;
+        this.linesCleared = 0;
+        this.piecesPlaced = 0;
+        this.startTime = System.currentTimeMillis();
+        this.elapsedTime = 0;
+        this.piecesPerSecond = 0;
+        this.attackPerMinute = 0;
+
     }
     
     public void updateStats() {
