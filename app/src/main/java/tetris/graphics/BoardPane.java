@@ -2,21 +2,21 @@ package tetris.graphics;
 
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
-import tetris.engine.Board;
 import javafx.scene.shape.Rectangle;
+import tetris.engine.GameEngine;
 
 public class BoardPane extends GridPane {
     private final int MINO_SIZE = 20;
-    private Board board;
+    private GameEngine engine;
 
     Rectangle[][] grid; // extra references to each rectangle
 
-    public BoardPane(Board board) { 
-        this.board = board;
-        grid = new Rectangle[(int)board.getWidth()][(int)board.getHeight()];
+    public BoardPane(GameEngine engine) { 
+        this.engine = engine;
+        grid = new Rectangle[(int)engine.getWidth()][(int)engine.getHeight()];
 
-        for (int i = 0; i < board.getWidth(); i++) {
-            for (int j = 0; j < board.getHeight(); j++) {
+        for (int i = 0; i < engine.getWidth(); i++) {
+            for (int j = 0; j < engine.getHeight(); j++) {
                 Rectangle square = new Rectangle(MINO_SIZE, MINO_SIZE, Color.WHITE);
                 square.setStroke(Color.LIGHTGRAY);
                 this.add(square, i, j);
@@ -26,8 +26,8 @@ public class BoardPane extends GridPane {
     }
 
     public void reset() {
-        for (int i = 0; i < board.getWidth(); i++) {
-            for (int j = 0; j < board.getHeight(); j++) {
+        for (int i = 0; i < engine.getWidth(); i++) {
+            for (int j = 0; j < engine.getHeight(); j++) {
                 Rectangle r = grid[i][j];
                 r.setFill(Color.WHITE);    
             }

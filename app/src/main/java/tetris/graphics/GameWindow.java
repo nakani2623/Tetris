@@ -3,16 +3,18 @@ package tetris.graphics;
 import tetris.engine.GameEngine;
 import tetris.engine.observers.BoardDisplayManager;
 import tetris.engine.observers.ScoreDisplayManager;
-import tetris.engine.type.Direction;
+import tetris.engine.operator.MoveLeftOperator;
+import tetris.engine.operator.MoveRightOperator;
+import tetris.engine.operator.RotateClockwiseOperator;
+import tetris.engine.operator.RotateCounterClockwiseOperator;
+import tetris.engine.operator.RotateR180Operator;
 import tetris.engine.type.GameState;
-import tetris.engine.type.Rotation;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.HBox;
-import tetris.engine.Board;
 
 /**
  * Manages In-Game contents, including a gameboard
@@ -22,19 +24,17 @@ public class GameWindow {
     Scene scene;
     Pane root;
     GameEngine engine;
-    Board board;
     // Rectangle[][] grid;
     // Set<Rectangle> updatingSquares;
 
     public GameWindow(GameEngine gameEngine) {
         this.engine = gameEngine;
-        this.board = engine.getBoard();
         root = new HBox();
         scene = new Scene(root, 640, 480);
 
-        BoardPane boardPane = new BoardPane(engine.getBoard());
+        BoardPane boardPane = new BoardPane(engine);
         root.getChildren().add(boardPane);
-        new BoardDisplayManager(engine.getBoard(), boardPane);
+        new BoardDisplayManager(engine, boardPane);
 
         ScorePane scorePanel = new ScorePane();
         root.getChildren().add(scorePanel);
@@ -53,12 +53,12 @@ public class GameWindow {
 
             if (engine.getGameState() == GameState.active) {              
                 switch (event.getCode()) {
-                    case J -> board.moveCurrent(Direction.LEFT);
-                    case L -> board.moveCurrent(Direction.RIGHT);
-                    case F -> board.hardDrop();
-                    case A -> board.rotateCurrent(Rotation.COUNTER_CLOCKWISE);
-                    case D -> board.rotateCurrent(Rotation.CLOCKWISE);
-                    case SEMICOLON -> board.rotateCurrent(Rotation.R_180);
+                    case J -> engine.operate(new MoveLeftOperator());
+                    case L -> engine.operate(new MoveRightOperator());
+                    case F -> engine.hardDrop();
+                    case A -> engine.operate(new RotateCounterClockwiseOperator());
+                    case D -> engine.operate(new RotateClockwiseOperator());
+                    case SEMICOLON -> engine.operate(new RotateR180Operator());
                 }
             }
 
