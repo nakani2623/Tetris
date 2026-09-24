@@ -1,7 +1,7 @@
 package tetris.engine.observers;
 
 import javafx.scene.paint.Color;
-import tetris.engine.Board;
+import tetris.engine.GameEngine;
 import tetris.engine.Mino;
 import tetris.engine.Tetromino;
 import tetris.engine.type.TetrominoType;
@@ -19,13 +19,13 @@ public class BoardDisplayManager implements Observer {
 
     @Override
     public void update() {
-        if (!(observable instanceof Board)) {
+        if (!(observable instanceof GameEngine)) {
             return;
         }
-        Board board = (Board) observable;
+        GameEngine engine = (GameEngine) observable;
         // todo: render the board and tetrominos
         boardPane.reset();
-        for (Tetromino t : board.allTetrominos) {
+        for (Tetromino t : engine.allTetrominos) {
             for (Mino m : t.children) {
                 int x = (int)m.getPosition().getX();
                 int y = (int)m.getPosition().getY();

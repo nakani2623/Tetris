@@ -12,7 +12,6 @@ import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.HBox;
-import tetris.engine.Board;
 
 /**
  * Manages In-Game contents, including a gameboard
@@ -22,19 +21,17 @@ public class GameWindow {
     Scene scene;
     Pane root;
     GameEngine engine;
-    Board board;
     // Rectangle[][] grid;
     // Set<Rectangle> updatingSquares;
 
     public GameWindow(GameEngine gameEngine) {
         this.engine = gameEngine;
-        this.board = engine.getBoard();
         root = new HBox();
         scene = new Scene(root, 640, 480);
 
-        BoardPane boardPane = new BoardPane(engine.getBoard());
+        BoardPane boardPane = new BoardPane(engine);
         root.getChildren().add(boardPane);
-        new BoardDisplayManager(engine.getBoard(), boardPane);
+        new BoardDisplayManager(engine, boardPane);
 
         ScorePane scorePanel = new ScorePane();
         root.getChildren().add(scorePanel);
@@ -53,12 +50,12 @@ public class GameWindow {
 
             if (engine.getGameState() == GameState.active) {              
                 switch (event.getCode()) {
-                    case J -> board.moveCurrent(Direction.LEFT);
-                    case L -> board.moveCurrent(Direction.RIGHT);
-                    case F -> board.hardDrop();
-                    case A -> board.rotateCurrent(Rotation.COUNTER_CLOCKWISE);
-                    case D -> board.rotateCurrent(Rotation.CLOCKWISE);
-                    case SEMICOLON -> board.rotateCurrent(Rotation.R_180);
+                    case J -> engine.moveCurrent(Direction.LEFT);
+                    case L -> engine.moveCurrent(Direction.RIGHT);
+                    case F -> engine.hardDrop();
+                    case A -> engine.rotateCurrent(Rotation.COUNTER_CLOCKWISE);
+                    case D -> engine.rotateCurrent(Rotation.CLOCKWISE);
+                    case SEMICOLON -> engine.rotateCurrent(Rotation.R_180);
                 }
             }
 
