@@ -31,9 +31,7 @@ public class GameEngine implements Observable{
     private int width;
     private int height;
     public List<Tetromino> allTetrominos;
-    // public List<Tetromino> upcomingTetrominos;
     public Tetromino currentTetromino;
-    private Mino[][] allMinos;
     List<Observer> observers;
 
     public Operator op;
@@ -62,21 +60,12 @@ public class GameEngine implements Observable{
 
     }
 
-    // public void rotate(Rotation rotation) {
-    //     rotationStrategy.rotate(board, board.currentTetromino, rotation);
-    // }
-
     /**
      * Constructs default game board 10x20 dimension
      */
     public GameEngine() {
         this(10, 20);
     }
-
-    // public void populateUpcoming(List<Tetromino> newTetrominos) {
-    //     //TODO: Exceptional whenever upcoming is less than 7
-    //     upcomingTetrominos.addAll(newTetrominos);
-    // }
 
     /**
      * Reset the board state into initial
@@ -180,15 +169,16 @@ public class GameEngine implements Observable{
         }
         return false;
     }
-
+    
+    /**
+     * clear specified lines, update board
+     * @param toClear: heights of lines to clear, e.g to clear bot 4 lines, to clear = [16, 17, 18, 19]
+     * @param relatedTetrominos: all possible tetrominos to clear
+     * 
+     * @ret int: lines cleared
+     */
     private int clearLines(ArrayList<Integer> toClear, ArrayList<Tetromino> relatedTetrominos) { 
-        /**
-         * clear specified lines, update board
-         * @param toClear: heights of lines to clear, e.g to clear bot 4 lines, to clear = [16, 17, 18, 19]
-         * @param relatedTetrominos: all possible tetrominos to clear
-         * 
-         * @ret int: lines cleared
-         */
+
 
         for (Tetromino t : relatedTetrominos) {
             Iterator<Mino> iterator = t.children.iterator();
@@ -211,32 +201,13 @@ public class GameEngine implements Observable{
                     }
                     mino.getPosition().setY(minoHeight + numToShift);
                 }
-
             }
         }
 
 
         return toClear.size();
     }
-    private String relatedSectionToString(boolean[][] relatedSection) {
-    if (relatedSection == null || relatedSection.length == 0) {
-            return "";
-        }
 
-        int width = relatedSection.length;
-        int height = relatedSection[0].length;
-
-        StringBuilder result = new StringBuilder();
-
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
-                result.append(relatedSection[x][y] ? "■ " : "· ");
-            }
-            result.append('\n');
-        }
-
-        return result.toString();
-    }
     private ArrayList<Integer> findLinesToClear(ArrayList<Tetromino> relatedTetrominos, HashSet<Double> relatedHeights) {
         ArrayList<Integer> linesToClear = new ArrayList<Integer>();
         boolean[][] related_section = new boolean[this.width][relatedHeights.size()]; // true for mino exist, false for empty
@@ -253,7 +224,7 @@ public class GameEngine implements Observable{
                 related_section[x][relativeY] = true;
             }
         }
-        // System.out.println(relatedSectionToString(related_section));
+
         for (int y = 0; y < related_section[0].length; y++) {
             boolean completed = true;
 
@@ -269,6 +240,7 @@ public class GameEngine implements Observable{
         }
         return linesToClear;
     }
+    
     private HashSet<Double> calcSetOfRelatedHeights(Tetromino t) {
         HashSet<Double> related_heights = new HashSet<Double>();
         for (Mino mino: t.children) {
@@ -276,11 +248,13 @@ public class GameEngine implements Observable{
         }
         return related_heights;
     }
+
+    /**
+     * lock tetromino trigger this, check for any lines to clear, if exist then clear.
+     * @param lastLocked, the tetromino just locked, possible line clears should related with position of it
+     */
     public void checkCompletedLines(Tetromino lastLocked) {
-        /**
-         * lock tetromino trigger this, check for any lines to clear, if exist then clear.
-         * @param lastLocked, the tetromino just locked, possible line clears should related with position of it
-         */
+  
         //
         // group to lower/around/upper
         HashSet<Double> lastLockedHeights = calcSetOfRelatedHeights(lastLocked);
