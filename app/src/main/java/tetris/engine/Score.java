@@ -12,9 +12,8 @@ import tetris.engine.type.GameState;
 
 public class Score implements Observable{
     // score tracking
-
+    private GameEngine engine;
     private static final int refreshRate_Hz = 30;
-    public GameEngine engine;
     private int score;
     private int linesCleared;
     private int piecesPlaced;
