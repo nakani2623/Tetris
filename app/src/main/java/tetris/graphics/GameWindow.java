@@ -3,9 +3,12 @@ package tetris.graphics;
 import tetris.engine.GameEngine;
 import tetris.engine.observers.BoardDisplayManager;
 import tetris.engine.observers.ScoreDisplayManager;
-import tetris.engine.type.Direction;
+import tetris.engine.operator.MoveLeftOperator;
+import tetris.engine.operator.MoveRightOperator;
+import tetris.engine.operator.RotateClockwiseOperator;
+import tetris.engine.operator.RotateCounterClockwiseOperator;
+import tetris.engine.operator.RotateR180Operator;
 import tetris.engine.type.GameState;
-import tetris.engine.type.Rotation;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -50,12 +53,12 @@ public class GameWindow {
 
             if (engine.getGameState() == GameState.active) {              
                 switch (event.getCode()) {
-                    case J -> engine.moveCurrent(Direction.LEFT);
-                    case L -> engine.moveCurrent(Direction.RIGHT);
+                    case J -> engine.operate(new MoveLeftOperator());
+                    case L -> engine.operate(new MoveRightOperator());
                     case F -> engine.hardDrop();
-                    case A -> engine.rotateCurrent(Rotation.COUNTER_CLOCKWISE);
-                    case D -> engine.rotateCurrent(Rotation.CLOCKWISE);
-                    case SEMICOLON -> engine.rotateCurrent(Rotation.R_180);
+                    case A -> engine.operate(new RotateCounterClockwiseOperator());
+                    case D -> engine.operate(new RotateClockwiseOperator());
+                    case SEMICOLON -> engine.operate(new RotateR180Operator());
                 }
             }
 

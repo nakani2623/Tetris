@@ -13,17 +13,10 @@ import tetris.engine.generatingStrategy.TetrominoGenerator;
 import tetris.engine.observers.Observable;
 import tetris.engine.observers.Observer;
 import tetris.engine.operator.MoveDownOperator;
-import tetris.engine.operator.MoveLeftOperator;
-import tetris.engine.operator.MoveRightOperator;
 import tetris.engine.operator.Operator;
-import tetris.engine.operator.RotateClockwiseOperator;
-import tetris.engine.operator.RotateCounterClockwiseOperator;
-import tetris.engine.operator.RotateR180Operator;
 import tetris.engine.rotationStrategy.RotationStrategy;
 import tetris.engine.rotationStrategy.classicRotation;
-import tetris.engine.type.Direction;
 import tetris.engine.type.GameState;
-import tetris.engine.type.Rotation;
 import tetris.engine.type.TetrominoType;
 import tetris.utils.Point;
 
@@ -118,30 +111,12 @@ public class GameEngine implements Observable{
         notifyObservers();
     }
 
-    public void moveCurrent(Direction d) {
-        switch (d) {
-            case LEFT -> op = new MoveLeftOperator();
-            case RIGHT -> op = new MoveRightOperator();
-        }
-        // create a clone that simulates the result of movement, move the real piece if
-        // there is no collision 
-        Tetromino clone = new Tetromino(currentTetromino);
-        op.operate(clone);
-
-        if (!hasCollision(clone)) {
-            op.operate(currentTetromino);
-            notifyObservers();
-        }
-    }
-
-    public void rotateCurrent(Rotation r) {
-        switch (r) {
-            case CLOCKWISE -> op = new RotateClockwiseOperator();
-            case COUNTER_CLOCKWISE -> op = new RotateCounterClockwiseOperator();
-            case R_180 -> op = new RotateR180Operator();
-        }
-        // create a clone that simulates the result of movement, move the real piece if
-        // there is no collision 
+    /**
+     * operates the current Tetromino with collision detection
+     * operations includes: horizontal movements, rotation
+     * @param op
+     */
+    public void operate(Operator op) {
         Tetromino clone = new Tetromino(currentTetromino);
         op.operate(clone);
 
