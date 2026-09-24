@@ -130,26 +130,16 @@ public class GameEngine implements Observable{
         op = new MoveDownOperator();
 
         Tetromino clone = new Tetromino(currentTetromino);
-        while (true) {
+        op.operate(clone);
+
+        while (!hasCollision(clone)) {
+            op.operate(currentTetromino);
             op.operate(clone);
-
-            if (!hasCollision(clone)) {
-                op.operate(currentTetromino);
-            }
-
-            else {
-                break;
-            }
         }
-        // because hard drop LOCK a piece, check for clear
-        checkCompletedLines(currentTetromino);
 
-        //spawn a new tetromino
+        checkCompletedLines(currentTetromino);
         spawn();
         notifyObservers();
-
-        
-
     }
 
     /**
