@@ -7,7 +7,7 @@ public interface LockStrategy {
      * @param tetromino
      * @param board
      */
-    void checkForLock(Tetromino tetromino, Board board);
+    void checkForLock(Tetromino tetromino, GameEngine engine);
 
 
     /**
@@ -15,5 +15,5 @@ public interface LockStrategy {
      * @param tetromino
      * @param board
      */
-    void lock(Tetromino tetromino, Board board);
+    void lock(Tetromino tetromino, GameEngine engine);
 }
