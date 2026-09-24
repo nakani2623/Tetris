@@ -8,6 +8,10 @@ import java.util.Queue;
 import java.util.Iterator;
 import java.util.LinkedList;
 
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
+import javafx.util.Duration;
+
 import tetris.engine.generatingStrategy.BagGenerator;
 import tetris.engine.generatingStrategy.TetrominoGenerator;
 import tetris.engine.observers.Observable;
@@ -35,6 +39,8 @@ public class GameEngine implements Observable{
     List<Observer> observers;
 
     public Operator op;
+    public double gravity; // move down num per sec
+    Timeline gravityTimeline;
     
     /**
      * Constructs game bord with specific dimension
@@ -57,6 +63,10 @@ public class GameEngine implements Observable{
         allTetrominos = new ArrayList<Tetromino>();
         // upcomingTetrominos = new LinkedList<>();
         observers = new ArrayList<Observer>();
+        gravity = 1;
+        gravityTimeline = new Timeline(new KeyFrame(Duration.seconds(1/gravity), event -> operate(new MoveDownOperator())));
+        gravityTimeline.setCycleCount(Timeline.INDEFINITE);
+        gravityTimeline.play();
 
     }
 

@@ -3,6 +3,7 @@ package tetris.graphics;
 import tetris.engine.GameEngine;
 import tetris.engine.observers.BoardDisplayManager;
 import tetris.engine.observers.ScoreDisplayManager;
+import tetris.engine.operator.MoveDownOperator;
 import tetris.engine.operator.MoveLeftOperator;
 import tetris.engine.operator.MoveRightOperator;
 import tetris.engine.operator.RotateClockwiseOperator;
@@ -56,6 +57,7 @@ public class GameWindow {
                     case J -> engine.operate(new MoveLeftOperator());
                     case L -> engine.operate(new MoveRightOperator());
                     case F -> engine.hardDrop();
+                    case K -> engine.operate(new MoveDownOperator());
                     case A -> engine.operate(new RotateCounterClockwiseOperator());
                     case D -> engine.operate(new RotateClockwiseOperator());
                     case SEMICOLON -> engine.operate(new RotateR180Operator());
