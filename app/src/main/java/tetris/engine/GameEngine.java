@@ -8,6 +8,10 @@ import java.util.Queue;
 import java.util.Iterator;
 import java.util.LinkedList;
 
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
+import javafx.util.Duration;
+
 import tetris.engine.generatingStrategy.BagGenerator;
 import tetris.engine.generatingStrategy.TetrominoGenerator;
 import tetris.engine.observers.Observable;
@@ -35,6 +39,11 @@ public class GameEngine implements Observable{
     List<Observer> observers;
 
     public Operator op;
+    // gravity & soft drop
+    public double baseGravity;
+    private double gravity; // move down num per sec
+    public Timeline gravityTimeline;
+    public double SDF; // Soft Drop factor
     
     /**
      * Constructs game bord with specific dimension
@@ -57,6 +66,9 @@ public class GameEngine implements Observable{
         allTetrominos = new ArrayList<Tetromino>();
         // upcomingTetrominos = new LinkedList<>();
         observers = new ArrayList<Observer>();
+        this.baseGravity = 1;
+        SDF = 15;
+        setGravity(this.baseGravity);
 
     }
 
@@ -289,6 +301,24 @@ public class GameEngine implements Observable{
     
     public Point centreTopPoint() {
         return new Point((this.width/2)-1, 1);
+    }
+
+    public void setGravity(double gravity){
+        this.gravity = gravity;
+        if (gravityTimeline != null) {
+            gravityTimeline.stop();
+        }
+        gravityTimeline = new Timeline(new KeyFrame(Duration.seconds(1/gravity), event -> operate(new MoveDownOperator())));
+        gravityTimeline.setCycleCount(Timeline.INDEFINITE);
+        gravityTimeline.play();
+    }
+
+    public void startSoftDrop(){
+        setGravity(baseGravity * SDF);
+    }
+
+    public void endSoftDrop(){
+        setGravity(baseGravity);
     }
 
     public double getWidth() {
