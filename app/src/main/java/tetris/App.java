@@ -5,6 +5,7 @@ package tetris;
 
 import javafx.application.Application;
 import javafx.stage.Stage;
+import tetris.controller.GameController;
 import tetris.engine.GameEngine;
 import tetris.graphics.GameWindow;
 
@@ -14,6 +15,9 @@ public class App extends Application {
     public void start(Stage stage) {
         GameEngine gameEngine = new GameEngine();
         GameWindow gameWindow = new GameWindow(gameEngine);
+
+        GameController controller = new GameController(gameEngine, gameWindow);
+        controller.setSoftDropFactor(15);
         
         // gameEngine.loop();
         gameWindow.execute(stage);
