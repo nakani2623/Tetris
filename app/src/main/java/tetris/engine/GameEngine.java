@@ -43,22 +43,18 @@ public class GameEngine implements Observable{
      * @param height
      */
     public GameEngine(int width, int height) {
-        nextQueue = new LinkedList<TetrominoType>();
-        observers = new ArrayList<>();
+        this.height = height;
+        this.width = width;
+        this.gravity = 1;
 
         // configure game, todo: create and use initEngine(JSON? configFile) instead below
         tetrominoGenerator = new BagGenerator();
         rotationStrategy = new classicRotation();
         score = new Score(this);
 
-
-        this.height = height;
-        this.width = width;
-
+        nextQueue = new LinkedList<TetrominoType>();
         allTetrominos = new ArrayList<Tetromino>();
-        // upcomingTetrominos = new LinkedList<>();
-        observers = new ArrayList<Observer>();
-        this.gravity = 1;
+        observers = new ArrayList<>();
     }
 
     /**
