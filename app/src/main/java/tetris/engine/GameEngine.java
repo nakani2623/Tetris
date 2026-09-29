@@ -32,6 +32,7 @@ public class GameEngine implements Observable{
     private int height;
     public List<Tetromino> allTetrominos;
     public Tetromino currentTetromino;
+    private TetrominoType holdTetrominoType;
     List<Observer> observers;
 
     public Operator op;
@@ -71,6 +72,7 @@ public class GameEngine implements Observable{
         score.reset();
         allTetrominos = new ArrayList<Tetromino>();
         currentTetromino = null;
+        holdTetrominoType = null;
         op = null;
         nextQueue = new LinkedList<TetrominoType>();
         notifyObservers();
@@ -125,6 +127,26 @@ public class GameEngine implements Observable{
 
         checkCompletedLines(currentTetromino);
         spawn();
+        notifyObservers();
+    }
+    
+    /**
+     * Swap holdTetromino and currentTetromino. spawn a new one if hold never used
+     * 
+     */
+    public void hold() {
+        allTetrominos.remove(currentTetromino);
+        Tetromino currentTetrominoClone = new Tetromino(currentTetromino);
+        if (holdTetrominoType == null) {
+            spawn();
+        }
+
+        else {
+            currentTetromino = new Tetromino(centreTopPoint(), holdTetrominoType);
+            allTetrominos.add(currentTetromino);
+        }
+
+        holdTetrominoType = currentTetrominoClone.type;
         notifyObservers();
     }
 
