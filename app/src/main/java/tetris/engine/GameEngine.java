@@ -72,6 +72,7 @@ public class GameEngine implements Observable{
         score.reset();
         allTetrominos = new ArrayList<Tetromino>();
         currentTetromino = null;
+        holdTetrominoType = null;
         op = null;
         nextQueue = new LinkedList<TetrominoType>();
         notifyObservers();
