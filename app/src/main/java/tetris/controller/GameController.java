@@ -68,6 +68,7 @@ public class GameController {
                     case L -> engine.operate(new MoveRightOperator());
                     case F -> engine.hardDrop();
                     case K -> startSoftDrop();
+                    case S -> engine.hold();
                     case A -> engine.operate(new RotateCounterClockwiseOperator());
                     case D -> engine.operate(new RotateClockwiseOperator());
                     case SEMICOLON -> engine.operate(new RotateR180Operator());
