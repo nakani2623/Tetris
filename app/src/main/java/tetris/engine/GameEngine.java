@@ -109,13 +109,15 @@ public class GameEngine implements Observable{
         Tetromino clone = new Tetromino(currentTetromino);
         op.operate(clone);
 
-        if (!hasCollision(clone)) {
+        if (hasCollision(clone)) {
+            return;
+        }
+
             op.operate(currentTetromino);
             if (landed(currentTetromino)) {
                 hardDrop();
             }
             notifyObservers();
-        }
     }
 
     public void hardDrop() {
