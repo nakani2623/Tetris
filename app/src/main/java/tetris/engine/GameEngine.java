@@ -5,6 +5,10 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Queue;
+
+import javafx.animation.PauseTransition;
+import javafx.util.Duration;
+
 import java.util.Iterator;
 import java.util.LinkedList;
 
@@ -37,7 +41,8 @@ public class GameEngine implements Observable{
 
     public Operator op;
     private double gravity; // move down num per sec
-    private double lockDelay;
+    private final PauseTransition lockTimer =
+        new PauseTransition(Duration.seconds(0.5));
     
     /**
      * Constructs game bord with specific dimension
@@ -57,6 +62,7 @@ public class GameEngine implements Observable{
         nextQueue = new LinkedList<TetrominoType>();
         allTetrominos = new ArrayList<Tetromino>();
         observers = new ArrayList<>();
+        lockTimer.setOnFinished(event -> hardDrop());
     }
 
     /**
@@ -113,11 +119,15 @@ public class GameEngine implements Observable{
             return;
         }
 
-            op.operate(currentTetromino);
-            if (landed(currentTetromino)) {
-                hardDrop();
-            }
-            notifyObservers();
+        op.operate(currentTetromino);
+        if (landed(currentTetromino)) {
+            lockTimer.playFromStart();
+        }
+
+        else {
+            lockTimer.stop();
+        }
+        notifyObservers();
     }
 
     public void hardDrop() {
@@ -132,6 +142,7 @@ public class GameEngine implements Observable{
         }
 
         checkCompletedLines(currentTetromino);
+        lockTimer.stop();
         spawn();
         notifyObservers();
     }
