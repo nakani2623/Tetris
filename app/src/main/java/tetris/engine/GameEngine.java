@@ -37,6 +37,7 @@ public class GameEngine implements Observable{
 
     public Operator op;
     private double gravity; // move down num per sec
+    private double lockDelay;
     
     /**
      * Constructs game bord with specific dimension
@@ -110,6 +111,9 @@ public class GameEngine implements Observable{
 
         if (!hasCollision(clone)) {
             op.operate(currentTetromino);
+            if (landed(currentTetromino)) {
+                hardDrop();
+            }
             notifyObservers();
         }
     }
@@ -189,6 +193,23 @@ public class GameEngine implements Observable{
         return false;
     }
     
+    /**
+     * Checks if the current tetromino has touches the gound or other tetrominos on the bottom
+     * @param t
+     * @return
+     */
+    public boolean landed(Tetromino t) {
+        // simulate a downward move, check if there is a collision
+        Tetromino clone  = new Tetromino(t);
+        clone.moveDown();
+
+        if (hasCollision(clone)) {
+            return true;
+        }
+
+        return false;
+    }
+
     /**
      * clear specified lines, update board
      * @param toClear: heights of lines to clear, e.g to clear bot 4 lines, to clear = [16, 17, 18, 19]
