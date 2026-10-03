@@ -18,9 +18,13 @@ import tetris.engine.observers.Observable;
 import tetris.engine.observers.Observer;
 import tetris.engine.operator.MoveDownOperator;
 import tetris.engine.operator.Operator;
+import tetris.engine.operator.RotateClockwiseOperator;
+import tetris.engine.operator.RotateCounterClockwiseOperator;
+import tetris.engine.operator.RotateR180Operator;
 import tetris.engine.rotationStrategy.RotationStrategy;
 import tetris.engine.rotationStrategy.classicRotation;
 import tetris.engine.type.GameState;
+import tetris.engine.type.Rotation;
 import tetris.engine.type.TetrominoType;
 import tetris.utils.Point;
 
@@ -110,13 +114,14 @@ public class GameEngine implements Observable{
      * operates the current Tetromino with collision detection
      * operations includes: horizontal movements, rotation
      * @param op
+     * @return true if operation success
      */
-    public void operate(Operator op) {
+    public boolean tryOperate(Operator op) {
         Tetromino clone = new Tetromino(currentTetromino);
         op.operate(clone);
 
         if (hasCollision(clone)) {
-            return;
+            return false;
         }
 
         op.operate(currentTetromino);
@@ -128,8 +133,22 @@ public class GameEngine implements Observable{
             lockTimer.stop();
         }
         notifyObservers();
+        return true;
     }
 
+    public void superRotate(Rotation rotation) {
+        Operator op;
+        if (rotation == Rotation.CLOCKWISE)              {op = new RotateClockwiseOperator();}
+        else if (rotation == Rotation.COUNTER_CLOCKWISE) {op = new RotateCounterClockwiseOperator();}
+        else                                             {op = new RotateR180Operator();}
+        
+        // try without kick
+        if (tryOperate(op)) {
+            return ;
+        }
+
+        
+    }
     public void lock() {
         checkCompletedLines(currentTetromino);
         lockTimer.stop();
