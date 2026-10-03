@@ -5,6 +5,10 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Queue;
+
+import javafx.animation.PauseTransition;
+import javafx.util.Duration;
+
 import java.util.Iterator;
 import java.util.LinkedList;
 
@@ -37,6 +41,8 @@ public class GameEngine implements Observable{
 
     public Operator op;
     private double gravity; // move down num per sec
+    private final PauseTransition lockTimer =
+        new PauseTransition(Duration.seconds(0.5));
     
     /**
      * Constructs game bord with specific dimension
@@ -56,6 +62,7 @@ public class GameEngine implements Observable{
         nextQueue = new LinkedList<TetrominoType>();
         allTetrominos = new ArrayList<Tetromino>();
         observers = new ArrayList<>();
+        lockTimer.setOnFinished(event -> lock());
     }
 
     /**
@@ -108,10 +115,26 @@ public class GameEngine implements Observable{
         Tetromino clone = new Tetromino(currentTetromino);
         op.operate(clone);
 
-        if (!hasCollision(clone)) {
-            op.operate(currentTetromino);
-            notifyObservers();
+        if (hasCollision(clone)) {
+            return;
         }
+
+        op.operate(currentTetromino);
+        if (landed(currentTetromino)) {
+            lockTimer.playFromStart();
+        }
+
+        else {
+            lockTimer.stop();
+        }
+        notifyObservers();
+    }
+
+    public void lock() {
+        checkCompletedLines(currentTetromino);
+        lockTimer.stop();
+        spawn();
+        notifyObservers();
     }
 
     public void hardDrop() {
@@ -125,8 +148,7 @@ public class GameEngine implements Observable{
             op.operate(clone);
         }
 
-        checkCompletedLines(currentTetromino);
-        spawn();
+        lock();
         notifyObservers();
     }
     
@@ -189,6 +211,23 @@ public class GameEngine implements Observable{
         return false;
     }
     
+    /**
+     * Checks if the current tetromino has touches the gound or other tetrominos on the bottom
+     * @param t
+     * @return
+     */
+    public boolean landed(Tetromino t) {
+        // simulate a downward move, check if there is a collision
+        Tetromino clone  = new Tetromino(t);
+        clone.moveDown();
+
+        if (hasCollision(clone)) {
+            return true;
+        }
+
+        return false;
+    }
+
     /**
      * clear specified lines, update board
      * @param toClear: heights of lines to clear, e.g to clear bot 4 lines, to clear = [16, 17, 18, 19]
