@@ -27,6 +27,11 @@ public class GameWindow {
         scene.setRoot(gamePane);
     }
 
+    public void showMenu(Scene scene) {
+        MenuPane menuPane = new MenuPane();
+        scene.setRoot(menuPane);
+    }
+
 
     public void execute(Stage stage) {
         stage.setScene(scene);
