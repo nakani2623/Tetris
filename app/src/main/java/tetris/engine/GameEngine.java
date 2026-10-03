@@ -62,7 +62,7 @@ public class GameEngine implements Observable{
         nextQueue = new LinkedList<TetrominoType>();
         allTetrominos = new ArrayList<Tetromino>();
         observers = new ArrayList<>();
-        lockTimer.setOnFinished(event -> hardDrop());
+        lockTimer.setOnFinished(event -> lock());
     }
 
     /**
@@ -130,6 +130,13 @@ public class GameEngine implements Observable{
         notifyObservers();
     }
 
+    public void lock() {
+        checkCompletedLines(currentTetromino);
+        lockTimer.stop();
+        spawn();
+        notifyObservers();
+    }
+
     public void hardDrop() {
         op = new MoveDownOperator();
 
@@ -141,9 +148,7 @@ public class GameEngine implements Observable{
             op.operate(clone);
         }
 
-        checkCompletedLines(currentTetromino);
-        lockTimer.stop();
-        spawn();
+        lock();
         notifyObservers();
     }
     
