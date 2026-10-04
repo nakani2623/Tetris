@@ -18,17 +18,18 @@ public class GameWindow {
 
     public GameWindow(GameEngine gameEngine) {
         this.engine = gameEngine;
-        scene = new Scene(null, 640, 480);
-        showGame(scene);
+        Pane initialPane = new Pane();
+        scene = new Scene(initialPane, 640, 480);
+        showMenu();
     }
 
-    public void showGame(Scene scene) {
+    public void showGame() {
         GamePane gamePane = new GamePane(engine);
         scene.setRoot(gamePane);
     }
 
-    public void showMenu(Scene scene) {
-        MenuPane menuPane = new MenuPane();
+    public void showMenu() {
+        MenuPane menuPane = new MenuPane(this);
         scene.setRoot(menuPane);
     }
 
