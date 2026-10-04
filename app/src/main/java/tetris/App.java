@@ -18,6 +18,7 @@ public class App extends Application {
 
         GameController controller = new GameController(gameEngine, gameWindow);
         controller.setSoftDropFactor(15);
+        gameWindow.setController(controller);
         
         // gameEngine.loop();
         gameWindow.execute(stage);

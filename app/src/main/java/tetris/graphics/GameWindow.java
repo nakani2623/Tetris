@@ -1,9 +1,10 @@
 package tetris.graphics;
 
-import tetris.engine.GameEngine;
 import javafx.scene.Scene;
-import javafx.stage.Stage;
 import javafx.scene.layout.Pane;
+import javafx.stage.Stage;
+import tetris.controller.GameController;
+import tetris.engine.GameEngine;
 
 /**
  * Manages In-Game contents, including a gameboard
@@ -13,6 +14,7 @@ public class GameWindow {
     Scene scene;
     Pane root;
     GameEngine engine;
+    GameController controller;
     // Rectangle[][] grid;
     // Set<Rectangle> updatingSquares;
 
@@ -26,7 +28,7 @@ public class GameWindow {
     public void showGame() {
         GamePane gamePane = new GamePane(engine);
         scene.setRoot(gamePane);
-        engine.start();
+        engine.start(controller);
     }
 
     public void showMenu() {
@@ -46,5 +48,9 @@ public class GameWindow {
 
     public Scene getScene() {
         return scene;
+    }
+
+    public void setController(GameController gc) {
+        this.controller = gc;
     }
 }

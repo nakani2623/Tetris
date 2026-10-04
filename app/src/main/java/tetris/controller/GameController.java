@@ -32,7 +32,6 @@ public class GameController {
         this.window = window;
 
         addKeyboardControl();
-        resetGravityTimeline(engine.getGravity());
     }
 
     public void resetGravityTimeline(double gravity){
@@ -59,7 +58,7 @@ public class GameController {
             if (engine.getGameState() == GameState.ended) {
                 if (event.getCode() == KeyCode.R) {
                     engine.reset();
-                    engine.start();
+                    engine.start(this);
                 }
             }
 

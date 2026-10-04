@@ -12,6 +12,7 @@ import javafx.util.Duration;
 import java.util.Iterator;
 import java.util.LinkedList;
 
+import tetris.controller.GameController;
 import tetris.engine.generatingStrategy.BagGenerator;
 import tetris.engine.generatingStrategy.TetrominoGenerator;
 import tetris.engine.observers.Observable;
@@ -452,8 +453,9 @@ public class GameEngine implements Observable{
     public void setGravity(double gravity){
         this.gravity = gravity;
     }
-    public void start() {
+    public void start(GameController gc) {
         gameState = GameState.active;
+        gc.resetGravityTimeline(gravity);
         spawn();
     }
 
