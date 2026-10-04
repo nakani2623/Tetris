@@ -26,6 +26,7 @@ public class GameWindow {
     public void showGame() {
         GamePane gamePane = new GamePane(engine);
         scene.setRoot(gamePane);
+        engine.start();
     }
 
     public void showMenu() {
