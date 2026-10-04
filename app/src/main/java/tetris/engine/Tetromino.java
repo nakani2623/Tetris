@@ -15,13 +15,15 @@ public class Tetromino {
     final int order = 4;
     public Point centre;
     public List<Mino> children;
-    public TetrominoType type;
+    public TetrominoType type; 
+    public int rotationState; // direction after n CW rotation, 0: origin, 1: CW-ed, 2: r-180-ed, 3: CCW-ed 
 //    Mino[] children;
 
     public Tetromino(Point centre, TetrominoType type) {
         this(type);
         this.centre = centre;
         children = new ArrayList<>();
+        rotationState = 0;
 
         if (type == TetrominoType.I) {
             centre.setX(centre.getX() + 0.5);
@@ -137,6 +139,7 @@ public class Tetromino {
             p.setY(newY);
 
         }
+        rotationState = (rotationState + 3) % 4;
     }
 
     /**
@@ -153,6 +156,8 @@ public class Tetromino {
             p.setX(newX);
             p.setY(newY);
         }
+        rotationState = (rotationState + 1) % 4;
+
     }
 
     /**
@@ -169,6 +174,8 @@ public class Tetromino {
             p.setX(newX);
             p.setY(newY);
         }
+        rotationState = (rotationState + 2) % 4;
+
     }
 
     public boolean collidesWith(Tetromino t) {
