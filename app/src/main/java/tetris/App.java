@@ -7,18 +7,19 @@ import javafx.application.Application;
 import javafx.stage.Stage;
 import tetris.controller.GameController;
 import tetris.engine.GameEngine;
+import tetris.engine.type.GameState;
 import tetris.graphics.GameWindow;
 
 public class App extends Application {
 
     @Override
     public void start(Stage stage) {
-        GameEngine gameEngine = new GameEngine();
+        GameState gameState = null;
+        GameEngine gameEngine = new GameEngine(gameState);
         GameWindow gameWindow = new GameWindow(gameEngine);
 
-        GameController controller = new GameController(gameEngine, gameWindow);
+        GameController controller = new GameController(gameEngine, gameWindow, gameState);
         controller.setSoftDropFactor(15);
-        gameWindow.setController(controller);
         
         // gameEngine.loop();
         gameWindow.execute(stage);
