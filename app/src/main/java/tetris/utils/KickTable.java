@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import tetris.engine.type.Rotation;
+import tetris.engine.type.RotationState;
 import tetris.engine.type.TetrominoType;
 
 public class KickTable {
@@ -121,37 +123,13 @@ public class KickTable {
 
     private static final ArrayList<Point> JLSTZ_L_0 = new ArrayList<>(List.of(
         new Point(0, 0),
-        new Point(1, 0),
-        new Point(1, 1),
+        new Point(-1, 0),
+        new Point(-1, 1),
         new Point(0, -2),
-        new Point(1, -2)
+        new Point(-1, -2)
     ));
 
     private static final ArrayList<Point> JLSTZ_L_2 = new ArrayList<>(List.of(
-        new Point(0, 0),
-        new Point(1, 0),
-        new Point(1, 1),
-        new Point(0, -2),
-        new Point(1, -2)
-    ));
-
-    private static final ArrayList<Point> JLSTZ_R_0 = new ArrayList<>(List.of(
-        new Point(0, 0),
-        new Point(-1, 0),
-        new Point(-1, -1),
-        new Point(0, 2),
-        new Point(-1, 2)
-    ));
-
-    private static final ArrayList<Point> JLSTZ_R_2 = new ArrayList<>(List.of(
-        new Point(0, 0),
-        new Point(-1, 0),
-        new Point(-1, -1),
-        new Point(0, 2),
-        new Point(-1, 2)
-    ));
-
-    private static final ArrayList<Point> JLSTZ_2_L = new ArrayList<>(List.of(
         new Point(0, 0),
         new Point(-1, 0),
         new Point(-1, 1),
@@ -159,12 +137,36 @@ public class KickTable {
         new Point(-1, -2)
     ));
 
-    private static final ArrayList<Point> JLSTZ_2_R = new ArrayList<>(List.of(
+    private static final ArrayList<Point> JLSTZ_R_0 = new ArrayList<>(List.of(
+        new Point(0, 0),
+        new Point(1, 0),
+        new Point(1, 1),
+        new Point(0, -2),
+        new Point(1, -2)
+    ));
+
+    private static final ArrayList<Point> JLSTZ_R_2 = new ArrayList<>(List.of(
+        new Point(0, 0),
+        new Point(1, 0),
+        new Point(1, 1),
+        new Point(0, -2),
+        new Point(1, -2)
+    ));
+
+    private static final ArrayList<Point> JLSTZ_2_L = new ArrayList<>(List.of(
         new Point(0, 0),
         new Point(1, 0),
         new Point(1, -1),
         new Point(0, 2),
         new Point(1, 2)
+    ));
+
+    private static final ArrayList<Point> JLSTZ_2_R = new ArrayList<>(List.of(
+        new Point(0, 0),
+        new Point(-1, 0),
+        new Point(-1, -1),
+        new Point(0, 2),
+        new Point(-1, 2)
     ));
 
     private static final ArrayList<ArrayList<Point>> JLSTZ_0 = new ArrayList<>(Arrays.asList(
@@ -203,7 +205,7 @@ public class KickTable {
     ));
 
 
-    public static List<Point> getKickList(TetrominoType type, int stateBeforeRotation, int stateAfterRotation) {
+    public static List<Point> getKickList(TetrominoType type, RotationState stateBeforeRotation, RotationState stateAfterRotation) {
         ArrayList<ArrayList<ArrayList<Point>>> kickTable;
         if (type == TetrominoType.I) {
             // I table
@@ -214,7 +216,7 @@ public class KickTable {
             kickTable = JLSTZ_table;
         }
 
-        return kickTable.get(stateBeforeRotation).get(stateAfterRotation);
+        return kickTable.get(stateBeforeRotation.ordinal()).get(stateAfterRotation.ordinal());
         
     }
 }

@@ -26,6 +26,7 @@ import tetris.engine.rotationStrategy.classicRotation;
 import tetris.engine.type.GameState;
 import tetris.engine.type.Rotation;
 import tetris.engine.type.TetrominoType;
+import tetris.utils.KickTable;
 import tetris.utils.Point;
 
 public class GameEngine implements Observable{
@@ -147,7 +148,53 @@ public class GameEngine implements Observable{
             return ;
         }
 
+        // failed without kick
+
+        // 1.  get kick table
+        List<Point> kickList = KickTable.getKickList(
+            currentTetromino.type,
+            currentTetromino.rotationState,
+            currentTetromino.rotationState.changeState(rotation)
+        );
         
+
+        Tetromino backup = new Tetromino(currentTetromino);
+        Point oriPos = new Point(currentTetromino.centre);
+        int currentIndex = allTetrominos.indexOf(currentTetromino);
+        if (kickList == null) {
+            return;
+        }
+        for (Point shift: kickList) {
+            // 2. move to next position (to try every position 1 by 1)
+            Point destination = Point.combine(shift, oriPos);
+            while (!currentTetromino.centre.equals(destination)) {
+                if (currentTetromino.centre.getX() < destination.getX()) {
+                    currentTetromino.moveRight();
+                }
+                else if (currentTetromino.centre.getX() > destination.getX()) {
+                    currentTetromino.moveLeft();
+                }
+                else if (currentTetromino.centre.getY() < destination.getY()) {
+                    currentTetromino.moveDown();
+                }
+                else if (currentTetromino.centre.getY() > destination.getY()) {
+                    currentTetromino.moveUp();
+                }
+            }
+            // 3. try rotate at this position
+
+            if (tryOperate(op)) {
+                return;
+            }
+
+            
+        }
+        // failed all attempts: move currTetro to origin
+        currentTetromino = new Tetromino(backup);
+
+        if (currentIndex >= 0) {
+            allTetrominos.set(currentIndex, currentTetromino);
+        }
     }
     public void lock() {
         checkCompletedLines(currentTetromino);
