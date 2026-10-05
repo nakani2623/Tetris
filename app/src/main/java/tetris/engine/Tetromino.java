@@ -4,7 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import tetris.utils.Point;
-
+import tetris.engine.type.Rotation;
+import tetris.engine.type.RotationState;
 import tetris.engine.type.TetrominoType;
 
 
@@ -16,14 +17,14 @@ public class Tetromino {
     public Point centre;
     public List<Mino> children;
     public TetrominoType type; 
-    public int rotationState; // direction after n CW rotation, 0: origin, 1: CW-ed, 2: r-180-ed, 3: CCW-ed 
+    public RotationState rotationState; // direction after n CW rotation, 0: origin, 1: CW-ed, 2: r-180-ed, 3: CCW-ed 
 //    Mino[] children;
 
     public Tetromino(Point centre, TetrominoType type) {
         this(type);
         this.centre = centre;
         children = new ArrayList<>();
-        rotationState = 0;
+        this.rotationState = RotationState.ZERO;
 
         if (type == TetrominoType.I) {
             centre.setX(centre.getX() + 0.5);
@@ -78,6 +79,7 @@ public class Tetromino {
 
     public Tetromino(TetrominoType type) {
         this.type = type;
+        this.rotationState = RotationState.ZERO;
     }
 
     /**
@@ -92,6 +94,7 @@ public class Tetromino {
         }
 
         this.type = t.type;
+        this.rotationState = t.rotationState;
     }
 
     public void moveLeft() {
@@ -124,6 +127,16 @@ public class Tetromino {
         }
     }
 
+    public void moveUp() {
+        double originalY = this.centre.getY();
+        this.centre.setY(originalY - 1);
+
+        for (Mino m : children) {
+            double y = m.getPosition().getY();
+            m.getPosition().setY(y - 1);
+        }
+    }
+
     /**
     * rotates the tetromino clockwise / right
     */
@@ -139,7 +152,8 @@ public class Tetromino {
             p.setY(newY);
 
         }
-        rotationState = (rotationState + 3) % 4;
+        //rotationState = (rotationState + 3) % 4;
+        rotationState = rotationState.changeState(Rotation.COUNTER_CLOCKWISE);
     }
 
     /**
@@ -156,7 +170,8 @@ public class Tetromino {
             p.setX(newX);
             p.setY(newY);
         }
-        rotationState = (rotationState + 1) % 4;
+        rotationState = rotationState.changeState(Rotation.CLOCKWISE);
+        
 
     }
 
@@ -174,7 +189,8 @@ public class Tetromino {
             p.setX(newX);
             p.setY(newY);
         }
-        rotationState = (rotationState + 2) % 4;
+        rotationState = rotationState.changeState(Rotation.R_180);
+
 
     }
 
