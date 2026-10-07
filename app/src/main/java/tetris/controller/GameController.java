@@ -1,17 +1,14 @@
 package tetris.controller;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.util.Duration;
 import tetris.engine.GameEngine;
-import tetris.engine.operator.MoveDownOperator;
-import tetris.engine.operator.MoveLeftOperator;
-import tetris.engine.operator.MoveRightOperator;
-import tetris.engine.operator.RotateClockwiseOperator;
-import tetris.engine.operator.RotateCounterClockwiseOperator;
-import tetris.engine.operator.RotateR180Operator;
 import tetris.engine.type.Direction;
 import tetris.engine.type.GameState;
 import tetris.engine.type.Rotation;
@@ -30,8 +27,9 @@ public class GameController implements GameOverListener {
     private Timeline gravityTimeline;
     private double softDropFactor;
     private GameState gameState;
+    private Set<KeyCode> pressedKeys = new HashSet<>(); 
 
-    public GameController(GameEngine engine, GameWindow window, GameState gameState) {
+    public GameController(Controllable engine, GameWindow window, GameState gameState) {
         this.engine = engine;
         this.window = window;
         this.gameState = gameState;
@@ -78,7 +76,10 @@ public class GameController implements GameOverListener {
     // keyboard controller, triggers tetromino movement functions
     public void addKeyboardControl() {
         window.getScene().addEventHandler(KeyEvent.KEY_PRESSED, event -> {
-            if (gameState == GameState.ended) {
+        if (!pressedKeys.add(event.getCode())) { // failed adding to set -> same key not released yet -> is system's auto repeat
+            return ;
+        }
+            if (engine.getGameState() == GameState.ended) {
                 if (event.getCode() == KeyCode.R) {
                     engine.reset();
                     start();
@@ -108,7 +109,8 @@ public class GameController implements GameOverListener {
         });
 
         window.getScene().addEventHandler(KeyEvent.KEY_RELEASED, event -> {
-            if (gameState == GameState.ended) {
+            pressedKeys.remove(event.getCode());
+            if (engine.getGameState() == GameState.ended) {
                 return;
             }
 
