@@ -48,7 +48,8 @@ public class GameEngine implements Observable{
     private double gravity; // move down num per sec
     private final PauseTransition lockTimer =
         new PauseTransition(Duration.seconds(0.5));
-    
+    private int maxLockResets = 15;
+    private int lockResets;
     /**
      * Constructs game bord with specific dimension
      * @param width
@@ -108,6 +109,7 @@ public class GameEngine implements Observable{
 
         currentTetromino = t;
         allTetrominos.add(currentTetromino);
+        lockResets = 0;
         notifyObservers();
     }
 
@@ -128,6 +130,10 @@ public class GameEngine implements Observable{
         op.operate(currentTetromino);
         if (landed(currentTetromino)) {
             lockTimer.playFromStart();
+            lockResets ++;
+            if (lockResets > maxLockResets) {
+                lock();
+            }
         }
 
         else {
