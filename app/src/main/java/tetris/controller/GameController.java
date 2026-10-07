@@ -12,6 +12,7 @@ import tetris.engine.operator.MoveRightOperator;
 import tetris.engine.operator.RotateClockwiseOperator;
 import tetris.engine.operator.RotateCounterClockwiseOperator;
 import tetris.engine.operator.RotateR180Operator;
+import tetris.engine.type.Direction;
 import tetris.engine.type.GameState;
 import tetris.engine.type.Rotation;
 import tetris.graphics.GameWindow;
@@ -21,7 +22,7 @@ import tetris.graphics.GameWindow;
  * GameController
  */
 public class GameController implements GameOverListener {
-    private GameEngine engine;
+    private Controllable engine;
     private GameWindow window;
 
     private Timeline gravityTimeline;
@@ -39,7 +40,7 @@ public class GameController implements GameOverListener {
     public void start() {
         gameState = GameState.active;
         resetGravityTimeline(engine.getGravity());
-        engine.spawn();
+        engine.start();
     }
 
     public void showGame() {
@@ -56,7 +57,7 @@ public class GameController implements GameOverListener {
             gravityTimeline.stop();
         }
 
-        gravityTimeline = new Timeline(new KeyFrame(Duration.seconds(1/gravity), event -> engine.tryOperate(new MoveDownOperator())));
+        gravityTimeline = new Timeline(new KeyFrame(Duration.seconds(1/gravity), event -> engine.move(Direction.DOWN)));
         gravityTimeline.setCycleCount(Timeline.INDEFINITE);
         gravityTimeline.play();
     }
@@ -81,20 +82,21 @@ public class GameController implements GameOverListener {
 
             if (gameState == GameState.active) {              
                 switch (event.getCode()) {
-                    case J -> engine.tryOperate(new MoveLeftOperator());
-                    case L -> engine.tryOperate(new MoveRightOperator());
+                    case J -> engine.move(Direction.LEFT);
+                    case L -> engine.move(Direction.RIGHT);
                     case F -> engine.hardDrop();
                     case K -> startSoftDrop();
                     case S -> engine.hold();
-                    case A -> engine.tryOperate(new RotateCounterClockwiseOperator());
-                    case D -> engine.tryOperate(new RotateClockwiseOperator());
-                    case SEMICOLON -> engine.tryOperate(new RotateR180Operator());
+                    case A -> engine.rotate(Rotation.COUNTER_CLOCKWISE);
+                    case D -> engine.rotate(Rotation.CLOCKWISE);
+                    case SEMICOLON -> engine.rotate(Rotation.R_180);
                     
-                    case Q -> engine.superRotate(Rotation.COUNTER_CLOCKWISE);
+                    case Q -> engine.rotate(Rotation.COUNTER_CLOCKWISE);
                     case W -> engine.hold();
-                    case E -> engine.superRotate(Rotation.CLOCKWISE);
-                    case R -> engine.superRotate(Rotation.R_180);
+                    case E -> engine.rotate(Rotation.CLOCKWISE);
+                    case R -> engine.rotate(Rotation.R_180);
                     case SPACE -> engine.hardDrop();
+
                 }
             }
 
