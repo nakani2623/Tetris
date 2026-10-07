@@ -13,6 +13,7 @@ import tetris.engine.operator.RotateClockwiseOperator;
 import tetris.engine.operator.RotateCounterClockwiseOperator;
 import tetris.engine.operator.RotateR180Operator;
 import tetris.engine.type.GameState;
+import tetris.engine.type.Rotation;
 import tetris.graphics.GameWindow;
 
 /**
@@ -39,7 +40,7 @@ public class GameController {
             gravityTimeline.stop();
         }
 
-        gravityTimeline = new Timeline(new KeyFrame(Duration.seconds(1/gravity), event -> engine.operate(new MoveDownOperator())));
+        gravityTimeline = new Timeline(new KeyFrame(Duration.seconds(1/gravity), event -> engine.tryOperate(new MoveDownOperator())));
         gravityTimeline.setCycleCount(Timeline.INDEFINITE);
         gravityTimeline.play();
     }
@@ -64,14 +65,20 @@ public class GameController {
 
             if (engine.getGameState() == GameState.active) {              
                 switch (event.getCode()) {
-                    case J -> engine.operate(new MoveLeftOperator());
-                    case L -> engine.operate(new MoveRightOperator());
+                    case J -> engine.tryOperate(new MoveLeftOperator());
+                    case L -> engine.tryOperate(new MoveRightOperator());
                     case F -> engine.hardDrop();
                     case K -> startSoftDrop();
                     case S -> engine.hold();
-                    case A -> engine.operate(new RotateCounterClockwiseOperator());
-                    case D -> engine.operate(new RotateClockwiseOperator());
-                    case SEMICOLON -> engine.operate(new RotateR180Operator());
+                    case A -> engine.tryOperate(new RotateCounterClockwiseOperator());
+                    case D -> engine.tryOperate(new RotateClockwiseOperator());
+                    case SEMICOLON -> engine.tryOperate(new RotateR180Operator());
+                    
+                    case Q -> engine.superRotate(Rotation.COUNTER_CLOCKWISE);
+                    case W -> engine.hold();
+                    case E -> engine.superRotate(Rotation.CLOCKWISE);
+                    case R -> engine.superRotate(Rotation.R_180);
+                    case SPACE -> engine.hardDrop();
                 }
             }
 
