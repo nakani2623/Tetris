@@ -13,24 +13,28 @@ import java.util.Iterator;
 import java.util.LinkedList;
 
 import tetris.controller.GameOverListener;
+import tetris.controller.Controllable;
 import tetris.engine.generatingStrategy.BagGenerator;
 import tetris.engine.generatingStrategy.TetrominoGenerator;
 import tetris.engine.observers.Observable;
 import tetris.engine.observers.Observer;
 import tetris.engine.operator.MoveDownOperator;
+import tetris.engine.operator.MoveLeftOperator;
+import tetris.engine.operator.MoveRightOperator;
 import tetris.engine.operator.Operator;
 import tetris.engine.operator.RotateClockwiseOperator;
 import tetris.engine.operator.RotateCounterClockwiseOperator;
 import tetris.engine.operator.RotateR180Operator;
 import tetris.engine.rotationStrategy.RotationStrategy;
 import tetris.engine.rotationStrategy.classicRotation;
+import tetris.engine.type.Direction;
 import tetris.engine.type.GameState;
 import tetris.engine.type.Rotation;
 import tetris.engine.type.TetrominoType;
 import tetris.utils.KickTable;
 import tetris.utils.Point;
 
-public class GameEngine implements Observable{
+public class GameEngine implements Observable, Controllable{
     private Score score;
     private Queue<TetrominoType> nextQueue;
     private TetrominoGenerator tetrominoGenerator;
@@ -93,6 +97,10 @@ public class GameEngine implements Observable{
         nextQueue = new LinkedList<TetrominoType>();
         notifyObservers();
     }
+    
+    public void start() {
+        spawn();
+    }
 
     public void spawn() {
                 // populate next queue
@@ -145,7 +153,6 @@ public class GameEngine implements Observable{
         notifyObservers();
         return true;
     }
-
     public void superRotate(Rotation rotation) {
         Operator op;
         if (rotation == Rotation.CLOCKWISE)              {op = new RotateClockwiseOperator();}
@@ -205,6 +212,9 @@ public class GameEngine implements Observable{
             allTetrominos.set(currentIndex, currentTetromino);
         }
     }
+    public void rotate(Rotation rotation) {
+        superRotate(rotation);
+    }
     public void lock() {
         checkCompletedLines(currentTetromino);
         lockTimer.stop();
@@ -212,19 +222,23 @@ public class GameEngine implements Observable{
         notifyObservers();
     }
 
+    public void move(Direction direction){
+        if (direction == Direction.DOWN) {op = new MoveDownOperator();}
+        if (direction == Direction.LEFT) {op = new MoveLeftOperator();}
+        if (direction == Direction.RIGHT) {op = new MoveRightOperator();}
+        tryOperate(op);
+    }
+
+    public void moveDAS(Direction direction) {
+        if (direction == Direction.DOWN) {op = new MoveDownOperator();}
+        if (direction == Direction.LEFT) {op = new MoveLeftOperator();}
+        if (direction == Direction.RIGHT) {op = new MoveRightOperator();}
+
+        while (tryOperate(op));
+    }
     public void hardDrop() {
-        op = new MoveDownOperator();
-
-        Tetromino clone = new Tetromino(currentTetromino);
-        op.operate(clone);
-
-        while (!hasCollision(clone)) {
-            op.operate(currentTetromino);
-            op.operate(clone);
-        }
-
+        moveDAS(Direction.DOWN);
         lock();
-        notifyObservers();
     }
     
     /**
