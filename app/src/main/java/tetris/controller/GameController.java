@@ -14,25 +14,46 @@ import tetris.engine.operator.RotateCounterClockwiseOperator;
 import tetris.engine.operator.RotateR180Operator;
 import tetris.engine.type.GameState;
 import tetris.engine.type.Rotation;
+import tetris.graphics.GamePane;
 import tetris.graphics.GameWindow;
+import tetris.graphics.MenuPane;
 
 /**
  * Handles user inputs, timing
  * GameController
  */
-public class GameController {
+public class GameController implements GameOverListener {
     private GameEngine engine;
     private GameWindow window;
 
     private Timeline gravityTimeline;
     private double softDropFactor;
+    private GameState gameState;
 
-    public GameController(GameEngine engine, GameWindow window) {
+    public GameController(GameEngine engine, GameWindow window, GameState gameState) {
         this.engine = engine;
         this.window = window;
+        this.gameState = gameState;
 
         addKeyboardControl();
+        showMenu();
+    }
+
+    public void start() {
+        gameState = GameState.active;
         resetGravityTimeline(engine.getGravity());
+        engine.spawn();
+    }
+
+       public void showGame() {
+        GamePane gamePane = new GamePane(engine);
+        window.getScene().setRoot(gamePane);
+        start();
+    }
+
+    public void showMenu() {
+        MenuPane menuPane = new MenuPane(this);
+        window.getScene().setRoot(menuPane);
     }
 
     public void resetGravityTimeline(double gravity){
@@ -56,14 +77,14 @@ public class GameController {
     // keyboard controller, triggers tetromino movement functions
     public void addKeyboardControl() {
         window.getScene().addEventHandler(KeyEvent.KEY_PRESSED, event -> {
-            if (engine.getGameState() == GameState.ended) {
+            if (gameState == GameState.ended) {
                 if (event.getCode() == KeyCode.R) {
                     engine.reset();
-                    engine.start();
+                    start();
                 }
             }
 
-            if (engine.getGameState() == GameState.active) {              
+            if (gameState == GameState.active) {              
                 switch (event.getCode()) {
                     case J -> engine.tryOperate(new MoveLeftOperator());
                     case L -> engine.tryOperate(new MoveRightOperator());
@@ -85,11 +106,11 @@ public class GameController {
         });
 
         window.getScene().addEventHandler(KeyEvent.KEY_RELEASED, event -> {
-            if (engine.getGameState() == GameState.ended) {
+            if (gameState == GameState.ended) {
                 return;
             }
 
-            if (engine.getGameState() == GameState.active) {              
+            if (gameState == GameState.active) {              
                 switch (event.getCode()) {
                     case K -> endSoftDrop();
                 }
@@ -100,5 +121,11 @@ public class GameController {
 
     public void setSoftDropFactor(double softDropFactor) {
         this.softDropFactor = softDropFactor;
+    }
+    
+    @Override 
+    public void onGameOver() {
+        gravityTimeline.stop();
+        gameState = GameState.ended;
     }
 }

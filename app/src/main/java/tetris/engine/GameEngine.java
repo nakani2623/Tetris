@@ -12,6 +12,7 @@ import javafx.util.Duration;
 import java.util.Iterator;
 import java.util.LinkedList;
 
+import tetris.controller.GameOverListener;
 import tetris.engine.generatingStrategy.BagGenerator;
 import tetris.engine.generatingStrategy.TetrominoGenerator;
 import tetris.engine.observers.Observable;
@@ -36,6 +37,7 @@ public class GameEngine implements Observable{
     private LockStrategy lockStrategy;
     private RotationStrategy rotationStrategy;
     private GameState gameState;
+    private GameOverListener listener;
 
     private int width;
     private int height;
@@ -74,8 +76,9 @@ public class GameEngine implements Observable{
     /**
      * Constructs default game board 10x20 dimension
      */
-    public GameEngine() {
+    public GameEngine(GameState gameState) {
         this(10, 20);
+        this.gameState = gameState;
     }
 
     /**
@@ -102,7 +105,7 @@ public class GameEngine implements Observable{
         Tetromino t = new Tetromino(centreTopPoint(), currentTetrominoType);
         currentTetromino = null;
         if (hasCollision(t)) {
-            setGameState(GameState.ended);
+            listener.onGameOver();
             return;
 
         }
@@ -441,10 +444,6 @@ public class GameEngine implements Observable{
         return gravity;
     }
 
-    public void setGameState(GameState state) {
-        this.gameState = state;
-    }
-    
     public void setRotationStrategy(RotationStrategy rotationStrategy) {
         this.rotationStrategy = rotationStrategy;
     }
@@ -452,9 +451,9 @@ public class GameEngine implements Observable{
     public void setGravity(double gravity){
         this.gravity = gravity;
     }
-    public void start() {
-        gameState = GameState.active;
-        spawn();
+
+    public void setGameOverListener(GameOverListener listener) {
+        this.listener = listener;
     }
 
     @Override

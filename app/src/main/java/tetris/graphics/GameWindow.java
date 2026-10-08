@@ -1,12 +1,9 @@
 package tetris.graphics;
 
-import tetris.engine.GameEngine;
-import tetris.engine.observers.BoardDisplayManager;
-import tetris.engine.observers.ScoreDisplayManager;
 import javafx.scene.Scene;
-import javafx.stage.Stage;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.HBox;
+import javafx.stage.Stage;
+import tetris.engine.GameEngine;
 
 /**
  * Manages In-Game contents, including a gameboard
@@ -21,16 +18,8 @@ public class GameWindow {
 
     public GameWindow(GameEngine gameEngine) {
         this.engine = gameEngine;
-        root = new HBox();
-        scene = new Scene(root, 640, 480);
-
-        BoardPane boardPane = new BoardPane(engine);
-        root.getChildren().add(boardPane);
-        new BoardDisplayManager(engine, boardPane);
-
-        ScorePane scorePanel = new ScorePane();
-        root.getChildren().add(scorePanel);
-        new ScoreDisplayManager(engine.getScore(), scorePanel);
+        Pane initialPane = new Pane();
+        scene = new Scene(initialPane, 640, 480);
     }
 
     public void execute(Stage stage) {
