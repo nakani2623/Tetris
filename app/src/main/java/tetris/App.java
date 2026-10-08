@@ -20,6 +20,8 @@ public class App extends Application {
 
         GameController controller = new GameController(gameEngine, gameWindow, gameState);
         controller.setSoftDropFactor(15);
+        gameEngine.setGameOverListener(controller);
+
         
         // gameEngine.loop();
         gameWindow.execute(stage);
