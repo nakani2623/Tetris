@@ -12,6 +12,7 @@ import javafx.util.Duration;
 import java.util.Iterator;
 import java.util.LinkedList;
 
+import tetris.controller.GameOverListener;
 import tetris.engine.generatingStrategy.BagGenerator;
 import tetris.engine.generatingStrategy.TetrominoGenerator;
 import tetris.engine.observers.Observable;
@@ -36,6 +37,7 @@ public class GameEngine implements Observable{
     private LockStrategy lockStrategy;
     private RotationStrategy rotationStrategy;
     private GameState gameState;
+    private GameOverListener listener;
 
     private int width;
     private int height;
@@ -103,7 +105,7 @@ public class GameEngine implements Observable{
         Tetromino t = new Tetromino(centreTopPoint(), currentTetrominoType);
         currentTetromino = null;
         if (hasCollision(t)) {
-            gameState = GameState.ended;
+            listener.onGameOver();
             return;
 
         }
@@ -450,6 +452,9 @@ public class GameEngine implements Observable{
         this.gravity = gravity;
     }
 
+    public void setGameOverListener(GameOverListener listener) {
+        this.listener = listener;
+    }
 
     @Override
     public void addObserver(Observer observer) {

@@ -22,7 +22,7 @@ import tetris.graphics.MenuPane;
  * Handles user inputs, timing
  * GameController
  */
-public class GameController {
+public class GameController implements GameOverListener {
     private GameEngine engine;
     private GameWindow window;
 
@@ -121,5 +121,11 @@ public class GameController {
 
     public void setSoftDropFactor(double softDropFactor) {
         this.softDropFactor = softDropFactor;
+    }
+    
+    @Override 
+    public void onGameOver() {
+        gravityTimeline.stop();
+        gameState = GameState.ended;
     }
 }
