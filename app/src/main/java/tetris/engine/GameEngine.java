@@ -14,6 +14,7 @@ import java.util.LinkedList;
 
 import tetris.controller.GameOverListener;
 import tetris.controller.Controllable;
+import tetris.controller.SpawnListener;
 import tetris.engine.generatingStrategy.BagGenerator;
 import tetris.engine.generatingStrategy.TetrominoGenerator;
 import tetris.engine.observers.Observable;
@@ -56,6 +57,7 @@ public class GameEngine implements Observable, Controllable{
         new PauseTransition(Duration.seconds(0.5));
     private int maxLockResets = 15;
     private int lockResets;
+    private SpawnListener spawnListener;
     /**
      * Constructs game bord with specific dimension
      * @param width
@@ -121,6 +123,7 @@ public class GameEngine implements Observable, Controllable{
         currentTetromino = t;
         allTetrominos.add(currentTetromino);
         lockResets = 0;
+        spawnListener.onSpawn();
         notifyObservers();
     }
 
@@ -458,6 +461,14 @@ public class GameEngine implements Observable, Controllable{
         return gravity;
     }
 
+    public void setGameState(GameState state) {
+        this.gameState = state;
+    }
+
+    public void setSpawnListener(SpawnListener spawnListener){
+        this.spawnListener = spawnListener;
+    }
+    
     public void setRotationStrategy(RotationStrategy rotationStrategy) {
         this.rotationStrategy = rotationStrategy;
     }

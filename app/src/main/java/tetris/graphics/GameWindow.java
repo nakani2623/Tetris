@@ -12,6 +12,7 @@ public class GameWindow {
     static final int MINO_SIZE = 20;
     Scene scene;
     Pane root;
+    GamePane gamePane;
     GameEngine engine;
     // Rectangle[][] grid;
     // Set<Rectangle> updatingSquares;
@@ -20,6 +21,7 @@ public class GameWindow {
         this.engine = gameEngine;
         Pane initialPane = new Pane();
         scene = new Scene(initialPane, 640, 480);
+        gamePane = new GamePane(engine);
     }
 
     public void execute(Stage stage) {
@@ -33,5 +35,9 @@ public class GameWindow {
 
     public Scene getScene() {
         return scene;
+    }
+
+    public GamePane getGamePane() {
+        return this.gamePane;
     }
 }

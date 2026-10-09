@@ -1,6 +1,5 @@
 package tetris.controller;
 
-import tetris.engine.operator.Operator;
 import tetris.engine.type.Direction;
 import tetris.engine.type.GameState;
 import tetris.engine.type.Rotation;
