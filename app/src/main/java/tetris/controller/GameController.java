@@ -44,15 +44,13 @@ public class GameController implements GameOverListener {
         engine.spawn();
     }
 
-       public void showGame() {
-        GamePane gamePane = new GamePane(engine);
-        window.showContent(gamePane);
+    public void showGame() {
+        window.showContent(window.getGamePane());
         start();    
     }
 
     public void showMenu() {
-        MenuPane menuPane = new MenuPane(this);
-        window.showContent(menuPane);
+        window.showContent(window.getMenuPane());
     }
 
     public void resetGravityTimeline(double gravity){
