@@ -36,7 +36,6 @@ public class GameController implements GameOverListener {
         this.gameState = gameState;
 
         addKeyboardControl();
-        showMenu();
     }
 
     public void start() {
