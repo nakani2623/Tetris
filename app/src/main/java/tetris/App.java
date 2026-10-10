@@ -19,10 +19,12 @@ public class App extends Application {
         GameWindow gameWindow = new GameWindow(gameEngine);
 
         GameController controller = new GameController(gameEngine, gameWindow, gameState);
-        controller.showMenu();
-        
+
         controller.setSoftDropFactor(15);
         gameEngine.setGameOverListener(controller);
+
+        controller.showMenu();
+        gameWindow.setOnStart(controller::showGame);
 
         
         // gameEngine.loop();
