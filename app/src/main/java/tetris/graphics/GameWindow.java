@@ -10,13 +10,13 @@ import tetris.engine.GameEngine;
  * Manages In-Game contents, including a gameboard
  */
 public class GameWindow {
-    static final int MINO_SIZE = 20;
-    Scene scene;
-    Pane root;
-    final GamePane gamePane;
-    final MenuPane menuPane;
+    private static final int MINO_SIZE = 20;
+    private Scene scene;
+    private Pane root;
+    private final GamePane gamePane;
+    private final MenuPane menuPane;
 
-    GameEngine engine;
+    private GameEngine engine;
     // Rectangle[][] grid;
     // Set<Rectangle> updatingSquares;
 
@@ -34,6 +34,14 @@ public class GameWindow {
         stage.show();
     }
 
+    public void showGame() {
+        showContent(gamePane);
+    }
+
+    public void showMenu() {
+        showContent(menuPane);
+    }
+
     public Pane getRoot() {
         return root;
     }
@@ -42,15 +50,7 @@ public class GameWindow {
         return scene;
     }
 
-    public GamePane getGamePane() {
-        return this.gamePane;
-    }
-
-    public MenuPane getMenuPane() {
-        return this.menuPane;
-    }
-
-    public void showContent(Parent content) {
+    private void showContent(Parent content) {
         scene.setRoot(content);
     }
 

@@ -14,9 +14,7 @@ import tetris.engine.operator.RotateCounterClockwiseOperator;
 import tetris.engine.operator.RotateR180Operator;
 import tetris.engine.type.GameState;
 import tetris.engine.type.Rotation;
-import tetris.graphics.GamePane;
 import tetris.graphics.GameWindow;
-import tetris.graphics.MenuPane;
 
 /**
  * Handles user inputs, timing
@@ -45,12 +43,12 @@ public class GameController implements GameOverListener {
     }
 
     public void showGame() {
-        window.showContent(window.getGamePane());
+        window.showGame();
         start();    
     }
 
     public void showMenu() {
-        window.showContent(window.getMenuPane());
+        window.showMenu();
     }
 
     public void resetGravityTimeline(double gravity){
