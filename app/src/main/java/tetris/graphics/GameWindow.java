@@ -1,5 +1,6 @@
 package tetris.graphics;
 
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
@@ -33,5 +34,9 @@ public class GameWindow {
 
     public Scene getScene() {
         return scene;
+    }
+
+    public void showContent(Parent content) {
+        scene.setRoot(content);
     }
 }

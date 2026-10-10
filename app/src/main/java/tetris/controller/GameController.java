@@ -47,13 +47,13 @@ public class GameController implements GameOverListener {
 
        public void showGame() {
         GamePane gamePane = new GamePane(engine);
-        window.getScene().setRoot(gamePane);
-        start();
+        window.showContent(gamePane);
+        start();    
     }
 
     public void showMenu() {
         MenuPane menuPane = new MenuPane(this);
-        window.getScene().setRoot(menuPane);
+        window.showContent(menuPane);
     }
 
     public void resetGravityTimeline(double gravity){
