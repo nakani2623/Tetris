@@ -1,4 +1,6 @@
 package tetris.graphics;
+import java.util.Locale;
+
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
@@ -20,6 +22,9 @@ public class ScorePane extends VBox {
         setPadding(new Insets(8));
         setSpacing(2);
         setAlignment(Pos.BOTTOM_LEFT);
+        setMinWidth(160);
+        setPrefWidth(160);
+        setMaxWidth(160);
 
         setupLabel(time);
         setupLabel(score);
@@ -34,15 +39,21 @@ public class ScorePane extends VBox {
     }
 
     public void updateTime(double time) {
-        this.time.setText("Time: " + time);
+        this.time.setText(
+                String.format(Locale.ROOT, "Time: %.2f", time)
+        );
     }
-    
+
     public void updateScore(double score) {
-        this.score.setText("Score: " + score);
+        this.score.setText(
+                String.format(Locale.ROOT, "Score: %.0f", score)
+        );
     }
 
     public void updatePPS(double pps) {
-        this.pps.setText("PPS: " + pps);
+        this.pps.setText(
+                String.format(Locale.ROOT, "PPS: %.2f", pps)
+        );
     }
 
     private void setupLabel(Label label) {
