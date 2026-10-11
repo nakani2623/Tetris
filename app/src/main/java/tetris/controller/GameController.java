@@ -89,7 +89,16 @@ public class GameController implements GameOverListener, AutoOperationListener{
         }
         else { // non-zero ARR
             engine.move(direction);
-            arrTimeline = new Timeline(new KeyFrame(Duration.seconds(ARR/60), event -> engine.move(direction)));
+            arrTimeline = new Timeline(
+                new KeyFrame(
+                    Duration.seconds(ARR/60), event -> {
+                        engine.move(direction);
+                        if (isSoftDropping && softDropFactor == Double.MAX_VALUE) {
+                            engine.moveDAS(Direction.DOWN);
+                        }
+                    }
+                )
+            );
             arrTimeline.setCycleCount(Timeline.INDEFINITE);
             arrTimeline.play();
         }
