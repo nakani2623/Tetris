@@ -14,7 +14,7 @@ import java.util.LinkedList;
 
 import tetris.controller.GameOverListener;
 import tetris.controller.Controllable;
-import tetris.controller.SpawnListener;
+import tetris.controller.AutoOperationListener;
 import tetris.engine.generatingStrategy.BagGenerator;
 import tetris.engine.generatingStrategy.TetrominoGenerator;
 import tetris.engine.observers.Observable;
@@ -54,10 +54,12 @@ public class GameEngine implements Observable, Controllable{
     public Operator op;
     private double gravity; // move down num per sec
     private final PauseTransition lockTimer =
-        new PauseTransition(Duration.seconds(0.5));
+        // new PauseTransition(Duration.seconds(0.5));
+        new PauseTransition(Duration.seconds(50));
     private int maxLockResets = 15;
     private int lockResets;
-    private SpawnListener spawnListener;
+    private boolean lockTimerFinished;
+    private AutoOperationListener autoOperationListener;
     /**
      * Constructs game bord with specific dimension
      * @param width
@@ -66,7 +68,7 @@ public class GameEngine implements Observable, Controllable{
     public GameEngine(int width, int height) {
         this.height = height;
         this.width = width;
-        this.gravity = 1;
+        this.gravity = 0.01;
 
         // configure game, todo: create and use initEngine(JSON? configFile) instead below
         tetrominoGenerator = new BagGenerator();
@@ -76,7 +78,10 @@ public class GameEngine implements Observable, Controllable{
         nextQueue = new LinkedList<TetrominoType>();
         allTetrominos = new ArrayList<Tetromino>();
         observers = new ArrayList<>();
-        lockTimer.setOnFinished(event -> lock());
+        lockTimer.setOnFinished(event -> {
+            lock();
+            this.lockTimerFinished = true;
+        });
     }
 
     /**
@@ -105,7 +110,11 @@ public class GameEngine implements Observable, Controllable{
     }
 
     public void spawn() {
-                // populate next queue
+
+        if (lockResets >= maxLockResets && lockTimerFinished) 
+            autoOperationListener.onAutoSpawn();
+        
+        // populate next queue
         while (nextQueue.size() < 7) {
             nextQueue.addAll(tetrominoGenerator.generateTetrominos());
         }
@@ -123,7 +132,8 @@ public class GameEngine implements Observable, Controllable{
         currentTetromino = t;
         allTetrominos.add(currentTetromino);
         lockResets = 0;
-        spawnListener.onSpawn();
+        
+        lockTimerFinished = false;
         notifyObservers();
     }
 
@@ -136,7 +146,6 @@ public class GameEngine implements Observable, Controllable{
     public boolean tryOperate(Operator op) {
         Tetromino clone = new Tetromino(currentTetromino);
         op.operate(clone);
-
         if (hasCollision(clone)) {
             return false;
         }
@@ -227,21 +236,32 @@ public class GameEngine implements Observable, Controllable{
 
     public void move(Direction direction){
         if (direction == Direction.DOWN) {op = new MoveDownOperator();}
-        if (direction == Direction.LEFT) {op = new MoveLeftOperator();}
-        if (direction == Direction.RIGHT) {op = new MoveRightOperator();}
+        else if (direction == Direction.LEFT) {op = new MoveLeftOperator();}
+        else if (direction == Direction.RIGHT) {op = new MoveRightOperator();}
+        else {op = null;}
         tryOperate(op);
+
     }
 
     public void moveDAS(Direction direction) {
+        Operator op;
         if (direction == Direction.DOWN) {op = new MoveDownOperator();}
-        if (direction == Direction.LEFT) {op = new MoveLeftOperator();}
-        if (direction == Direction.RIGHT) {op = new MoveRightOperator();}
+        else if (direction == Direction.LEFT) {op = new MoveLeftOperator();}
+        else if (direction == Direction.RIGHT) {op = new MoveRightOperator();}
+        else {op = null;}
 
-        while (tryOperate(op));
+        while (true) {
+            if (! tryOperate(op)) {
+                break;
+            }
+            if (direction != Direction.DOWN)
+                {autoOperationListener.onAutoHorizontalMove();}
+        }
     }
     public void hardDrop() {
         moveDAS(Direction.DOWN);
         lock();
+
     }
     
     /**
@@ -408,7 +428,6 @@ public class GameEngine implements Observable, Controllable{
         //
         // group to lower/around/upper
         HashSet<Double> lastLockedHeights = calcSetOfRelatedHeights(lastLocked);
-        //System.out.println("lock heights: "+lastLockedHeights);
         ArrayList<Tetromino> lower = new ArrayList<Tetromino>();
         ArrayList<Tetromino> around = new ArrayList<Tetromino>();
         ArrayList<Tetromino> upper = new ArrayList<Tetromino>();
@@ -465,8 +484,8 @@ public class GameEngine implements Observable, Controllable{
         this.gameState = state;
     }
 
-    public void setSpawnListener(SpawnListener spawnListener){
-        this.spawnListener = spawnListener;
+    public void setAutoSpawnListener(AutoOperationListener autoOperationListener){
+        this.autoOperationListener = autoOperationListener;
     }
     
     public void setRotationStrategy(RotationStrategy rotationStrategy) {

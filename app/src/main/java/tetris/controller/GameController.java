@@ -13,7 +13,6 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.util.Duration;
 import tetris.controller.Controllable;
-import tetris.engine.GameEngine;
 import tetris.engine.type.Direction;
 import tetris.engine.type.GameState;
 import tetris.engine.type.Rotation;
@@ -23,7 +22,7 @@ import tetris.graphics.GameWindow;
  * Handles user inputs, timing
  * GameController
  */
-public class GameController implements GameOverListener, SpawnListener{
+public class GameController implements GameOverListener, AutoOperationListener{
     private Controllable engine;
     private GameWindow window;
 
@@ -34,8 +33,9 @@ public class GameController implements GameOverListener, SpawnListener{
     private Map<Direction, Integer> DASCharges = new HashMap<Direction, Integer>();
     private Map<KeyCode, Timeline> DASChargingKeys = new HashMap<KeyCode, Timeline>();
     private List<KeyCode> DASChargedKeys = new LinkedList<KeyCode>();
+    private boolean isSoftDropping = false;
     private double DAS = 5;
-    private double ARR = 1;
+    private double ARR = 0;
 
     public GameController(Controllable engine, GameWindow window, GameState gameState) {
         this.engine = engine;
@@ -69,25 +69,40 @@ public class GameController implements GameOverListener, SpawnListener{
      * called when das staus changed or new piece spawned and notified by engine
      */
     private void handleDASEvent(){
+        // calculate das direction
         int leftDAS = DASCharges.get(Direction.LEFT);
         int rightDAS = DASCharges.get(Direction.RIGHT);
-        if (leftDAS - rightDAS == 0) {
-            return;
+        boolean isLeft;
+        if (leftDAS - rightDAS == 0) { return; } 
+        else if (leftDAS - rightDAS > 0) { isLeft = true; }
+        else { isLeft = false; }
+        
+        if (ARR == 0) { // 0 ARR
+            if (isLeft) { // left
+                engine.moveDAS(Direction.LEFT);
+            }
+            else {// right
+                engine.moveDAS(Direction.RIGHT);
+            } 
         }
-        else if (leftDAS - rightDAS > 0) { // left
-            engine.moveDAS(Direction.LEFT);
+        else { // non-zero ARR
+            
         }
-        else {// right
-            engine.moveDAS(Direction.RIGHT);
-        } 
+        
     }
     /**
      * controller need to handle das for next current piece
      * when engine lock piece by timer, engine call this method onSpawn
      */
-    public void onSpawn() {
+    public void onAutoSpawn() {
         handleDASEvent();
+        handleSoftDropEvent();
     }
+    
+    public void onAutoHorizontalMove() {
+        handleSoftDropEvent();
+    }
+
     private void startCharging(KeyCode key, Direction direction) {
         Timeline t = new Timeline(
             new KeyFrame(
@@ -126,12 +141,23 @@ public class GameController implements GameOverListener, SpawnListener{
         gravityTimeline.play();
     }
 
-    public void startSoftDrop() {
-        resetGravityTimeline(engine.getGravity() * softDropFactor);
+    private void handleSoftDropEvent() {
+        if (isSoftDropping && softDropFactor == Double.MAX_VALUE) {
+            engine.moveDAS(Direction.DOWN);
+        }
+    }
+    private void startSoftDrop() {
+        isSoftDropping = true;
+        if (softDropFactor != Double.MAX_VALUE) {
+            resetGravityTimeline(engine.getGravity() * softDropFactor);
+        }
+        
     }
 
-    public void endSoftDrop() {
-        resetGravityTimeline(engine.getGravity());
+    private void endSoftDrop() {
+        isSoftDropping = false;
+        if (softDropFactor != Double.MAX_VALUE)
+            resetGravityTimeline(engine.getGravity());
     }
 
     // keyboard controller, triggers tetromino movement functions
@@ -169,6 +195,7 @@ public class GameController implements GameOverListener, SpawnListener{
                 }
                 // for ARR = 0, das need to be handled after any input
                 handleDASEvent();
+                handleSoftDropEvent();
             }
 
         });
