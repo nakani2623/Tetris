@@ -51,11 +51,9 @@ public class GameEngine implements Observable, Controllable{
     private TetrominoType holdTetrominoType;
     List<Observer> observers;
 
-    public Operator op;
     private double gravity; // move down num per sec
     private final PauseTransition lockTimer =
-        // new PauseTransition(Duration.seconds(0.5));
-        new PauseTransition(Duration.seconds(50));
+        new PauseTransition(Duration.seconds(0.5));
     private int maxLockResets = 15;
     private int lockResets;
     private boolean lockTimerFinished;
@@ -68,7 +66,7 @@ public class GameEngine implements Observable, Controllable{
     public GameEngine(int width, int height) {
         this.height = height;
         this.width = width;
-        this.gravity = 0.01;
+        this.gravity = 1;
 
         // configure game, todo: create and use initEngine(JSON? configFile) instead below
         tetrominoGenerator = new BagGenerator();
@@ -100,7 +98,6 @@ public class GameEngine implements Observable, Controllable{
         allTetrominos = new ArrayList<Tetromino>();
         currentTetromino = null;
         holdTetrominoType = null;
-        op = null;
         nextQueue = new LinkedList<TetrominoType>();
         notifyObservers();
     }
@@ -158,13 +155,13 @@ public class GameEngine implements Observable, Controllable{
                 lock();
             }
         }
-
         else {
             lockTimer.stop();
         }
         notifyObservers();
         return true;
     }
+
     public void superRotate(Rotation rotation) {
         Operator op;
         if (rotation == Rotation.CLOCKWISE)              {op = new RotateClockwiseOperator();}
@@ -235,6 +232,7 @@ public class GameEngine implements Observable, Controllable{
     }
 
     public void move(Direction direction){
+        Operator op;
         if (direction == Direction.DOWN) {op = new MoveDownOperator();}
         else if (direction == Direction.LEFT) {op = new MoveLeftOperator();}
         else if (direction == Direction.RIGHT) {op = new MoveRightOperator();}
