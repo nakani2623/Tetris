@@ -13,8 +13,9 @@ public class GamePane extends StackPane {
     public GamePane(GameEngine engine) {
         BoardPane boardPane = new BoardPane(engine);
         ScorePane scorePane = new ScorePane();
+        HoldPane holdPane = new HoldPane();
 
-        HBox content = new HBox(boardPane, scorePane);
+        HBox content = new HBox(holdPane, boardPane, scorePane);
         content.setAlignment(Pos.TOP_CENTER);
         content.setFillHeight(false);
 
