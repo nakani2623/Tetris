@@ -15,7 +15,7 @@ public class GamePane extends StackPane {
         ScorePane scorePane = new ScorePane();
         HoldPane holdPane = new HoldPane();
 
-        HBox content = new HBox(holdPane, boardPane, scorePane);
+        HBox content = new HBox(16, holdPane, boardPane, scorePane);
         content.setAlignment(Pos.TOP_CENTER);
         content.setFillHeight(false);
 
