@@ -27,6 +27,7 @@ public class GameController implements GameOverListener, AutoOperationListener{
     private GameWindow window;
 
     private Timeline gravityTimeline;
+    private Timeline arrTimeline;
     private double softDropFactor;
     private GameState gameState;
     private Set<KeyCode> pressedKeys = new HashSet<>(); 
@@ -35,7 +36,7 @@ public class GameController implements GameOverListener, AutoOperationListener{
     private List<KeyCode> DASChargedKeys = new LinkedList<KeyCode>();
     private boolean isSoftDropping = false;
     private double DAS = 5;
-    private double ARR = 0;
+    private double ARR = 2;
 
     public GameController(Controllable engine, GameWindow window, GameState gameState) {
         this.engine = engine;
@@ -69,24 +70,28 @@ public class GameController implements GameOverListener, AutoOperationListener{
      * called when das staus changed or new piece spawned and notified by engine
      */
     private void handleDASEvent(){
+        if (ARR != 0 && arrTimeline != null) {
+            // stop arr timeline
+            arrTimeline.stop();
+        }
         // calculate das direction
         int leftDAS = DASCharges.get(Direction.LEFT);
         int rightDAS = DASCharges.get(Direction.RIGHT);
-        boolean isLeft;
-        if (leftDAS - rightDAS == 0) { return; } 
-        else if (leftDAS - rightDAS > 0) { isLeft = true; }
-        else { isLeft = false; }
+        Direction direction;
+        if (leftDAS - rightDAS == 0) { 
+            return; 
+        } 
+        else if (leftDAS - rightDAS > 0) { direction = Direction.LEFT; }
+        else { direction = Direction.RIGHT; }
         
         if (ARR == 0) { // 0 ARR
-            if (isLeft) { // left
-                engine.moveDAS(Direction.LEFT);
-            }
-            else {// right
-                engine.moveDAS(Direction.RIGHT);
-            } 
+            engine.moveDAS(direction);
         }
         else { // non-zero ARR
-            
+            engine.move(direction);
+            arrTimeline = new Timeline(new KeyFrame(Duration.seconds(ARR/60), event -> engine.move(direction)));
+            arrTimeline.setCycleCount(Timeline.INDEFINITE);
+            arrTimeline.play();
         }
         
     }

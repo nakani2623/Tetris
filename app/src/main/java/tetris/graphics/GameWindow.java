@@ -27,7 +27,6 @@ public class GameWindow {
         menuPane = new MenuPane();
         Pane initialPane = new Pane();
         scene = new Scene(initialPane, 640, 480);
-        gamePane = new GamePane(engine);
     }
 
     public void execute(Stage stage) {
