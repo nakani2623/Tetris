@@ -503,6 +503,10 @@ public class GameEngine implements Observable, Controllable{
         return this.holdTetrominoType;
     }
 
+    public List<TetrominoType> getNextQueue() {
+        return List.copyOf(nextQueue);
+    }
+
     public void setRotationStrategy(RotationStrategy rotationStrategy) {
         this.rotationStrategy = rotationStrategy;
     }
