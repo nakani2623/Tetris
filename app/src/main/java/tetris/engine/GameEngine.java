@@ -13,24 +13,29 @@ import java.util.Iterator;
 import java.util.LinkedList;
 
 import tetris.controller.GameOverListener;
+import tetris.controller.Controllable;
+import tetris.controller.AutoOperationListener;
 import tetris.engine.generatingStrategy.BagGenerator;
 import tetris.engine.generatingStrategy.TetrominoGenerator;
 import tetris.engine.observers.Observable;
 import tetris.engine.observers.Observer;
 import tetris.engine.operator.MoveDownOperator;
+import tetris.engine.operator.MoveLeftOperator;
+import tetris.engine.operator.MoveRightOperator;
 import tetris.engine.operator.Operator;
 import tetris.engine.operator.RotateClockwiseOperator;
 import tetris.engine.operator.RotateCounterClockwiseOperator;
 import tetris.engine.operator.RotateR180Operator;
 import tetris.engine.rotationStrategy.RotationStrategy;
 import tetris.engine.rotationStrategy.classicRotation;
+import tetris.engine.type.Direction;
 import tetris.engine.type.GameState;
 import tetris.engine.type.Rotation;
 import tetris.engine.type.TetrominoType;
 import tetris.utils.KickTable;
 import tetris.utils.Point;
 
-public class GameEngine implements Observable{
+public class GameEngine implements Observable, Controllable{
     private Score score;
     private Queue<TetrominoType> nextQueue;
     private TetrominoGenerator tetrominoGenerator;
@@ -46,12 +51,13 @@ public class GameEngine implements Observable{
     private TetrominoType holdTetrominoType;
     List<Observer> observers;
 
-    public Operator op;
     private double gravity; // move down num per sec
     private final PauseTransition lockTimer =
         new PauseTransition(Duration.seconds(0.5));
     private int maxLockResets = 15;
     private int lockResets;
+    private boolean lockTimerFinished;
+    private AutoOperationListener autoOperationListener;
     /**
      * Constructs game bord with specific dimension
      * @param width
@@ -70,7 +76,10 @@ public class GameEngine implements Observable{
         nextQueue = new LinkedList<TetrominoType>();
         allTetrominos = new ArrayList<Tetromino>();
         observers = new ArrayList<>();
-        lockTimer.setOnFinished(event -> lock());
+        lockTimer.setOnFinished(event -> {
+            lock();
+            this.lockTimerFinished = true;
+        });
     }
 
     /**
@@ -89,13 +98,20 @@ public class GameEngine implements Observable{
         allTetrominos = new ArrayList<Tetromino>();
         currentTetromino = null;
         holdTetrominoType = null;
-        op = null;
         nextQueue = new LinkedList<TetrominoType>();
         notifyObservers();
     }
+    
+    public void start() {
+        spawn();
+    }
 
     public void spawn() {
-                // populate next queue
+
+        if (lockResets >= maxLockResets && lockTimerFinished) 
+            autoOperationListener.onAutoSpawn();
+        
+        // populate next queue
         while (nextQueue.size() < 7) {
             nextQueue.addAll(tetrominoGenerator.generateTetrominos());
         }
@@ -113,6 +129,8 @@ public class GameEngine implements Observable{
         currentTetromino = t;
         allTetrominos.add(currentTetromino);
         lockResets = 0;
+        
+        lockTimerFinished = false;
         notifyObservers();
     }
 
@@ -125,7 +143,6 @@ public class GameEngine implements Observable{
     public boolean tryOperate(Operator op) {
         Tetromino clone = new Tetromino(currentTetromino);
         op.operate(clone);
-
         if (hasCollision(clone)) {
             return false;
         }
@@ -138,7 +155,6 @@ public class GameEngine implements Observable{
                 lock();
             }
         }
-
         else {
             lockTimer.stop();
         }
@@ -205,6 +221,9 @@ public class GameEngine implements Observable{
             allTetrominos.set(currentIndex, currentTetromino);
         }
     }
+    public void rotate(Rotation rotation) {
+        superRotate(rotation);
+    }
     public void lock() {
         checkCompletedLines(currentTetromino);
         lockTimer.stop();
@@ -212,19 +231,35 @@ public class GameEngine implements Observable{
         notifyObservers();
     }
 
-    public void hardDrop() {
-        op = new MoveDownOperator();
+    public void move(Direction direction){
+        Operator op;
+        if (direction == Direction.DOWN) {op = new MoveDownOperator();}
+        else if (direction == Direction.LEFT) {op = new MoveLeftOperator();}
+        else if (direction == Direction.RIGHT) {op = new MoveRightOperator();}
+        else {op = null;}
+        tryOperate(op);
 
-        Tetromino clone = new Tetromino(currentTetromino);
-        op.operate(clone);
+    }
 
-        while (!hasCollision(clone)) {
-            op.operate(currentTetromino);
-            op.operate(clone);
+    public void moveDAS(Direction direction) {
+        Operator op;
+        if (direction == Direction.DOWN) {op = new MoveDownOperator();}
+        else if (direction == Direction.LEFT) {op = new MoveLeftOperator();}
+        else if (direction == Direction.RIGHT) {op = new MoveRightOperator();}
+        else {op = null;}
+
+        while (true) {
+            if (! tryOperate(op)) {
+                break;
+            }
+            if (direction != Direction.DOWN)
+                {autoOperationListener.onAutoHorizontalMove();}
         }
-
+    }
+    public void hardDrop() {
+        moveDAS(Direction.DOWN);
         lock();
-        notifyObservers();
+
     }
     
     /**
@@ -391,7 +426,6 @@ public class GameEngine implements Observable{
         //
         // group to lower/around/upper
         HashSet<Double> lastLockedHeights = calcSetOfRelatedHeights(lastLocked);
-        //System.out.println("lock heights: "+lastLockedHeights);
         ArrayList<Tetromino> lower = new ArrayList<Tetromino>();
         ArrayList<Tetromino> around = new ArrayList<Tetromino>();
         ArrayList<Tetromino> upper = new ArrayList<Tetromino>();
@@ -444,6 +478,14 @@ public class GameEngine implements Observable{
         return gravity;
     }
 
+    public void setGameState(GameState state) {
+        this.gameState = state;
+    }
+
+    public void setAutoSpawnListener(AutoOperationListener autoOperationListener){
+        this.autoOperationListener = autoOperationListener;
+    }
+    
     public void setRotationStrategy(RotationStrategy rotationStrategy) {
         this.rotationStrategy = rotationStrategy;
     }
