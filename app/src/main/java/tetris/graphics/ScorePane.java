@@ -22,9 +22,9 @@ public class ScorePane extends VBox {
         setPadding(new Insets(8));
         setSpacing(2);
         setAlignment(Pos.BOTTOM_LEFT);
-        setMinWidth(160);
-        setPrefWidth(160);
-        setMaxWidth(160);
+        setMinWidth(90);
+        setPrefWidth(90);
+        setMaxWidth(90);
 
         setupLabel(time);
         setupLabel(score);
