@@ -208,5 +208,15 @@ public class Tetromino {
     public int getOrder() {
         return this.order;
     }
+
+    // debug helpers
+    public String toString() {
+        String str = "tetromino: "+this.type+" at:";
+        for (Mino mino : children) {
+            str += mino.getPosition().toString();
+        }
+        str.concat("\n");
+        return str;
+    }
     
 }
