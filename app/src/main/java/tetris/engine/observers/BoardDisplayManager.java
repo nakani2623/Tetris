@@ -4,8 +4,8 @@ import javafx.scene.paint.Color;
 import tetris.engine.GameEngine;
 import tetris.engine.Mino;
 import tetris.engine.Tetromino;
-import tetris.engine.type.TetrominoType;
 import tetris.graphics.BoardPane;
+import tetris.graphics.TetrominoColor;
 
 public class BoardDisplayManager implements Observer {
     private Observable observable = null;
@@ -26,26 +26,11 @@ public class BoardDisplayManager implements Observer {
         // todo: render the board and tetrominos
         boardPane.reset();
         for (Tetromino t : engine.allTetrominos) {
+            Color fillColor = TetrominoColor.forType(t.type);
+
             for (Mino m : t.children) {
                 int x = (int)m.getPosition().getX();
                 int y = (int)m.getPosition().getY();
-                
-                Color fillColor = null;
-                if (t.type == TetrominoType.T)
-                    fillColor = Color.PURPLE;
-                else if (t.type == TetrominoType.O) {
-                    fillColor = Color.YELLOW;
-                } else if (t.type == TetrominoType.I) {
-                    fillColor = Color.CYAN;
-                } else if (t.type == TetrominoType.S) {
-                    fillColor = Color.GREEN;
-                } else if (t.type == TetrominoType.Z) {
-                    fillColor = Color.RED;
-                } else if (t.type == TetrominoType.J) {
-                    fillColor = Color.BLUE;
-                } else if (t.type == TetrominoType.L) {
-                    fillColor = Color.ORANGE;
-                }
 
                 boardPane.fill(x, y, fillColor);
             } 
