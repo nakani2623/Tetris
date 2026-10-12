@@ -7,14 +7,16 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import tetris.engine.GameEngine;
 import tetris.engine.observers.BoardDisplayManager;
+import tetris.engine.observers.HoldDisplayManager;
 import tetris.engine.observers.ScoreDisplayManager;
 
 public class GamePane extends StackPane {
     public GamePane(GameEngine engine) {
         BoardPane boardPane = new BoardPane(engine);
         ScorePane scorePane = new ScorePane();
+        HoldPane holdPane = new HoldPane();
 
-        HBox content = new HBox(boardPane, scorePane);
+        HBox content = new HBox(16, holdPane, boardPane, scorePane);
         content.setAlignment(Pos.TOP_CENTER);
         content.setFillHeight(false);
 
@@ -28,6 +30,7 @@ public class GamePane extends StackPane {
 
         new BoardDisplayManager(engine, boardPane);
         new ScoreDisplayManager(engine.getScore(), scorePane);
+        new HoldDisplayManager(engine, holdPane);
 
     }
 }

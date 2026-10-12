@@ -23,6 +23,8 @@ public class BoardPane extends GridPane {
                 grid[i][j] = square;    
             }
         }
+
+        this.setStyle("-fx-border-color: gray;");
     }
 
     public void reset() {
