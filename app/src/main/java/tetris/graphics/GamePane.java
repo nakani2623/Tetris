@@ -15,8 +15,9 @@ public class GamePane extends StackPane {
         BoardPane boardPane = new BoardPane(engine);
         ScorePane scorePane = new ScorePane();
         HoldPane holdPane = new HoldPane();
+        NextQueuePane nextQueuePane = new NextQueuePane();
 
-        HBox content = new HBox(16, holdPane, boardPane, scorePane);
+        HBox content = new HBox(16, holdPane, boardPane, nextQueuePane);
         content.setAlignment(Pos.TOP_CENTER);
         content.setFillHeight(false);
 
@@ -31,6 +32,7 @@ public class GamePane extends StackPane {
         new BoardDisplayManager(engine, boardPane);
         new ScoreDisplayManager(engine.getScore(), scorePane);
         new HoldDisplayManager(engine, holdPane);
+        nextQueuePane.showNext();
 
     }
 }
