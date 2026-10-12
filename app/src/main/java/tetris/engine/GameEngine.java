@@ -77,8 +77,8 @@ public class GameEngine implements Observable, Controllable{
         allTetrominos = new ArrayList<Tetromino>();
         observers = new ArrayList<>();
         lockTimer.setOnFinished(event -> {
-            lock();
             this.lockTimerFinished = true;
+            lock();
         });
     }
 
@@ -107,10 +107,11 @@ public class GameEngine implements Observable, Controllable{
     }
 
     public void spawn() {
-
-        if (lockResets >= maxLockResets && lockTimerFinished) 
-            autoOperationListener.onAutoSpawn();
-        
+        // from previous piece's leftover data, decide isAutoSpawned true/false, 
+        // to know if needed to notify controller RIGHT AFTER current piece spawned
+        boolean isAutoSpawned = false;
+        if ((lockResets >= maxLockResets) || lockTimerFinished) 
+            isAutoSpawned = true;        
         // populate next queue
         while (nextQueue.size() < 7) {
             nextQueue.addAll(tetrominoGenerator.generateTetrominos());
@@ -120,6 +121,7 @@ public class GameEngine implements Observable, Controllable{
         TetrominoType currentTetrominoType = nextQueue.remove();
         Tetromino t = new Tetromino(centreTopPoint(), currentTetrominoType);
         currentTetromino = null;
+        // when gameover, notify controller
         if (hasCollision(t)) {
             listener.onGameOver();
             return;
@@ -130,6 +132,11 @@ public class GameEngine implements Observable, Controllable{
         allTetrominos.add(currentTetromino);
         lockResets = 0;
         
+        // when auto-spawned, notify controller
+        if (isAutoSpawned) {
+            autoOperationListener.onAutoSpawn();
+        }
+
         lockTimerFinished = false;
         notifyObservers();
     }
