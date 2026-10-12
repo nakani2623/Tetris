@@ -19,7 +19,6 @@ public class HoldPane extends VBox {
 
     public HoldPane() {
         Label title = new Label("HOLD");
-        showPiece(TetrominoType.I);
         preview.setMinSize(90, 60);
         preview.setPrefSize(90, 60);
         preview.setMaxSize(90, 60);

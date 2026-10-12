@@ -7,6 +7,7 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import tetris.engine.GameEngine;
 import tetris.engine.observers.BoardDisplayManager;
+import tetris.engine.observers.HoldDisplayManager;
 import tetris.engine.observers.ScoreDisplayManager;
 
 public class GamePane extends StackPane {
@@ -29,6 +30,7 @@ public class GamePane extends StackPane {
 
         new BoardDisplayManager(engine, boardPane);
         new ScoreDisplayManager(engine.getScore(), scorePane);
+        new HoldDisplayManager(engine, holdPane);
 
     }
 }
