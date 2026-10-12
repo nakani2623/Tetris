@@ -125,7 +125,6 @@ public class GameEngine implements Observable, Controllable{
         if (hasCollision(t)) {
             listener.onGameOver();
             return;
-
         }
 
         currentTetromino = t;
@@ -274,7 +273,7 @@ public class GameEngine implements Observable, Controllable{
      * 
      */
     public void hold() {
-        allTetrominos.remove(currentTetromino);
+        removeCurrentTetromino();
         Tetromino currentTetrominoClone = new Tetromino(currentTetromino);
         if (holdTetrominoType == null) {
             spawn();
@@ -460,7 +459,14 @@ public class GameEngine implements Observable, Controllable{
             }
         }
     }
-    
+    /**
+     * everything need to do beside removing from allTetrominos list
+     */
+    private void removeCurrentTetromino() {
+        lockTimer.stop();
+        allTetrominos.remove(currentTetromino);
+    }
+
     public Point centreTopPoint() {
         return new Point((this.width/2)-1, 1);
     }
