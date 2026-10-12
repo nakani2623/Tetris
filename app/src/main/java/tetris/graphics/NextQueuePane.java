@@ -1,5 +1,7 @@
 package tetris.graphics;
 
+import java.util.List;
+
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
@@ -23,13 +25,20 @@ public class NextQueuePane extends VBox {
         setStyle("-fx-border-color: gray;");
     }
 
-    public void showNext() {
-        previews[0].showPiece(TetrominoType.T);
-        previews[1].showPiece(TetrominoType.O);
-        previews[2].showPiece(TetrominoType.I);
-        previews[3].showPiece(TetrominoType.S);
-        previews[4].showPiece(TetrominoType.Z);
+    public void showNext(List<TetrominoType> next) {
+        // empty leftover display
+        for (int i = 0; i < previews.length; i++) {
+            previews[i].showPiece(null);
+        }
 
+        // show given next
+        for (int i = 0; i < previews.length; i++) {
+            if (i >= next.size()) {
+                break;
+            }
+
+            previews[i].showPiece(next.get(i)); 
+        }
     }
 
 }
