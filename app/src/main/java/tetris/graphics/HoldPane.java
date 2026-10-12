@@ -40,24 +40,27 @@ public class HoldPane extends VBox {
 
         Tetromino piece = new Tetromino(new Point(4, 4), type);
         Group shape = new Group();
+        Color color = TetrominoColor.forType(type);
+
 
         for (Mino mino : piece.children) {
             double x = mino.getPosition().getX();
             double y = mino.getPosition().getY();
 
-            shape.getChildren().add(renderMino((int)x, (int)y));
+            shape.getChildren().add(renderMino((int)x, (int)y, color));
         }
 
         preview.getChildren().add(shape);
     }
 
-    private Rectangle renderMino(int x, int y) {
+    private Rectangle renderMino(int x, int y, Color color) {
         int MINO_SIZE = 20;
         Rectangle minoRectangle = new Rectangle(MINO_SIZE, MINO_SIZE);
         minoRectangle.setX(x * MINO_SIZE);
         minoRectangle.setY(y * MINO_SIZE);
 
-        minoRectangle.setFill(Color.GRAY);
+
+        minoRectangle.setFill(color);
         minoRectangle.setStroke(Color.LIGHTGRAY);
         minoRectangle.setStrokeType(StrokeType.INSIDE);
 
