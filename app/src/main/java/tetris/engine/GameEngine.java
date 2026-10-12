@@ -486,6 +486,10 @@ public class GameEngine implements Observable, Controllable{
         this.autoOperationListener = autoOperationListener;
     }
     
+    public TetrominoType getHoldTetrominoType() {
+        return this.holdTetrominoType;
+    }
+
     public void setRotationStrategy(RotationStrategy rotationStrategy) {
         this.rotationStrategy = rotationStrategy;
     }
