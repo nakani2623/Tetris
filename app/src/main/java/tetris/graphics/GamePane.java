@@ -1,5 +1,8 @@
 package tetris.graphics;
 
+import java.util.Arrays;
+import java.util.List;
+
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.layout.HBox;
@@ -10,6 +13,7 @@ import tetris.engine.GameEngine;
 import tetris.engine.observers.BoardDisplayManager;
 import tetris.engine.observers.HoldDisplayManager;
 import tetris.engine.observers.ScoreDisplayManager;
+import tetris.engine.type.TetrominoType;
 
 public class GamePane extends StackPane {
     public GamePane(GameEngine engine) {
@@ -35,7 +39,10 @@ public class GamePane extends StackPane {
         new BoardDisplayManager(engine, boardPane);
         new ScoreDisplayManager(engine.getScore(), scorePane);
         new HoldDisplayManager(engine, holdPane);
-        nextQueuePane.showNext();
+
+        TetrominoType next_array[] = new TetrominoType[] {TetrominoType.T, TetrominoType.I, TetrominoType.O, TetrominoType.O, TetrominoType.S, TetrominoType.I};
+        List<TetrominoType> next = Arrays.asList(next_array);
+        nextQueuePane.showNext(next);
 
     }
 }
