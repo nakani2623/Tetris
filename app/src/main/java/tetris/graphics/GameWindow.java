@@ -57,4 +57,20 @@ public class GameWindow {
     public void setOnStart(Runnable action) {
         menuPane.setOnStart(action);
     }
+
+    public void setOnRestart(Runnable action) {
+        gamePane.setOnRestart(action);
+    }
+
+    public void setOnReturn(Runnable action) {
+        gamePane.setOnReturn(action);
+    }
+
+    public void onGameOver() {
+        gamePane.showGameOver();
+    }
+
+    public void onStart() {
+        gamePane.hideGameOver();
+    }
 }
