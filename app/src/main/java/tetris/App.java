@@ -11,13 +11,16 @@ import tetris.engine.GameEngine;
 import tetris.graphics.GameWindow;
 
 public class App extends Application {
+    private GameEngine gameEngine;
+    private GameWindow gameWindow;
+    private GameController controller;
 
     @Override
     public void start(Stage stage) {
-        GameEngine gameEngine = new GameEngine();
-        GameWindow gameWindow = new GameWindow(gameEngine);
+        gameEngine = new GameEngine();
+        gameWindow = new GameWindow(gameEngine);
+        controller = new GameController(gameEngine, gameWindow);
 
-        GameController controller = new GameController(gameEngine, gameWindow);
         gameEngine.setAutoSpawnListener(controller);
         // controller.setSoftDropFactor(15);
         controller.setSoftDropFactor(Double.MAX_VALUE);
@@ -25,7 +28,7 @@ public class App extends Application {
 
         controller.showMenu();
         gameWindow.setOnStart(controller::start);
-        gameWindow.setOnExit(this::stop);
+        gameWindow.setOnExit(Platform::exit);
         gameWindow.setOnReturn(controller::showMenu);
         gameWindow.setOnRestart(controller::restart);
 
@@ -36,7 +39,7 @@ public class App extends Application {
 
     @Override 
     public void stop() {
-        Platform.exit();
+        gameEngine.dispose();
     }
 
     public static void main(String[] args) {

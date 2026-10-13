@@ -535,4 +535,8 @@ public class GameEngine implements Observable, Controllable{
             observer.update();
         }
     }
+
+    public void dispose() {
+        score.dispose();
+    }
 }
