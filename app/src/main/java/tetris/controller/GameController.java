@@ -88,14 +88,12 @@ public class GameController implements GameOverListener, AutoOperationListener{
             engine.moveDAS(direction);
         }
         else { // non-zero ARR
-            engine.move(direction);
+            // instantly move one step
+            horizontalMove(direction);
             arrTimeline = new Timeline(
                 new KeyFrame(
                     Duration.seconds(ARR/60), event -> {
-                        engine.move(direction);
-                        if (isSoftDropping && softDropFactor == Double.MAX_VALUE) {
-                            engine.moveDAS(Direction.DOWN);
-                        }
+                        horizontalMove(direction);
                     }
                 )
             );
@@ -249,7 +247,7 @@ public class GameController implements GameOverListener, AutoOperationListener{
      * operate engine by move/moveDAS
      */
     public void horizontalMovePressed(KeyCode key, Direction direction){
-        engine.move(direction);
+        horizontalMove(direction);
         startCharging(key, direction);
     }
 
@@ -262,5 +260,17 @@ public class GameController implements GameOverListener, AutoOperationListener{
     public void horizontalMoveReleased(KeyCode key, Direction direction){
         // end charging/ remove charged
         endCharging(key, direction);
+    }
+
+    /** 
+     * controller call this function to move tetromino,
+     * it let engine move than check softdrop event
+    */
+    private void horizontalMove(Direction direction) {
+        engine.move(direction);
+        // check if needed to repeat softdrop event
+        if (isSoftDropping && softDropFactor == Double.MAX_VALUE) {
+            engine.moveDAS(Direction.DOWN);
+        }
     }
 }
