@@ -1,7 +1,6 @@
 package tetris.controller;
 
 import tetris.engine.type.Direction;
-import tetris.engine.type.GameState;
 import tetris.engine.type.Rotation;
 
 public interface Controllable {
@@ -14,5 +13,4 @@ public interface Controllable {
     double getGravity();
     void start();
     void reset();
-    GameState getGameState();
 }
