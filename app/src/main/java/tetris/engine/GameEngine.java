@@ -130,6 +130,8 @@ public class GameEngine implements Observable, Controllable{
         currentTetromino = t;
         allTetrominos.add(currentTetromino);
         lockResets = 0;
+
+        checkLanded();
         
         // when auto-spawned, notify controller
         if (isAutoSpawned) {
@@ -138,6 +140,24 @@ public class GameEngine implements Observable, Controllable{
 
         lockTimerFinished = false;
         notifyObservers();
+    }
+
+    /**
+     * check if currentTetromino is landed, 
+     * then if landed, start lockTimer
+     * otherwise, end lock Timer
+     */
+    private void checkLanded() {
+        if (landed(currentTetromino)) {
+            lockTimer.playFromStart();
+            lockResets ++;
+            if (lockResets > maxLockResets) {
+                lock();
+            }
+        }
+        else {
+            lockTimer.stop();
+        }
     }
 
     /**
@@ -154,16 +174,7 @@ public class GameEngine implements Observable, Controllable{
         }
 
         op.operate(currentTetromino);
-        if (landed(currentTetromino)) {
-            lockTimer.playFromStart();
-            lockResets ++;
-            if (lockResets > maxLockResets) {
-                lock();
-            }
-        }
-        else {
-            lockTimer.stop();
-        }
+        checkLanded();
         notifyObservers();
         return true;
     }
