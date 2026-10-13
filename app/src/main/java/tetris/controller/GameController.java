@@ -155,7 +155,6 @@ public class GameController implements GameOverListener, AutoOperationListener{
 
     private void handleSoftDropEvent() {
         if (isSoftDropping && softDropFactor == Double.MAX_VALUE) {
-
             engine.moveDAS(Direction.DOWN);
         }
     }
@@ -269,8 +268,6 @@ public class GameController implements GameOverListener, AutoOperationListener{
     private void horizontalMove(Direction direction) {
         engine.move(direction);
         // check if needed to repeat softdrop event
-        if (isSoftDropping && softDropFactor == Double.MAX_VALUE) {
-            engine.moveDAS(Direction.DOWN);
-        }
+        handleSoftDropEvent();
     }
 }
