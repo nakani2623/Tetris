@@ -38,10 +38,9 @@ public class GameController implements GameOverListener, AutoOperationListener{
     private double DAS = 5;
     private double ARR = 2;
 
-    public GameController(Controllable engine, GameWindow window, GameState gameState) {
+    public GameController(Controllable engine, GameWindow window) {
         this.engine = engine;
         this.window = window;
-        this.gameState = gameState;
 
         addKeyboardControl();
         DASCharges.put(Direction.LEFT, 0);
@@ -219,7 +218,7 @@ public class GameController implements GameOverListener, AutoOperationListener{
 
         window.getScene().addEventHandler(KeyEvent.KEY_RELEASED, event -> {
             pressedKeys.remove(event.getCode());
-            if (engine.getGameState() == GameState.ended) {
+            if (gameState == GameState.ended) {
                 return;
             }
 

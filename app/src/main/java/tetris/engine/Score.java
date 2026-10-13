@@ -8,7 +8,6 @@ import java.util.ArrayList;
 
 import tetris.engine.observers.Observable;
 import tetris.engine.observers.Observer;
-import tetris.engine.type.GameState;
 
 public class Score implements Observable{
     // score tracking
@@ -56,10 +55,6 @@ public class Score implements Observable{
     }
     
     public void updateStats() {
-        if (engine.getGameState() == GameState.ended) {
-            return;
-        }
-
         this.elapsedTime = (System.currentTimeMillis() - startTime) / 1000.0; // in seconds
         if (elapsedTime > 0) {
             this.piecesPerSecond = piecesPlaced / elapsedTime;
