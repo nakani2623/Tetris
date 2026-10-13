@@ -52,7 +52,7 @@ public class GameController implements GameOverListener, AutoOperationListener{
     public void start() {
         gameState = GameState.active;
         engine.start();
-
+        window.showGame();
         resetGravityTimeline(engine.getGravity());
     }
 
@@ -61,12 +61,7 @@ public class GameController implements GameOverListener, AutoOperationListener{
         window.onStart();
         start();
     }
-
-    public void showGame() {
-        window.showGame();
-        start();    
-    }
-
+    
     public void showMenu() {
         window.showMenu();
     }
