@@ -44,7 +44,6 @@ public class GameController implements GameOverListener, AutoOperationListener{
         this.gameState = gameState;
 
         addKeyboardControl();
-        showMenu();
         DASCharges.put(Direction.LEFT, 0);
         DASCharges.put(Direction.RIGHT, 0);
     }
@@ -57,13 +56,18 @@ public class GameController implements GameOverListener, AutoOperationListener{
     }
 
     public void restart() {
-        engine.reset();
-        window.onStart();
+        reset();
         start();
     }
     
     public void showMenu() {
+        reset();
         window.showMenu();
+    }
+
+    private void reset() {
+        engine.reset();
+        window.onStart();
     }
 
 

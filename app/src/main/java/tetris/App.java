@@ -25,7 +25,7 @@ public class App extends Application {
         gameEngine.setGameOverListener(controller);
 
         controller.showMenu();
-        gameWindow.setOnStart(controller::restart);
+        gameWindow.setOnStart(controller::start);
         gameWindow.setOnReturn(controller::showMenu);
         gameWindow.setOnRestart(controller::restart);
 
