@@ -58,6 +58,10 @@ public class GameWindow {
         menuPane.setOnStart(action);
     }
 
+    public void setOnExit(Runnable action) {
+        menuPane.setOnExit(action);
+    }
+
     public void setOnRestart(Runnable action) {
         gamePane.setOnRestart(action);
     }
