@@ -62,6 +62,7 @@ public class GameController implements GameOverListener, AutoOperationListener{
     
     public void showMenu() {
         reset();
+        gameState = GameState.inMenu;
         window.showMenu();
     }
 
