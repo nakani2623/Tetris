@@ -29,7 +29,6 @@ import tetris.engine.operator.RotateR180Operator;
 import tetris.engine.rotationStrategy.RotationStrategy;
 import tetris.engine.rotationStrategy.classicRotation;
 import tetris.engine.type.Direction;
-import tetris.engine.type.GameState;
 import tetris.engine.type.Rotation;
 import tetris.engine.type.TetrominoType;
 import tetris.utils.KickTable;
@@ -41,7 +40,6 @@ public class GameEngine implements Observable, Controllable{
     private TetrominoGenerator tetrominoGenerator;
     private LockStrategy lockStrategy;
     private RotationStrategy rotationStrategy;
-    private GameState gameState;
     private GameOverListener listener;
 
     private int width;
@@ -85,9 +83,8 @@ public class GameEngine implements Observable, Controllable{
     /**
      * Constructs default game board 10x20 dimension
      */
-    public GameEngine(GameState gameState) {
+    public GameEngine() {
         this(10, 20);
-        this.gameState = gameState;
     }
 
     /**
@@ -494,16 +491,8 @@ public class GameEngine implements Observable, Controllable{
         return score;
     }
 
-    public GameState getGameState() {
-        return gameState;
-    }
-
     public double getGravity() {
         return gravity;
-    }
-
-    public void setGameState(GameState state) {
-        this.gameState = state;
     }
 
     public void setAutoSpawnListener(AutoOperationListener autoOperationListener){

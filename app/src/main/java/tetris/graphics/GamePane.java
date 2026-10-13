@@ -13,6 +13,7 @@ import tetris.engine.observers.NextQueueDisplayManager;
 import tetris.engine.observers.ScoreDisplayManager;
 
 public class GamePane extends StackPane {
+    private GameOverPane gameOverModal;
     public GamePane(GameEngine engine) {
         ScorePane scorePane = new ScorePane();
         HoldPane holdPane = new HoldPane();
@@ -33,9 +34,30 @@ public class GamePane extends StackPane {
         setPadding(new Insets(20));
         this.getChildren().add(content);
 
+        gameOverModal = new GameOverPane();
+        this.getChildren().add(gameOverModal);
+        hideGameOver();
+
         new BoardDisplayManager(engine, boardPane);
         new ScoreDisplayManager(engine.getScore(), scorePane);
         new HoldDisplayManager(engine, holdPane);   
         new NextQueueDisplayManager(engine, nextQueuePane);
+    }
+
+    public void showGameOver() {
+        gameOverModal.setVisible(true);
+    }
+
+    public void hideGameOver() {
+        gameOverModal.setVisible(false);
+    }
+
+
+    public void setOnRestart(Runnable action) {
+        gameOverModal.setOnRestart(action);
+    }
+
+    public void setOnReturn(Runnable action) {
+        gameOverModal.setOnReturn(action);
     }
 }

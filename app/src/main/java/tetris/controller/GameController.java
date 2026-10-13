@@ -38,13 +38,11 @@ public class GameController implements GameOverListener, AutoOperationListener{
     private double DAS = 5;
     private double ARR = 2;
 
-    public GameController(Controllable engine, GameWindow window, GameState gameState) {
+    public GameController(Controllable engine, GameWindow window) {
         this.engine = engine;
         this.window = window;
-        this.gameState = gameState;
 
         addKeyboardControl();
-        showMenu();
         DASCharges.put(Direction.LEFT, 0);
         DASCharges.put(Direction.RIGHT, 0);
     }
@@ -52,17 +50,24 @@ public class GameController implements GameOverListener, AutoOperationListener{
     public void start() {
         gameState = GameState.active;
         engine.start();
-
+        window.showGame();
         resetGravityTimeline(engine.getGravity());
     }
 
-    public void showGame() {
-        window.showGame();
-        start();    
+    public void restart() {
+        reset();
+        start();
+    }
+    
+    public void showMenu() {
+        reset();
+        gameState = GameState.inMenu;
+        window.showMenu();
     }
 
-    public void showMenu() {
-        window.showMenu();
+    private void reset() {
+        engine.reset();
+        window.onStart();
     }
 
 
@@ -180,8 +185,7 @@ public class GameController implements GameOverListener, AutoOperationListener{
         }
             if (gameState == GameState.ended) {
                 if (event.getCode() == KeyCode.R) {
-                    engine.reset();
-                    start();
+                    restart();
                 }
                 return ;
             }
@@ -214,7 +218,7 @@ public class GameController implements GameOverListener, AutoOperationListener{
 
         window.getScene().addEventHandler(KeyEvent.KEY_RELEASED, event -> {
             pressedKeys.remove(event.getCode());
-            if (engine.getGameState() == GameState.ended) {
+            if (gameState == GameState.ended) {
                 return;
             }
 
@@ -237,6 +241,7 @@ public class GameController implements GameOverListener, AutoOperationListener{
     public void onGameOver() {
         gravityTimeline.stop();
         gameState = GameState.ended;
+        window.onGameOver();
     }
 
     /**

@@ -6,14 +6,20 @@ import javafx.scene.layout.VBox;
 
 public class MenuPane extends VBox {
     private Button startButton;
+    private Button exitButton;
     public MenuPane() {
         Label title = new Label("Menu");
         startButton = new Button("Start game");
-        Button exitButton = new Button("Exit");
+        exitButton = new Button("Exit");
         this.getChildren().addAll(title, startButton, exitButton);
     }
 
     public void setOnStart(Runnable action) {
         this.startButton.setOnAction(event -> action.run());
     }
+
+    public void setOnExit(Runnable action) {
+        this.exitButton.setOnAction(event -> action.run());
+    }
+
 }

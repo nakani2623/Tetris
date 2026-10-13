@@ -4,32 +4,39 @@
 package tetris;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.stage.Stage;
 import tetris.controller.GameController;
 import tetris.engine.GameEngine;
-import tetris.engine.type.GameState;
 import tetris.graphics.GameWindow;
 
 public class App extends Application {
 
     @Override
     public void start(Stage stage) {
-        GameState gameState = null;
-        GameEngine gameEngine = new GameEngine(gameState);
+        GameEngine gameEngine = new GameEngine();
         GameWindow gameWindow = new GameWindow(gameEngine);
 
-        GameController controller = new GameController(gameEngine, gameWindow, gameState);
+        GameController controller = new GameController(gameEngine, gameWindow);
         gameEngine.setAutoSpawnListener(controller);
         // controller.setSoftDropFactor(15);
         controller.setSoftDropFactor(Double.MAX_VALUE);
         gameEngine.setGameOverListener(controller);
 
         controller.showMenu();
-        gameWindow.setOnStart(controller::showGame);
+        gameWindow.setOnStart(controller::start);
+        gameWindow.setOnExit(this::stop);
+        gameWindow.setOnReturn(controller::showMenu);
+        gameWindow.setOnRestart(controller::restart);
 
         
         // gameEngine.loop();
         gameWindow.execute(stage);
+    }
+
+    @Override 
+    public void stop() {
+        Platform.exit();
     }
 
     public static void main(String[] args) {
