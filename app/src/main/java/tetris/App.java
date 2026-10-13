@@ -4,6 +4,7 @@
 package tetris;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.stage.Stage;
 import tetris.controller.GameController;
 import tetris.engine.GameEngine;
@@ -24,12 +25,18 @@ public class App extends Application {
 
         controller.showMenu();
         gameWindow.setOnStart(controller::start);
+        gameWindow.setOnExit(this::stop);
         gameWindow.setOnReturn(controller::showMenu);
         gameWindow.setOnRestart(controller::restart);
 
         
         // gameEngine.loop();
         gameWindow.execute(stage);
+    }
+
+    @Override 
+    public void stop() {
+        Platform.exit();
     }
 
     public static void main(String[] args) {
