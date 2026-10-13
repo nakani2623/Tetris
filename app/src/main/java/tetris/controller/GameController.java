@@ -56,6 +56,12 @@ public class GameController implements GameOverListener, AutoOperationListener{
         resetGravityTimeline(engine.getGravity());
     }
 
+    public void restart() {
+        engine.reset();
+        window.onStart();
+        start();
+    }
+
     public void showGame() {
         window.showGame();
         start();    
@@ -180,8 +186,7 @@ public class GameController implements GameOverListener, AutoOperationListener{
         }
             if (gameState == GameState.ended) {
                 if (event.getCode() == KeyCode.R) {
-                    engine.reset();
-                    start();
+                    restart();
                 }
                 return ;
             }
@@ -237,6 +242,7 @@ public class GameController implements GameOverListener, AutoOperationListener{
     public void onGameOver() {
         gravityTimeline.stop();
         gameState = GameState.ended;
+        window.onGameOver();
     }
 
     /**
