@@ -9,14 +9,11 @@ import javafx.stage.Stage;
  * Manages In-Game contents, including a gameboard
  */
 public class GameWindow {
-    private Scene scene;
-    private Pane root;
-    private final GamePane gamePane;
-    private final MenuPane menuPane;
+    private final GamePane gamePane = new GamePane();
+    private final MenuPane menuPane = new MenuPane();
+    private final Scene scene;
 
     public GameWindow() {
-        gamePane = new GamePane();
-        menuPane = new MenuPane();
         Pane initialPane = new Pane();
         scene = new Scene(initialPane, 640, 480);
     }
@@ -32,10 +29,6 @@ public class GameWindow {
 
     public void showMenu() {
         showContent(menuPane);
-    }
-
-    public Pane getRoot() {
-        return root;
     }
 
     public Scene getScene() {

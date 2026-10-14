@@ -8,19 +8,14 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 
 public class GamePane extends StackPane {
-    private BoardPane boardPane;
-    private ScorePane scorePane;
-    private HoldPane holdPane;
-    private NextQueuePane nextQueuePane;
+    private final BoardPane boardPane = new BoardPane();
+    private final ScorePane scorePane = new ScorePane();
+    private final HoldPane holdPane = new HoldPane();
+    private final NextQueuePane nextQueuePane = new NextQueuePane();
 
     private GameOverPane gameOverModal;
     public GamePane() {
-        scorePane = new ScorePane();
-        holdPane = new HoldPane();
         VBox leftBox = new VBox(holdPane, scorePane);
-
-        boardPane = new BoardPane();
-        nextQueuePane = new NextQueuePane();
 
         HBox content = new HBox(16, leftBox, boardPane, nextQueuePane);
         content.setAlignment(Pos.TOP_CENTER);
