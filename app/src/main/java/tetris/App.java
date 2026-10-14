@@ -15,21 +15,17 @@ import tetris.engine.observers.ScoreDisplayManager;
 import tetris.graphics.GameWindow;
 
 public class App extends Application {
-    private GameEngine engine;
-    private GameWindow window;
-    private GameController controller;
+    private final GameEngine engine = new GameEngine();
+    private final GameWindow window = new GameWindow();
+    private final GameController controller = new GameController(engine, window);
 
     @Override
     public void start(Stage stage) {
-        engine = new GameEngine();
-        window = new GameWindow();
-
         new BoardDisplayManager(engine, window.getBoardPane());
         new ScoreDisplayManager(engine.getScore(), window.getScorePane());
         new HoldDisplayManager(engine, window.getHoldPane());   
         new NextQueueDisplayManager(engine, window.getNextQueuePane());
 
-        controller = new GameController(engine, window);
 
         engine.setAutoSpawnListener(controller);
         // controller.setSoftDropFactor(15);

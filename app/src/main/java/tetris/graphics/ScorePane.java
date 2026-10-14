@@ -8,16 +8,14 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
 public class ScorePane extends VBox {
-    private Label time;
-    private Label score;
-    private Label pps;
+    private final Label time = new Label("Time: 0");
+    private final Label score = new Label("Score: 0");
+    private final Label pps = new Label("PPS: 0");
 
     // private String longestSample = "SCORE: 999999";
 
     public ScorePane() {
-        time = new Label("Time: 0");
-        score = new Label("Score: 0");
-        pps = new Label("PPS: 0");
+        getChildren().addAll(time, score, pps);
 
         setPadding(new Insets(8));
         setSpacing(2);
@@ -34,8 +32,6 @@ public class ScorePane extends VBox {
         VBox.setVgrow(time, Priority.ALWAYS);
         VBox.setVgrow(score, Priority.ALWAYS);
         VBox.setVgrow(pps, Priority.ALWAYS);
-
-        getChildren().addAll(time, score, pps);
     }
 
     public void updateTime(double time) {
