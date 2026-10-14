@@ -4,26 +4,18 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
-import tetris.engine.GameEngine;
 
 /**
  * Manages In-Game contents, including a gameboard
  */
 public class GameWindow {
-    private static final int MINO_SIZE = 20;
     private Scene scene;
     private Pane root;
     private final GamePane gamePane;
     private final MenuPane menuPane;
 
-    private GameEngine engine;
-    // Rectangle[][] grid;
-    // Set<Rectangle> updatingSquares;
-
-    public GameWindow(GameEngine gameEngine) {
-        this.engine = gameEngine;
-
-        gamePane = new GamePane(engine);
+    public GameWindow() {
+        gamePane = new GamePane();
         menuPane = new MenuPane();
         Pane initialPane = new Pane();
         scene = new Scene(initialPane, 640, 480);

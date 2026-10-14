@@ -15,41 +15,41 @@ import tetris.engine.observers.ScoreDisplayManager;
 import tetris.graphics.GameWindow;
 
 public class App extends Application {
-    private GameEngine gameEngine;
-    private GameWindow gameWindow;
+    private GameEngine engine;
+    private GameWindow window;
     private GameController controller;
 
     @Override
     public void start(Stage stage) {
-        gameEngine = new GameEngine();
-        gameWindow = new GameWindow(gameEngine);
+        engine = new GameEngine();
+        window = new GameWindow();
 
-        new BoardDisplayManager(gameEngine, gameWindow.getBoardPane());
-        new ScoreDisplayManager(gameEngine.getScore(), gameWindow.getScorePane());
-        new HoldDisplayManager(gameEngine, gameWindow.getHoldPane());   
-        new NextQueueDisplayManager(gameEngine, gameWindow.getNextQueuePane());
+        new BoardDisplayManager(engine, window.getBoardPane());
+        new ScoreDisplayManager(engine.getScore(), window.getScorePane());
+        new HoldDisplayManager(engine, window.getHoldPane());   
+        new NextQueueDisplayManager(engine, window.getNextQueuePane());
 
-        controller = new GameController(gameEngine, gameWindow);
+        controller = new GameController(engine, window);
 
-        gameEngine.setAutoSpawnListener(controller);
+        engine.setAutoSpawnListener(controller);
         // controller.setSoftDropFactor(15);
         controller.setSoftDropFactor(Double.MAX_VALUE);
-        gameEngine.setGameOverListener(controller);
+        engine.setGameOverListener(controller);
 
         controller.showMenu();
-        gameWindow.setOnStart(controller::start);
-        gameWindow.setOnExit(Platform::exit);
-        gameWindow.setOnReturn(controller::showMenu);
-        gameWindow.setOnRestart(controller::restart);
+        window.setOnStart(controller::start);
+        window.setOnExit(Platform::exit);
+        window.setOnReturn(controller::showMenu);
+        window.setOnRestart(controller::restart);
 
         
         // gameEngine.loop();
-        gameWindow.execute(stage);
+        window.execute(stage);
     }
 
     @Override 
     public void stop() {
-        gameEngine.dispose();
+        engine.dispose();
     }
 
     public static void main(String[] args) {

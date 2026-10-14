@@ -6,7 +6,6 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import tetris.engine.GameEngine;
 
 public class GamePane extends StackPane {
     private BoardPane boardPane;
@@ -15,7 +14,7 @@ public class GamePane extends StackPane {
     private NextQueuePane nextQueuePane;
 
     private GameOverPane gameOverModal;
-    public GamePane(GameEngine engine) {
+    public GamePane() {
         scorePane = new ScorePane();
         holdPane = new HoldPane();
         VBox leftBox = new VBox(holdPane, scorePane);
