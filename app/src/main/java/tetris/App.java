@@ -8,6 +8,10 @@ import javafx.application.Platform;
 import javafx.stage.Stage;
 import tetris.controller.GameController;
 import tetris.engine.GameEngine;
+import tetris.engine.observers.BoardDisplayManager;
+import tetris.engine.observers.HoldDisplayManager;
+import tetris.engine.observers.NextQueueDisplayManager;
+import tetris.engine.observers.ScoreDisplayManager;
 import tetris.graphics.GameWindow;
 
 public class App extends Application {
@@ -19,6 +23,12 @@ public class App extends Application {
     public void start(Stage stage) {
         gameEngine = new GameEngine();
         gameWindow = new GameWindow(gameEngine);
+
+        new BoardDisplayManager(gameEngine, gameWindow.getBoardPane());
+        new ScoreDisplayManager(gameEngine.getScore(), gameWindow.getScorePane());
+        new HoldDisplayManager(gameEngine, gameWindow.getHoldPane());   
+        new NextQueueDisplayManager(gameEngine, gameWindow.getNextQueuePane());
+
         controller = new GameController(gameEngine, gameWindow);
 
         gameEngine.setAutoSpawnListener(controller);

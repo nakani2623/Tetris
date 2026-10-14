@@ -7,20 +7,21 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import tetris.engine.GameEngine;
-import tetris.engine.observers.BoardDisplayManager;
-import tetris.engine.observers.HoldDisplayManager;
-import tetris.engine.observers.NextQueueDisplayManager;
-import tetris.engine.observers.ScoreDisplayManager;
 
 public class GamePane extends StackPane {
+    private BoardPane boardPane;
+    private ScorePane scorePane;
+    private HoldPane holdPane;
+    private NextQueuePane nextQueuePane;
+
     private GameOverPane gameOverModal;
     public GamePane(GameEngine engine) {
-        ScorePane scorePane = new ScorePane();
-        HoldPane holdPane = new HoldPane();
+        scorePane = new ScorePane();
+        holdPane = new HoldPane();
         VBox leftBox = new VBox(holdPane, scorePane);
 
-        BoardPane boardPane = new BoardPane();
-        NextQueuePane nextQueuePane = new NextQueuePane();
+        boardPane = new BoardPane();
+        nextQueuePane = new NextQueuePane();
 
         HBox content = new HBox(16, leftBox, boardPane, nextQueuePane);
         content.setAlignment(Pos.TOP_CENTER);
@@ -37,11 +38,6 @@ public class GamePane extends StackPane {
         gameOverModal = new GameOverPane();
         this.getChildren().add(gameOverModal);
         hideGameOver();
-
-        new BoardDisplayManager(engine, boardPane);
-        new ScoreDisplayManager(engine.getScore(), scorePane);
-        new HoldDisplayManager(engine, holdPane);   
-        new NextQueueDisplayManager(engine, nextQueuePane);
     }
 
     public void showGameOver() {
@@ -59,5 +55,21 @@ public class GamePane extends StackPane {
 
     public void setOnReturn(Runnable action) {
         gameOverModal.setOnReturn(action);
+    }
+
+    public BoardPane getBoardPane() {
+        return boardPane;
+    }
+
+    public ScorePane getScorePane() {
+        return scorePane;
+    }
+
+    public HoldPane getHoldPane() {
+        return holdPane;
+    }
+
+    public NextQueuePane getNextQueuePane() {
+        return nextQueuePane;
     }
 }
