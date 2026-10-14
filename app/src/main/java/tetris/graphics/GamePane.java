@@ -19,7 +19,7 @@ public class GamePane extends StackPane {
         HoldPane holdPane = new HoldPane();
         VBox leftBox = new VBox(holdPane, scorePane);
 
-        BoardPane boardPane = new BoardPane(engine);
+        BoardPane boardPane = new BoardPane();
         NextQueuePane nextQueuePane = new NextQueuePane();
 
         HBox content = new HBox(16, leftBox, boardPane, nextQueuePane);
