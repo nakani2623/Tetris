@@ -50,6 +50,22 @@ public class GameWindow {
         return scene;
     }
 
+    public BoardPane getBoardPane() {
+        return gamePane.getBoardPane();
+    }
+
+    public ScorePane getScorePane() {
+        return gamePane.getScorePane();
+    }
+
+    public HoldPane getHoldPane() {
+        return gamePane.getHoldPane();
+    }
+
+    public NextQueuePane getNextQueuePane() {
+        return gamePane.getNextQueuePane();
+    }
+
     private void showContent(Parent content) {
         scene.setRoot(content);
     }
