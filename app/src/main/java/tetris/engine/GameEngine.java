@@ -44,7 +44,7 @@ public class GameEngine implements Observable, Controllable{
 
     private int width;
     private int height;
-    public List<Tetromino> allTetrominos;
+    private List<Tetromino> allTetrominos;
     public Tetromino currentTetromino;
     private TetrominoType holdTetrominoType;
     List<Observer> observers;
@@ -505,6 +505,10 @@ public class GameEngine implements Observable, Controllable{
 
     public List<TetrominoType> getNextQueue() {
         return List.copyOf(nextQueue);
+    }
+
+    public List<Tetromino> getAllTetrominos() {
+        return List.copyOf(allTetrominos);
     }
 
     public void setRotationStrategy(RotationStrategy rotationStrategy) {

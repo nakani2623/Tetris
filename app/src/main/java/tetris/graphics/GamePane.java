@@ -6,21 +6,16 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import tetris.engine.GameEngine;
-import tetris.engine.observers.BoardDisplayManager;
-import tetris.engine.observers.HoldDisplayManager;
-import tetris.engine.observers.NextQueueDisplayManager;
-import tetris.engine.observers.ScoreDisplayManager;
 
 public class GamePane extends StackPane {
-    private GameOverPane gameOverModal;
-    public GamePane(GameEngine engine) {
-        ScorePane scorePane = new ScorePane();
-        HoldPane holdPane = new HoldPane();
-        VBox leftBox = new VBox(holdPane, scorePane);
+    private final BoardPane boardPane = new BoardPane();
+    private final ScorePane scorePane = new ScorePane();
+    private final HoldPane holdPane = new HoldPane();
+    private final NextQueuePane nextQueuePane = new NextQueuePane();
 
-        BoardPane boardPane = new BoardPane(engine);
-        NextQueuePane nextQueuePane = new NextQueuePane();
+    private GameOverPane gameOverModal;
+    public GamePane() {
+        VBox leftBox = new VBox(holdPane, scorePane);
 
         HBox content = new HBox(16, leftBox, boardPane, nextQueuePane);
         content.setAlignment(Pos.TOP_CENTER);
@@ -37,11 +32,6 @@ public class GamePane extends StackPane {
         gameOverModal = new GameOverPane();
         this.getChildren().add(gameOverModal);
         hideGameOver();
-
-        new BoardDisplayManager(engine, boardPane);
-        new ScoreDisplayManager(engine.getScore(), scorePane);
-        new HoldDisplayManager(engine, holdPane);   
-        new NextQueueDisplayManager(engine, nextQueuePane);
     }
 
     public void showGameOver() {
@@ -59,5 +49,21 @@ public class GamePane extends StackPane {
 
     public void setOnReturn(Runnable action) {
         gameOverModal.setOnReturn(action);
+    }
+
+    public BoardPane getBoardPane() {
+        return boardPane;
+    }
+
+    public ScorePane getScorePane() {
+        return scorePane;
+    }
+
+    public HoldPane getHoldPane() {
+        return holdPane;
+    }
+
+    public NextQueuePane getNextQueuePane() {
+        return nextQueuePane;
     }
 }
