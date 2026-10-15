@@ -8,7 +8,7 @@ import javafx.scene.layout.VBox;
 import tetris.engine.type.TetrominoType;
 
 public class NextQueuePane extends VBox {
-    private PreviewPane[] previews;
+    private final PreviewPane[] previews;
 
     public NextQueuePane() {
         Label title = new Label("NEXT");
