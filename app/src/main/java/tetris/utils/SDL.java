@@ -46,4 +46,17 @@ public class SDL {
             throw new RuntimeException("Failed to call simp_win", e);
         }
     }
+
+    private static final MethodHandle poll_event = load(
+        "poll_event",
+        FunctionDescriptor.of(ValueLayout.JAVA_INT)
+    );
+
+    public static int poll_event() {
+        try {
+            return (int)poll_event.invokeExact();
+        } catch (Throwable e) {
+            throw new RuntimeException("Failed to call poll_event", e);
+        }
+    }
 }
