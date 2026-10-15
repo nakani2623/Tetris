@@ -23,7 +23,8 @@ public class GameOverPane extends VBox {
         );
         setSpacing(16);
         setPadding(new Insets(16));
-        setStyle("-fx-border-color: gray;");
+        
+        setStyle("-fx-border-color: gray; -fx-background-color: -fx-background;");
 
         this.getChildren().addAll(title, restartButton, returnButton);
     }
