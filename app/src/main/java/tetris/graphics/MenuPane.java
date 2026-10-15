@@ -1,17 +1,33 @@
 package tetris.graphics;
 
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 
-public class MenuPane extends VBox {
+public class MenuPane extends StackPane {
     private Button startButton;
     private Button exitButton;
     public MenuPane() {
-        Label title = new Label("Menu");
+        Label title = new Label("Tetris");
         startButton = new Button("Start game");
         exitButton = new Button("Exit");
-        this.getChildren().addAll(title, startButton, exitButton);
+
+        VBox content = new VBox(title, startButton, exitButton);
+        this.getChildren().add(content);
+
+        content.setAlignment(Pos.TOP_CENTER);
+        content.setFillWidth(false);
+        content.setMaxSize(
+                Region.USE_PREF_SIZE,
+                Region.USE_PREF_SIZE
+        );
+        content.setSpacing(16);
+        content.setPadding(new Insets(16));
+        content.setStyle("-fx-border-color: gray;");
     }
 
     public void setOnStart(Runnable action) {
