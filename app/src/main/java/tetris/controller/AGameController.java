@@ -187,18 +187,18 @@ public class AGameController implements GameOverListener, AutoOperationListener{
     public void handleGameInput(GameInput input) {
         GameKey key = input.gameKey();
         UnifiedKey physicalKey = input.unifiedKey();
+        if (key == null) {
+            return;
+        }
         if (input.keyAction() == KeyAction.PRESS) {
 
             // Ignore repeated KEY_DOWN events
             if (!pressedKeys.add(physicalKey)) {
                 return;
             }
-            System.out.println("pressed"+input.gameKey());
             handleKeyPressed(input.gameKey(), input.unifiedKey());
 
         } else {
-            System.out.println("released"+input.gameKey());
-
             pressedKeys.remove(physicalKey);
             handleKeyReleased(key, physicalKey);
         }
