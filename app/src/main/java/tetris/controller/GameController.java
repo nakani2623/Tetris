@@ -9,13 +9,15 @@ import java.util.Set;
 
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
 import javafx.util.Duration;
 import tetris.controller.Controllable;
 import tetris.engine.type.Direction;
 import tetris.engine.type.GameState;
 import tetris.engine.type.Rotation;
+import tetris.engine.type.UnifiedKey;
+import tetris.engine.type.Input.GameInput;
+import tetris.engine.type.Input.GameKey;
+import tetris.engine.type.Input.KeyAction;
 import tetris.graphics.GameWindow;
 
 /**
@@ -30,10 +32,10 @@ public class GameController implements GameOverListener, AutoOperationListener{
     private Timeline arrTimeline;
     private double softDropFactor;
     private GameState gameState;
-    private Set<KeyCode> pressedKeys = new HashSet<>(); 
+    private Set<UnifiedKey> pressedKeys = new HashSet<>(); 
     private Map<Direction, Integer> DASCharges = new HashMap<Direction, Integer>();
-    private Map<KeyCode, Timeline> DASChargingKeys = new HashMap<KeyCode, Timeline>();
-    private List<KeyCode> DASChargedKeys = new LinkedList<KeyCode>();
+    private Map<UnifiedKey, Timeline> DASChargingKeys = new HashMap<UnifiedKey, Timeline>();
+    private List<UnifiedKey> DASChargedKeys = new LinkedList<UnifiedKey>();
     private boolean isSoftDropping = false;
     private double DAS = 5;
     private double ARR = 2;
@@ -41,8 +43,6 @@ public class GameController implements GameOverListener, AutoOperationListener{
     public GameController(Controllable engine, GameWindow window) {
         this.engine = engine;
         this.window = window;
-
-        addKeyboardControl();
         DASCharges.put(Direction.LEFT, 0);
         DASCharges.put(Direction.RIGHT, 0);
     }
@@ -120,7 +120,7 @@ public class GameController implements GameOverListener, AutoOperationListener{
         handleSoftDropEvent();
     }
 
-    private void startCharging(KeyCode key, Direction direction) {
+    private void startCharging(UnifiedKey key, Direction direction) {
         Timeline t = new Timeline(
             new KeyFrame(
                 Duration.seconds(DAS/60), event -> {
@@ -136,7 +136,7 @@ public class GameController implements GameOverListener, AutoOperationListener{
         t.play();
         DASChargingKeys.put(key, t);
     }
-    private void endCharging(KeyCode key, Direction direction) {
+    private void endCharging(UnifiedKey key, Direction direction) {
         if (DASChargingKeys.containsKey(key)) {
             this.DASChargingKeys.get(key).stop();
         }
@@ -178,60 +178,89 @@ public class GameController implements GameOverListener, AutoOperationListener{
     }
 
     // keyboard controller, triggers tetromino movement functions
-    public void addKeyboardControl() {
-        window.getScene().addEventHandler(KeyEvent.KEY_PRESSED, event -> {
-        if (!pressedKeys.add(event.getCode())) { // failed adding to set -> same key not released yet -> is system's auto repeat
-            return ;
+    public void handleGameInput(GameInput input) {
+        GameKey key = input.gameKey();
+        UnifiedKey physicalKey = input.unifiedKey();
+        if (key == null) {
+            return;
         }
-            if (gameState == GameState.ended) {
-                if (event.getCode() == KeyCode.R) {
-                    restart();
-                }
-                return ;
-            }
+        if (input.keyAction() == KeyAction.PRESS) {
 
-            if (gameState == GameState.active) {              
-                switch (event.getCode()) {
-                    case J -> horizontalMovePressed(event.getCode(), Direction.LEFT);
-                    case L -> horizontalMovePressed(event.getCode(), Direction.RIGHT);
-                    case F -> engine.hardDrop();
-                    case K -> startSoftDrop();
-                    case S -> engine.hold();
-                    case A -> engine.rotate(Rotation.COUNTER_CLOCKWISE);
-                    case D -> engine.rotate(Rotation.CLOCKWISE);
-                    case SEMICOLON -> engine.rotate(Rotation.R_180);
-                    
-                    case Q -> engine.rotate(Rotation.COUNTER_CLOCKWISE);
-                    case W -> engine.hold();
-                    case E -> engine.rotate(Rotation.CLOCKWISE);
-                    case R -> engine.rotate(Rotation.R_180);
-                    // case I -> engine.move(Direction.LEFT);
-                    case SPACE -> engine.hardDrop();
-
-                }
-                // for ARR = 0, das need to be handled after any input
-                handleDASEvent();
-                handleSoftDropEvent();
-            }
-
-        });
-
-        window.getScene().addEventHandler(KeyEvent.KEY_RELEASED, event -> {
-            pressedKeys.remove(event.getCode());
-            if (gameState == GameState.ended) {
+            // Ignore repeated KEY_DOWN events
+            if (!pressedKeys.add(physicalKey)) {
                 return;
             }
+            handleKeyPressed(input.gameKey(), input.unifiedKey());
 
-            if (gameState == GameState.active) {              
-                switch (event.getCode()) {
-                    case K -> endSoftDrop();
-                    case J -> horizontalMoveReleased(event.getCode(), Direction.LEFT);
-                    case L -> horizontalMoveReleased(event.getCode(), Direction.RIGHT);
-                }
-            }
-        });
-
+        } else {
+            pressedKeys.remove(physicalKey);
+            handleKeyReleased(key, physicalKey);
+        }
     }
+
+    private void handleKeyPressed(GameKey key, UnifiedKey physicalKey) {
+        if (gameState == GameState.ended) {
+            if (key == GameKey.RESTART) {
+                restart();
+            }
+            return;
+        }
+
+        if (gameState != GameState.active) {
+            return;
+        }
+
+        switch (key) {
+            case MOVE_LEFT ->
+                horizontalMovePressed(physicalKey, Direction.LEFT);
+
+            case MOVE_RIGHT ->
+                horizontalMovePressed(physicalKey, Direction.RIGHT);
+
+            case HARDDROP ->
+                engine.hardDrop();
+
+            case SOFTDROP ->
+                startSoftDrop();
+
+            case HOLD ->
+                engine.hold();
+
+            case ROTATE_CCW ->
+                engine.rotate(Rotation.COUNTER_CLOCKWISE);
+
+            case ROTATE_CW ->
+                engine.rotate(Rotation.CLOCKWISE);
+
+            case ROTATE_180 ->
+                engine.rotate(Rotation.R_180);
+        }
+
+        // Must execute after each newly pressed key
+        handleDASEvent();
+        handleSoftDropEvent();
+    }
+
+    private void handleKeyReleased(GameKey key, UnifiedKey physicalKey) {
+        if (gameState != GameState.active) {
+            return;
+        }
+
+        switch (key) {
+            case SOFTDROP ->
+                endSoftDrop();
+
+            case MOVE_LEFT ->
+                horizontalMoveReleased(physicalKey, Direction.LEFT);
+
+            case MOVE_RIGHT ->
+                horizontalMoveReleased(physicalKey, Direction.RIGHT);
+
+            default -> {}
+        }
+    }
+
+    
 
     public void setSoftDropFactor(double softDropFactor) {
         this.softDropFactor = softDropFactor;
@@ -250,7 +279,7 @@ public class GameController implements GameOverListener, AutoOperationListener{
      * start/end das and arr timeline
      * operate engine by move/moveDAS
      */
-    public void horizontalMovePressed(KeyCode key, Direction direction){
+    public void horizontalMovePressed(UnifiedKey key, Direction direction){
         horizontalMove(direction);
         startCharging(key, direction);
     }
@@ -261,7 +290,7 @@ public class GameController implements GameOverListener, AutoOperationListener{
      * end das timeline
      * operate engine by move/moveDAS
      */
-    public void horizontalMoveReleased(KeyCode key, Direction direction){
+    public void horizontalMoveReleased(UnifiedKey key, Direction direction){
         // end charging/ remove charged
         endCharging(key, direction);
     }
@@ -274,5 +303,9 @@ public class GameController implements GameOverListener, AutoOperationListener{
         engine.move(direction);
         // check if needed to repeat softdrop event
         handleSoftDropEvent();
+    }
+
+    public GameState getGameState() {
+        return gameState;
     }
 }

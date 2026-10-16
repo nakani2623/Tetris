@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.function.Supplier;
 
 import tetris.engine.type.GameState;
 import tetris.engine.type.UnifiedKey;
@@ -13,8 +14,10 @@ import tetris.engine.type.Input.GameKey;
 
 public class KeyBinds {
     public Map<GameState, Map<UnifiedKey, GameKey>> binds;
+    private Supplier<GameState> stateSupplier;
 
-    public KeyBinds() {
+    public KeyBinds(Supplier<GameState> stateSupplier) {
+        this.stateSupplier = stateSupplier;
         binds = new HashMap<>();
         for (GameState state : GameState.values()) {
             Map bindOfState = new HashMap<UnifiedKey, GameKey>();
@@ -25,7 +28,7 @@ public class KeyBinds {
     }
 
     public GameKey map(UnifiedKey unifiedKey) {
-        return binds.get(GameState.active).get(unifiedKey);
+        return binds.get(stateSupplier.get()).get(unifiedKey);
     }
 
     public void addBind(UnifiedKey unifiedKey, GameKey gameKey, GameState state) {

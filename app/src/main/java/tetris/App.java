@@ -8,7 +8,7 @@ import javafx.application.Platform;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
-import tetris.controller.AGameController;
+import tetris.controller.GameController;
 import tetris.controller.input.JavaFXKeyboardAdapter;
 import tetris.controller.input.KeyBinds;
 import tetris.controller.input.KeyboardAdapter;
@@ -25,13 +25,13 @@ import tetris.graphics.GameWindow;
 public class App extends Application {
     private final GameEngine engine = new GameEngine();
     private final GameWindow window = new GameWindow();
-    private final AGameController controller = new AGameController(engine, window);
+    private final GameController controller = new GameController(engine, window);
     private final KeyboardAdapter<KeyCode> jKeyboardAdapter = new JavaFXKeyboardAdapter();
     private KeyBinds keyBinds;
     @Override
     public void start(Stage stage) {
         // load config
-        keyBinds = new KeyBinds();
+        keyBinds = new KeyBinds(controller::getGameState);
         addKeyboardControl();
 
         new BoardDisplayManager(engine, window.getBoardPane());
