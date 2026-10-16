@@ -18,6 +18,7 @@ import tetris.controller.Controllable;
 import tetris.engine.type.Direction;
 import tetris.engine.type.GameState;
 import tetris.engine.type.Rotation;
+import tetris.engine.type.UnifiedKey;
 import tetris.engine.type.Input.GameInput;
 import tetris.engine.type.Input.GameKey;
 import tetris.engine.type.Input.KeyAction;
@@ -27,7 +28,7 @@ import tetris.graphics.GameWindow;
  * Handles user inputs, timing
  * GameController
  */
-public abstract class AGameController implements GameOverListener, AutoOperationListener{
+public class AGameController implements GameOverListener, AutoOperationListener{
     protected  Controllable engine;
     protected GameWindow window;
 
@@ -35,10 +36,10 @@ public abstract class AGameController implements GameOverListener, AutoOperation
     protected Timeline arrTimeline;
     protected double softDropFactor;
     protected GameState gameState;
-    protected Set<Integer> pressedKeys = new HashSet<>(); 
+    protected Set<UnifiedKey> pressedKeys = new HashSet<>(); 
     protected Map<Direction, Integer> DASCharges = new HashMap<Direction, Integer>();
-    protected Map<Integer, Timeline> DASChargingKeys = new HashMap<Integer, Timeline>();
-    protected List<Integer> DASChargedKeys = new LinkedList<Integer>();
+    protected Map<UnifiedKey, Timeline> DASChargingKeys = new HashMap<UnifiedKey, Timeline>();
+    protected List<UnifiedKey> DASChargedKeys = new LinkedList<UnifiedKey>();
     protected boolean isSoftDropping = false;
     protected double DAS = 5;
     protected double ARR = 2;
@@ -125,7 +126,7 @@ public abstract class AGameController implements GameOverListener, AutoOperation
         handleSoftDropEvent();
     }
 
-    protected void startCharging(int key, Direction direction) {
+    protected void startCharging(UnifiedKey key, Direction direction) {
         Timeline t = new Timeline(
             new KeyFrame(
                 Duration.seconds(DAS/60), event -> {
@@ -141,7 +142,7 @@ public abstract class AGameController implements GameOverListener, AutoOperation
         t.play();
         DASChargingKeys.put(key, t);
     }
-    protected void endCharging(int key, Direction direction) {
+    protected void endCharging(UnifiedKey key, Direction direction) {
         if (DASChargingKeys.containsKey(key)) {
             this.DASChargingKeys.get(key).stop();
         }
@@ -184,25 +185,26 @@ public abstract class AGameController implements GameOverListener, AutoOperation
 
     // keyboard controller, triggers tetromino movement functions
     public void handleGameInput(GameInput input) {
-        int physicalKey = input.physicalKey();
         GameKey key = input.gameKey();
-
+        UnifiedKey physicalKey = input.unifiedKey();
         if (input.keyAction() == KeyAction.PRESS) {
 
             // Ignore repeated KEY_DOWN events
             if (!pressedKeys.add(physicalKey)) {
                 return;
             }
-
-            handleKeyPressed(key, physicalKey);
+            System.out.println("pressed"+input.gameKey());
+            handleKeyPressed(input.gameKey(), input.unifiedKey());
 
         } else {
+            System.out.println("released"+input.gameKey());
+
             pressedKeys.remove(physicalKey);
             handleKeyReleased(key, physicalKey);
         }
     }
 
-    private void handleKeyPressed(GameKey key, int physicalKey) {
+    private void handleKeyPressed(GameKey key, UnifiedKey physicalKey) {
         if (gameState == GameState.ended) {
             if (key == GameKey.RESTART) {
                 restart();
@@ -245,7 +247,7 @@ public abstract class AGameController implements GameOverListener, AutoOperation
         handleSoftDropEvent();
     }
 
-    private void handleKeyReleased(GameKey key, int physicalKey) {
+    private void handleKeyReleased(GameKey key, UnifiedKey physicalKey) {
         if (gameState != GameState.active) {
             return;
         }
@@ -283,7 +285,7 @@ public abstract class AGameController implements GameOverListener, AutoOperation
      * start/end das and arr timeline
      * operate engine by move/moveDAS
      */
-    public void horizontalMovePressed(Integer key, Direction direction){
+    public void horizontalMovePressed(UnifiedKey key, Direction direction){
         horizontalMove(direction);
         startCharging(key, direction);
     }
@@ -294,7 +296,7 @@ public abstract class AGameController implements GameOverListener, AutoOperation
      * end das timeline
      * operate engine by move/moveDAS
      */
-    public void horizontalMoveReleased(Integer key, Direction direction){
+    public void horizontalMoveReleased(UnifiedKey key, Direction direction){
         // end charging/ remove charged
         endCharging(key, direction);
     }
