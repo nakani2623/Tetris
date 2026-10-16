@@ -1,0 +1,311 @@
+package tetris.controller;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.checkerframework.checker.units.qual.A;
+
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
+import javafx.util.Duration;
+import tetris.controller.Controllable;
+import tetris.engine.type.Direction;
+import tetris.engine.type.GameState;
+import tetris.engine.type.Rotation;
+import tetris.engine.type.Input.GameInput;
+import tetris.engine.type.Input.GameKey;
+import tetris.engine.type.Input.KeyAction;
+import tetris.graphics.GameWindow;
+
+/**
+ * Handles user inputs, timing
+ * GameController
+ */
+public abstract class AGameController implements GameOverListener, AutoOperationListener{
+    protected  Controllable engine;
+    protected GameWindow window;
+
+    protected Timeline gravityTimeline;
+    protected Timeline arrTimeline;
+    protected double softDropFactor;
+    protected GameState gameState;
+    protected Set<Integer> pressedKeys = new HashSet<>(); 
+    protected Map<Direction, Integer> DASCharges = new HashMap<Direction, Integer>();
+    protected Map<Integer, Timeline> DASChargingKeys = new HashMap<Integer, Timeline>();
+    protected List<Integer> DASChargedKeys = new LinkedList<Integer>();
+    protected boolean isSoftDropping = false;
+    protected double DAS = 5;
+    protected double ARR = 2;
+
+    public AGameController(Controllable engine, GameWindow window) {
+        this.engine = engine;
+        this.window = window;
+
+        // addKeyboardControl();
+        DASCharges.put(Direction.LEFT, 0);
+        DASCharges.put(Direction.RIGHT, 0);
+    }
+
+    public void start() {
+        gameState = GameState.active;
+        engine.start();
+        window.showGame();
+        resetGravityTimeline(engine.getGravity());
+    }
+
+    public void restart() {
+        reset();
+        start();
+    }
+    
+    public void showMenu() {
+        reset();
+        gameState = GameState.inMenu;
+        window.showMenu();
+    }
+
+    protected void reset() {
+        engine.reset();
+        window.onStart();
+    }
+
+
+    /**
+     * called when das staus changed or new piece spawned and notified by engine
+     */
+    protected void handleDASEvent(){
+        if (ARR != 0 && arrTimeline != null) {
+            // stop arr timeline
+            arrTimeline.stop();
+        }
+        // calculate das direction
+        int leftDAS = DASCharges.get(Direction.LEFT);
+        int rightDAS = DASCharges.get(Direction.RIGHT);
+        Direction direction;
+        if (leftDAS - rightDAS == 0) { 
+            return; 
+        } 
+        else if (leftDAS - rightDAS > 0) { direction = Direction.LEFT; }
+        else { direction = Direction.RIGHT; }
+        
+        if (ARR == 0) { // 0 ARR
+            engine.moveDAS(direction);
+        }
+        else { // non-zero ARR
+            // instantly move one step
+            horizontalMove(direction);
+            arrTimeline = new Timeline(
+                new KeyFrame(
+                    Duration.seconds(ARR/60), event -> {
+                        horizontalMove(direction);
+                    }
+                )
+            );
+            arrTimeline.setCycleCount(Timeline.INDEFINITE);
+            arrTimeline.play();
+        }
+        
+    }
+    /**
+     * controller need to handle das for next current piece
+     * when engine lock piece by timer, engine call this method onSpawn
+     */
+    public void onAutoSpawn() {
+        handleDASEvent();
+        handleSoftDropEvent();
+    }
+    
+    public void onAutoHorizontalMove() {
+        handleSoftDropEvent();
+    }
+
+    protected void startCharging(int key, Direction direction) {
+        Timeline t = new Timeline(
+            new KeyFrame(
+                Duration.seconds(DAS/60), event -> {
+                    DASCharges.put(direction, DASCharges.get(direction) + 1);
+                    DASChargedKeys.add(key);
+                    handleDASEvent();
+                }
+            )
+        );
+        t.setOnFinished(event -> {
+            DASChargingKeys.remove(key);
+        });
+        t.play();
+        DASChargingKeys.put(key, t);
+    }
+    protected void endCharging(int key, Direction direction) {
+        if (DASChargingKeys.containsKey(key)) {
+            this.DASChargingKeys.get(key).stop();
+        }
+
+        if (DASChargedKeys.contains(key)) {
+            DASCharges.put(direction, DASCharges.get(direction) - 1);
+            DASChargedKeys.remove(key);
+        }
+        handleDASEvent();
+        
+    }
+    public void resetGravityTimeline(double gravity){
+        if (gravityTimeline != null) {
+            gravityTimeline.stop();
+        }
+
+        gravityTimeline = new Timeline(new KeyFrame(Duration.seconds(1/gravity), event -> engine.move(Direction.DOWN)));
+        gravityTimeline.setCycleCount(Timeline.INDEFINITE);
+        gravityTimeline.play();
+    }
+
+    protected void handleSoftDropEvent() {
+        if (isSoftDropping && softDropFactor == Double.MAX_VALUE) {
+            engine.moveDAS(Direction.DOWN);
+        }
+    }
+    protected void startSoftDrop() {
+        isSoftDropping = true;
+        if (softDropFactor != Double.MAX_VALUE) {
+            resetGravityTimeline(engine.getGravity() * softDropFactor);
+        }
+        
+    }
+
+    protected void endSoftDrop() {
+        isSoftDropping = false;
+        if (softDropFactor != Double.MAX_VALUE)
+            resetGravityTimeline(engine.getGravity());
+    }
+
+    // keyboard controller, triggers tetromino movement functions
+    public void handleGameInput(GameInput input) {
+        int physicalKey = input.physicalKey();
+        GameKey key = input.gameKey();
+
+        if (input.keyAction() == KeyAction.PRESS) {
+
+            // Ignore repeated KEY_DOWN events
+            if (!pressedKeys.add(physicalKey)) {
+                return;
+            }
+
+            handleKeyPressed(key, physicalKey);
+
+        } else {
+            pressedKeys.remove(physicalKey);
+            handleKeyReleased(key, physicalKey);
+        }
+    }
+
+    private void handleKeyPressed(GameKey key, int physicalKey) {
+        if (gameState == GameState.ended) {
+            if (key == GameKey.RESTART) {
+                restart();
+            }
+            return;
+        }
+
+        if (gameState != GameState.active) {
+            return;
+        }
+
+        switch (key) {
+            case MOVE_LEFT ->
+                horizontalMovePressed(physicalKey, Direction.LEFT);
+
+            case MOVE_RIGHT ->
+                horizontalMovePressed(physicalKey, Direction.RIGHT);
+
+            case HARDDROP ->
+                engine.hardDrop();
+
+            case SOFTDROP ->
+                startSoftDrop();
+
+            case HOLD ->
+                engine.hold();
+
+            case ROTATE_CCW ->
+                engine.rotate(Rotation.COUNTER_CLOCKWISE);
+
+            case ROTATE_CW ->
+                engine.rotate(Rotation.CLOCKWISE);
+
+            case ROTATE_180 ->
+                engine.rotate(Rotation.R_180);
+        }
+
+        // Must execute after each newly pressed key
+        handleDASEvent();
+        handleSoftDropEvent();
+    }
+
+    private void handleKeyReleased(GameKey key, int physicalKey) {
+        if (gameState != GameState.active) {
+            return;
+        }
+
+        switch (key) {
+            case SOFTDROP ->
+                endSoftDrop();
+
+            case MOVE_LEFT ->
+                horizontalMoveReleased(physicalKey, Direction.LEFT);
+
+            case MOVE_RIGHT ->
+                horizontalMoveReleased(physicalKey, Direction.RIGHT);
+
+            default -> {}
+        }
+    }
+
+    
+
+    public void setSoftDropFactor(double softDropFactor) {
+        this.softDropFactor = softDropFactor;
+    }
+    
+    @Override 
+    public void onGameOver() {
+        gravityTimeline.stop();
+        gameState = GameState.ended;
+        window.onGameOver();
+    }
+
+    /**
+     * @param direction only accept LEFT or RIGHT
+     * called when binded "<-"/"->" pressed
+     * start/end das and arr timeline
+     * operate engine by move/moveDAS
+     */
+    public void horizontalMovePressed(Integer key, Direction direction){
+        horizontalMove(direction);
+        startCharging(key, direction);
+    }
+
+    /**
+     * @param direction only accept LEFT or RIGHT
+     * called when binded "<-"/"->" released
+     * end das timeline
+     * operate engine by move/moveDAS
+     */
+    public void horizontalMoveReleased(Integer key, Direction direction){
+        // end charging/ remove charged
+        endCharging(key, direction);
+    }
+
+    /** 
+     * controller call this function to move tetromino,
+     * it let engine move than check softdrop event
+    */
+    protected void horizontalMove(Direction direction) {
+        engine.move(direction);
+        // check if needed to repeat softdrop event
+        handleSoftDropEvent();
+    }
+}
