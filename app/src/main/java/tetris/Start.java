@@ -3,7 +3,7 @@ package tetris;
 import javafx.application.Application;
 
 public class Start {
-    public static final RendererType rendererType = RendererType.SDL3;
+    public static final RendererType rendererType = RendererType.JavaFX;
 
     public static void main(String[] args) {
         if (rendererType == RendererType.JavaFX) {
