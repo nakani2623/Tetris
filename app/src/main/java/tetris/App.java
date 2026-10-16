@@ -5,22 +5,35 @@ package tetris;
 
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
-import tetris.controller.GameController;
+import tetris.controller.AGameController;
+import tetris.controller.input.JavaFXKeyboardAdapter;
+import tetris.controller.input.KeyBinds;
+import tetris.controller.input.KeyboardAdapter;
 import tetris.engine.GameEngine;
 import tetris.engine.observers.BoardDisplayManager;
 import tetris.engine.observers.HoldDisplayManager;
 import tetris.engine.observers.NextQueueDisplayManager;
 import tetris.engine.observers.ScoreDisplayManager;
+import tetris.engine.type.Input.GameInput;
+import tetris.engine.type.Input.KeyAction;
 import tetris.graphics.GameWindow;
+
 
 public class App extends Application {
     private final GameEngine engine = new GameEngine();
     private final GameWindow window = new GameWindow();
-    private final GameController controller = new GameController(engine, window);
-
+    private final AGameController controller = new AGameController(engine, window);
+    private final KeyboardAdapter<KeyCode> jKeyboardAdapter = new JavaFXKeyboardAdapter();
+    private KeyBinds keyBinds;
     @Override
     public void start(Stage stage) {
+        // load config
+        keyBinds = new KeyBinds();
+        addKeyboardControl();
+
         new BoardDisplayManager(engine, window.getBoardPane());
         new ScoreDisplayManager(engine.getScore(), window.getScorePane());
         new HoldDisplayManager(engine, window.getHoldPane());   
@@ -47,5 +60,31 @@ public class App extends Application {
     public void stop() {
         engine.dispose();
     }
+    public void addKeyboardControl() {
+        window.getScene().addEventHandler(KeyEvent.KEY_PRESSED, event -> {
+            controller.handleGameInput(
+                new GameInput( 
+                    keyBinds.map(jKeyboardAdapter.mapUnified(event.getCode())),
+                    KeyAction.PRESS, 
+                    jKeyboardAdapter.mapUnified(event.getCode())
+                )
+            );          
+                
+        });
+
+
+        window.getScene().addEventHandler(KeyEvent.KEY_RELEASED, event -> {
+            controller.handleGameInput(
+                new GameInput( 
+                    keyBinds.map(jKeyboardAdapter.mapUnified(event.getCode())),
+                    KeyAction.RELEASE, 
+                    jKeyboardAdapter.mapUnified(event.getCode())
+                )
+            );          
+                
+        });
+
+    }
+
     
 }
