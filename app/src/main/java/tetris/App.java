@@ -44,7 +44,6 @@ public class App extends Application {
         new NextQueueDisplayManager(engine, window.getNextQueuePane());
 
 
-        engine.setAutoSpawnListener(controller);
         // controller.setSoftDropFactor(15);
         controller.setSoftDropFactor(Double.MAX_VALUE);
         engine.setGameOverListener(controller);
@@ -64,14 +63,14 @@ public class App extends Application {
     public void stop() {
         engine.dispose();
     }
+    
     public void addKeyboardControl() {
         window.getScene().addEventHandler(KeyEvent.KEY_PRESSED, event -> {
-            UnifiedKey pressedKey = jKeyboardAdapter.mapUnified(event.getCode());
             controller.handleGameInput(
                 new GameInput( 
-                    keyBinds.map(pressedKey),
+                    keyBinds.map(jKeyboardAdapter.mapUnified(event.getCode())),
                     KeyAction.PRESS, 
-                    pressedKey
+                    jKeyboardAdapter.mapUnified(event.getCode())
                 )
             );          
                 
