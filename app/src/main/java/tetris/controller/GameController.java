@@ -6,11 +6,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
-import javafx.animation.KeyFrame;
-import javafx.animation.Timeline;
-import javafx.util.Duration;
-import tetris.controller.Controllable;
+import tetris.controller.dispatch.MainThreadDispatcher;
 import tetris.engine.type.Direction;
 import tetris.engine.type.GameState;
 import tetris.engine.type.Rotation;
@@ -27,22 +28,28 @@ import tetris.graphics.GameWindow;
 public class GameController implements GameOverListener, AutoOperationListener{
     private Controllable engine;
     private GameWindow window;
+    private MainThreadDispatcher dispatcher;
 
-    private Timeline gravityTimeline;
-    private Timeline arrTimeline;
+    private ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+    private ScheduledFuture<?> gravityTask;
+    private ScheduledFuture<?> arrTask;
+
+    // private Timeline arrTimeline;
     private double softDropFactor;
     private GameState gameState;
     private Set<UnifiedKey> pressedKeys = new HashSet<>(); 
     private Map<Direction, Integer> DASCharges = new HashMap<Direction, Integer>();
-    private Map<UnifiedKey, Timeline> DASChargingKeys = new HashMap<UnifiedKey, Timeline>();
+    private Map<UnifiedKey, ScheduledFuture<?>> DASChargingKeys = new HashMap<UnifiedKey, ScheduledFuture<?>>();
     private List<UnifiedKey> DASChargedKeys = new LinkedList<UnifiedKey>();
     private boolean isSoftDropping = false;
     private double DAS = 5;
-    private double ARR = 2;
+    private double ARR = 0;
 
-    public GameController(Controllable engine, GameWindow window) {
+    public GameController(Controllable engine, GameWindow window, MainThreadDispatcher dispatcher) {
         this.engine = engine;
         this.window = window;
+        this.dispatcher = dispatcher;
+
         DASCharges.put(Direction.LEFT, 0);
         DASCharges.put(Direction.RIGHT, 0);
     }
@@ -75,9 +82,9 @@ public class GameController implements GameOverListener, AutoOperationListener{
      * called when das staus changed or new piece spawned and notified by engine
      */
     private void handleDASEvent(){
-        if (ARR != 0 && arrTimeline != null) {
+        if (ARR != 0 && arrTask != null) {
             // stop arr timeline
-            arrTimeline.stop();
+            arrTask.cancel(false);
         }
         // calculate das direction
         int leftDAS = DASCharges.get(Direction.LEFT);
@@ -88,22 +95,23 @@ public class GameController implements GameOverListener, AutoOperationListener{
         } 
         else if (leftDAS - rightDAS > 0) { direction = Direction.LEFT; }
         else { direction = Direction.RIGHT; }
-        
+
         if (ARR == 0) { // 0 ARR
-            engine.moveDAS(direction);
+            try {
+                engine.moveDAS(direction);
+            } catch (Throwable e) {
+                e.printStackTrace();
+            }
         }
         else { // non-zero ARR
             // instantly move one step
             horizontalMove(direction);
-            arrTimeline = new Timeline(
-                new KeyFrame(
-                    Duration.seconds(ARR/60), event -> {
-                        horizontalMove(direction);
-                    }
-                )
-            );
-            arrTimeline.setCycleCount(Timeline.INDEFINITE);
-            arrTimeline.play();
+            long duration = (long)(ARR * 1000 / 60);
+            arrTask = scheduler.scheduleAtFixedRate( () -> {
+                dispatcher.dispatch(() -> {
+                    horizontalMove(direction);
+                });
+            }, 0, duration, TimeUnit.MILLISECONDS);
         }
         
     }
@@ -121,24 +129,38 @@ public class GameController implements GameOverListener, AutoOperationListener{
     }
 
     private void startCharging(UnifiedKey key, Direction direction) {
-        Timeline t = new Timeline(
-            new KeyFrame(
-                Duration.seconds(DAS/60), event -> {
-                    DASCharges.put(direction, DASCharges.get(direction) + 1);
-                    DASChargedKeys.add(key);
-                    handleDASEvent();
-                }
-            )
-        );
-        t.setOnFinished(event -> {
-            DASChargingKeys.remove(key);
-        });
-        t.play();
-        DASChargingKeys.put(key, t);
+        // Timeline t = new Timeline(
+        //     new KeyFrame(
+        //         Duration.seconds(DAS/60), event -> {
+        //             DASCharges.put(direction, DASCharges.get(direction) + 1);
+        //             DASChargedKeys.add(key);
+        //             handleDASEvent();
+        //         }
+        //     )
+        // );
+        // t.setOnFinished(event -> {
+        //     DASChargingKeys.remove(key);
+        // });
+        // t.play();
+        // DASChargingKeys.put(key, t);
+
+
+    // new
+    long delay = (long)(DAS * 1000 / 60);
+    // long delay = (long)(DAS * 1000000000 / 60);
+        ScheduledFuture chargeDAS = scheduler.schedule(() -> {
+            dispatcher.dispatch(() -> {            
+                DASCharges.put(direction, DASCharges.get(direction) + 1);
+                DASChargedKeys.add(key);
+                handleDASEvent();
+                DASChargingKeys.remove(key);});
+        }, delay, TimeUnit.MILLISECONDS);
+        DASChargingKeys.put(key, chargeDAS);
+
     }
     private void endCharging(UnifiedKey key, Direction direction) {
         if (DASChargingKeys.containsKey(key)) {
-            this.DASChargingKeys.get(key).stop();
+            this.DASChargingKeys.get(key).cancel(false);
         }
 
         if (DASChargedKeys.contains(key)) {
@@ -149,13 +171,19 @@ public class GameController implements GameOverListener, AutoOperationListener{
         
     }
     public void resetGravityTimeline(double gravity){
-        if (gravityTimeline != null) {
-            gravityTimeline.stop();
+        if (gravityTask != null) {
+            gravityTask.cancel(false);
         }
-
-        gravityTimeline = new Timeline(new KeyFrame(Duration.seconds(1/gravity), event -> engine.move(Direction.DOWN)));
-        gravityTimeline.setCycleCount(Timeline.INDEFINITE);
-        gravityTimeline.play();
+        long duration = (long)(1000 / gravity);
+        gravityTask = scheduler.scheduleAtFixedRate( () -> {
+            dispatcher.dispatch(() -> {
+                try {
+                    engine.move(Direction.DOWN);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
+        }, 0, duration, TimeUnit.MILLISECONDS);
     }
 
     private void handleSoftDropEvent() {
@@ -268,7 +296,7 @@ public class GameController implements GameOverListener, AutoOperationListener{
     
     @Override 
     public void onGameOver() {
-        gravityTimeline.stop();
+        gravityTask.cancel(false);
         gameState = GameState.ended;
         window.onGameOver();
     }

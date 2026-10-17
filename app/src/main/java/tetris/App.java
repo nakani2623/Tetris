@@ -9,6 +9,8 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
 import tetris.controller.GameController;
+import tetris.controller.dispatch.JavaFXMainThreadDispatcher;
+import tetris.controller.dispatch.MainThreadDispatcher;
 import tetris.controller.input.JavaFXKeyboardAdapter;
 import tetris.controller.input.KeyBinds;
 import tetris.controller.input.KeyboardAdapter;
@@ -17,6 +19,7 @@ import tetris.engine.observers.BoardDisplayManager;
 import tetris.engine.observers.HoldDisplayManager;
 import tetris.engine.observers.NextQueueDisplayManager;
 import tetris.engine.observers.ScoreDisplayManager;
+import tetris.engine.type.UnifiedKey;
 import tetris.engine.type.Input.GameInput;
 import tetris.engine.type.Input.KeyAction;
 import tetris.graphics.GameWindow;
@@ -25,7 +28,8 @@ import tetris.graphics.GameWindow;
 public class App extends Application {
     private final GameEngine engine = new GameEngine();
     private final GameWindow window = new GameWindow();
-    private final GameController controller = new GameController(engine, window);
+    private MainThreadDispatcher dispatcher = new JavaFXMainThreadDispatcher();
+    private final GameController controller = new GameController(engine, window, dispatcher);
     private final KeyboardAdapter<KeyCode> jKeyboardAdapter = new JavaFXKeyboardAdapter();
     private KeyBinds keyBinds;
     @Override
@@ -62,11 +66,12 @@ public class App extends Application {
     }
     public void addKeyboardControl() {
         window.getScene().addEventHandler(KeyEvent.KEY_PRESSED, event -> {
+            UnifiedKey pressedKey = jKeyboardAdapter.mapUnified(event.getCode());
             controller.handleGameInput(
                 new GameInput( 
-                    keyBinds.map(jKeyboardAdapter.mapUnified(event.getCode())),
+                    keyBinds.map(pressedKey),
                     KeyAction.PRESS, 
-                    jKeyboardAdapter.mapUnified(event.getCode())
+                    pressedKey
                 )
             );          
                 
