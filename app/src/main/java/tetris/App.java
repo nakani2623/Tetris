@@ -9,6 +9,8 @@ import javafx.event.EventHandler;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
 import tetris.controller.GameController;
+import tetris.controller.dispatch.JavaFXMainThreadDispatcher;
+import tetris.controller.dispatch.MainThreadDispatcher;
 import tetris.controller.input.JavaFXKeyboardAdapter;
 import tetris.controller.input.KeyBinds;
 import tetris.engine.GameEngine;
@@ -30,7 +32,8 @@ public class App extends Application {
     private KeyBinds keyBinds = new KeyBinds();
     private final GameEngine engine = new GameEngine(10, 20);
     private final GameWindow window = new GameWindow(keyBinds);
-    private final GameController controller = new GameController(engine, window);
+    private MainThreadDispatcher dispatcher = new JavaFXMainThreadDispatcher();
+    private final GameController controller = new GameController(engine, window, dispatcher);
     @Override
     public void start(Stage stage) {
         // load config
