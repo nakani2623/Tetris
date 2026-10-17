@@ -45,10 +45,10 @@ public class GameEngine implements Observable, Controllable{
     private int width;
     private int height;
     private List<Tetromino> allTetrominos;
-    public Tetromino currentTetromino;
+    private Tetromino currentTetromino;
     private Tetromino shadowTetromino;
     private TetrominoType holdTetrominoType;
-    List<Observer> observers;
+    private List<Observer> observers;
 
     private double gravity; // move down num per sec
     private final PauseTransition lockTimer =
@@ -106,6 +106,7 @@ public class GameEngine implements Observable, Controllable{
 
     public void rotate(Rotation rotation) {
         superRotate(rotation);
+        updateShadow();
     }
 
     public void move(Direction direction){
@@ -115,6 +116,8 @@ public class GameEngine implements Observable, Controllable{
         else if (direction == Direction.RIGHT) {op = new MoveRightOperator();}
         else {op = null;}
         tryOperate(op);
+        if (direction != Direction.DOWN)
+            updateShadow();
     }
 
     public void moveDAS(Direction direction) {
@@ -131,6 +134,8 @@ public class GameEngine implements Observable, Controllable{
             if (direction != Direction.DOWN)
                 {autoOperationListener.onAutoHorizontalMove();}
         }
+        if (direction != Direction.DOWN)
+            updateShadow();
     }
 
     public void hardDrop() {
@@ -155,6 +160,17 @@ public class GameEngine implements Observable, Controllable{
         }
 
         holdTetrominoType = currentTetrominoClone.type;
+        updateShadow();
+    }
+
+    private void updateShadow() {
+        shadowTetromino = new Tetromino(currentTetromino);
+        Tetromino clone = new Tetromino(currentTetromino);
+        Operator op = new MoveDownOperator();
+        while (!hasCollision(shadowTetromino)) {
+            shadowTetromino.moveDown();
+        }
+        shadowTetromino.moveUp();
         notifyObservers();
     }
 
@@ -191,7 +207,8 @@ public class GameEngine implements Observable, Controllable{
         }
 
         lockTimerFinished = false;
-        notifyObservers();
+        updateShadow();
+        // notifyObservers();
     }
 
     /**
@@ -541,6 +558,10 @@ public class GameEngine implements Observable, Controllable{
             observer.update();
         }
     }
+
+    public Tetromino getShadowTetromino() {
+        return this.shadowTetromino;
+    } 
 
     public void dispose() {
         score.dispose();
