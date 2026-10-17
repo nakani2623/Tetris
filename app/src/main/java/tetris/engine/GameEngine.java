@@ -46,6 +46,7 @@ public class GameEngine implements Observable, Controllable{
     private int height;
     private List<Tetromino> allTetrominos;
     public Tetromino currentTetromino;
+    private Tetromino shadowTetromino;
     private TetrominoType holdTetrominoType;
     List<Observer> observers;
 
@@ -103,7 +104,61 @@ public class GameEngine implements Observable, Controllable{
         spawn();
     }
 
-    public void spawn() {
+    public void rotate(Rotation rotation) {
+        superRotate(rotation);
+    }
+
+    public void move(Direction direction){
+        Operator op;
+        if (direction == Direction.DOWN) {op = new MoveDownOperator();}
+        else if (direction == Direction.LEFT) {op = new MoveLeftOperator();}
+        else if (direction == Direction.RIGHT) {op = new MoveRightOperator();}
+        else {op = null;}
+        tryOperate(op);
+    }
+
+    public void moveDAS(Direction direction) {
+        Operator op;
+        if (direction == Direction.DOWN) {op = new MoveDownOperator();}
+        else if (direction == Direction.LEFT) {op = new MoveLeftOperator();}
+        else if (direction == Direction.RIGHT) {op = new MoveRightOperator();}
+        else {op = null;}
+
+        while (true) {
+            if (! tryOperate(op)) {
+                break;
+            }
+            if (direction != Direction.DOWN)
+                {autoOperationListener.onAutoHorizontalMove();}
+        }
+    }
+
+    public void hardDrop() {
+        moveDAS(Direction.DOWN);
+        lock();
+    }
+    
+    /**
+     * Swap holdTetromino and currentTetromino. spawn a new one if hold never used
+     * 
+     */
+    public void hold() {
+        removeCurrentTetromino();
+        Tetromino currentTetrominoClone = new Tetromino(currentTetromino);
+        if (holdTetrominoType == null) {
+            spawn();
+        }
+
+        else {
+            currentTetromino = new Tetromino(centreTopPoint(), holdTetrominoType);
+            allTetrominos.add(currentTetromino);
+        }
+
+        holdTetrominoType = currentTetrominoClone.type;
+        notifyObservers();
+    }
+
+    private void spawn() {
         // from previous piece's leftover data, decide isAutoSpawned true/false, 
         // to know if needed to notify controller RIGHT AFTER current piece spawned
         boolean isAutoSpawned = false;
@@ -163,7 +218,7 @@ public class GameEngine implements Observable, Controllable{
      * @param op
      * @return true if operation success
      */
-    public boolean tryOperate(Operator op) {
+    private boolean tryOperate(Operator op) {
         Tetromino clone = new Tetromino(currentTetromino);
         op.operate(clone);
         if (hasCollision(clone)) {
@@ -176,7 +231,7 @@ public class GameEngine implements Observable, Controllable{
         return true;
     }
 
-    public void superRotate(Rotation rotation) {
+    private void superRotate(Rotation rotation) {
         Operator op;
         if (rotation == Rotation.CLOCKWISE)              {op = new RotateClockwiseOperator();}
         else if (rotation == Rotation.COUNTER_CLOCKWISE) {op = new RotateCounterClockwiseOperator();}
@@ -235,64 +290,11 @@ public class GameEngine implements Observable, Controllable{
             allTetrominos.set(currentIndex, currentTetromino);
         }
     }
-    public void rotate(Rotation rotation) {
-        superRotate(rotation);
-    }
-    public void lock() {
+
+    private void lock() {
         checkCompletedLines(currentTetromino);
         lockTimer.stop();
         spawn();
-        notifyObservers();
-    }
-
-    public void move(Direction direction){
-        Operator op;
-        if (direction == Direction.DOWN) {op = new MoveDownOperator();}
-        else if (direction == Direction.LEFT) {op = new MoveLeftOperator();}
-        else if (direction == Direction.RIGHT) {op = new MoveRightOperator();}
-        else {op = null;}
-        tryOperate(op);
-
-    }
-
-    public void moveDAS(Direction direction) {
-        Operator op;
-        if (direction == Direction.DOWN) {op = new MoveDownOperator();}
-        else if (direction == Direction.LEFT) {op = new MoveLeftOperator();}
-        else if (direction == Direction.RIGHT) {op = new MoveRightOperator();}
-        else {op = null;}
-
-        while (true) {
-            if (! tryOperate(op)) {
-                break;
-            }
-            if (direction != Direction.DOWN)
-                {autoOperationListener.onAutoHorizontalMove();}
-        }
-    }
-    public void hardDrop() {
-        moveDAS(Direction.DOWN);
-        lock();
-
-    }
-    
-    /**
-     * Swap holdTetromino and currentTetromino. spawn a new one if hold never used
-     * 
-     */
-    public void hold() {
-        removeCurrentTetromino();
-        Tetromino currentTetrominoClone = new Tetromino(currentTetromino);
-        if (holdTetrominoType == null) {
-            spawn();
-        }
-
-        else {
-            currentTetromino = new Tetromino(centreTopPoint(), holdTetrominoType);
-            allTetrominos.add(currentTetromino);
-        }
-
-        holdTetrominoType = currentTetrominoClone.type;
         notifyObservers();
     }
 
@@ -301,7 +303,7 @@ public class GameEngine implements Observable, Controllable{
      * @param m
      * @return
      */
-    public boolean hasCollision(Tetromino t) {
+    private boolean hasCollision(Tetromino t) {
         for (Tetromino other : allTetrominos) {
             if (other == t || other == currentTetromino)
                 continue;
@@ -318,7 +320,7 @@ public class GameEngine implements Observable, Controllable{
         return false;
     }
 
-    protected boolean hasWallCollision(Tetromino t) {
+    private boolean hasWallCollision(Tetromino t) {
         for (Mino m : t.children) {
             double x = m.getPosition().getX();
             double y = m.getPosition().getY();
@@ -340,7 +342,7 @@ public class GameEngine implements Observable, Controllable{
      * @param t
      * @return
      */
-    public boolean landed(Tetromino t) {
+    private boolean landed(Tetromino t) {
         // simulate a downward move, check if there is a collision
         Tetromino clone  = new Tetromino(t);
         clone.moveDown();
@@ -435,7 +437,7 @@ public class GameEngine implements Observable, Controllable{
      * lock tetromino trigger this, check for any lines to clear, if exist then clear.
      * @param lastLocked, the tetromino just locked, possible line clears should related with position of it
      */
-    public void checkCompletedLines(Tetromino lastLocked) {
+    private void checkCompletedLines(Tetromino lastLocked) {
   
         //
         // group to lower/around/upper
