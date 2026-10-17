@@ -11,11 +11,14 @@ import javafx.stage.Stage;
 public class GameWindow {
     private final GamePane gamePane = new GamePane();
     private final MenuPane menuPane = new MenuPane();
+    private final ConfigPane configPane = new ConfigPane();
     private final Scene scene;
 
     public GameWindow() {
         Pane initialPane = new Pane();
         scene = new Scene(initialPane, 640, 480);
+        configPane.setOnReturnMenu(this::showMenu);
+        menuPane.setOnConfig(this::showConfig);
     }
 
     public void execute(Stage stage) {
@@ -29,6 +32,10 @@ public class GameWindow {
 
     public void showMenu() {
         showContent(menuPane);
+    }
+
+    public void showConfig() {
+        showContent(configPane);
     }
 
     public Scene getScene() {
