@@ -17,6 +17,7 @@ public class BoardDisplayManager implements Observer {
     public void update() {
         boardPane.render(
             engine.getAllTetrominos(),
+            engine.getShadowTetromino(),
             (int)engine.getWidth(),
             (int)engine.getHeight());
     }
