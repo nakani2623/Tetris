@@ -163,7 +163,7 @@ public class GameEngine implements Observable, Controllable{
         updateShadow();
     }
 
-    private void updateShadow() {
+    void updateShadow() {
         shadowTetromino = new Tetromino(currentTetromino);
         Tetromino clone = new Tetromino(currentTetromino);
         Operator op = new MoveDownOperator();
@@ -174,7 +174,7 @@ public class GameEngine implements Observable, Controllable{
         notifyObservers();
     }
 
-    private void spawn() {
+    void spawn() {
         // from previous piece's leftover data, decide isAutoSpawned true/false, 
         // to know if needed to notify controller RIGHT AFTER current piece spawned
         boolean isAutoSpawned = false;
@@ -216,7 +216,7 @@ public class GameEngine implements Observable, Controllable{
      * then if landed, start lockTimer
      * otherwise, end lock Timer
      */
-    private void checkLanded() {
+    void checkLanded() {
         if (landed(currentTetromino)) {
             lockTimer.playFromStart();
             lockResets ++;
@@ -235,7 +235,7 @@ public class GameEngine implements Observable, Controllable{
      * @param op
      * @return true if operation success
      */
-    private boolean tryOperate(Operator op) {
+    boolean tryOperate(Operator op) {
         Tetromino clone = new Tetromino(currentTetromino);
         op.operate(clone);
         if (hasCollision(clone)) {
@@ -248,7 +248,7 @@ public class GameEngine implements Observable, Controllable{
         return true;
     }
 
-    private void superRotate(Rotation rotation) {
+    void superRotate(Rotation rotation) {
         Operator op;
         if (rotation == Rotation.CLOCKWISE)              {op = new RotateClockwiseOperator();}
         else if (rotation == Rotation.COUNTER_CLOCKWISE) {op = new RotateCounterClockwiseOperator();}
@@ -308,7 +308,7 @@ public class GameEngine implements Observable, Controllable{
         }
     }
 
-    private void lock() {
+    void lock() {
         checkCompletedLines(currentTetromino);
         lockTimer.stop();
         spawn();
@@ -320,7 +320,7 @@ public class GameEngine implements Observable, Controllable{
      * @param m
      * @return
      */
-    private boolean hasCollision(Tetromino t) {
+    boolean hasCollision(Tetromino t) {
         for (Tetromino other : allTetrominos) {
             if (other == t || other == currentTetromino)
                 continue;
@@ -337,7 +337,7 @@ public class GameEngine implements Observable, Controllable{
         return false;
     }
 
-    private boolean hasWallCollision(Tetromino t) {
+    boolean hasWallCollision(Tetromino t) {
         for (Mino m : t.children) {
             double x = m.getPosition().getX();
             double y = m.getPosition().getY();
@@ -359,7 +359,7 @@ public class GameEngine implements Observable, Controllable{
      * @param t
      * @return
      */
-    private boolean landed(Tetromino t) {
+    boolean landed(Tetromino t) {
         // simulate a downward move, check if there is a collision
         Tetromino clone  = new Tetromino(t);
         clone.moveDown();
@@ -378,7 +378,7 @@ public class GameEngine implements Observable, Controllable{
      * 
      * @ret int: lines cleared
      */
-    private int clearLines(ArrayList<Integer> toClear, ArrayList<Tetromino> relatedTetrominos) { 
+    int clearLines(ArrayList<Integer> toClear, ArrayList<Tetromino> relatedTetrominos) { 
 
 
         for (Tetromino t : relatedTetrominos) {
@@ -409,7 +409,7 @@ public class GameEngine implements Observable, Controllable{
         return toClear.size();
     }
 
-    private ArrayList<Integer> findLinesToClear(ArrayList<Tetromino> relatedTetrominos, HashSet<Double> relatedHeights) {
+    ArrayList<Integer> findLinesToClear(ArrayList<Tetromino> relatedTetrominos, HashSet<Double> relatedHeights) {
         ArrayList<Integer> linesToClear = new ArrayList<Integer>();
         boolean[][] related_section = new boolean[this.width][relatedHeights.size()]; // true for mino exist, false for empty
         int minHeight = Collections.min(relatedHeights).intValue();
@@ -442,7 +442,7 @@ public class GameEngine implements Observable, Controllable{
         return linesToClear;
     }
     
-    private HashSet<Double> calcSetOfRelatedHeights(Tetromino t) {
+    HashSet<Double> calcSetOfRelatedHeights(Tetromino t) {
         HashSet<Double> related_heights = new HashSet<Double>();
         for (Mino mino: t.children) {
             related_heights.add(mino.getPosition().getY());
@@ -454,7 +454,7 @@ public class GameEngine implements Observable, Controllable{
      * lock tetromino trigger this, check for any lines to clear, if exist then clear.
      * @param lastLocked, the tetromino just locked, possible line clears should related with position of it
      */
-    private void checkCompletedLines(Tetromino lastLocked) {
+    void checkCompletedLines(Tetromino lastLocked) {
   
         //
         // group to lower/around/upper
@@ -489,7 +489,7 @@ public class GameEngine implements Observable, Controllable{
     /**
      * everything need to do beside removing from allTetrominos list
      */
-    private void removeCurrentTetromino() {
+    void removeCurrentTetromino() {
         lockTimer.stop();
         allTetrominos.remove(currentTetromino);
     }
