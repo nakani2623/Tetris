@@ -36,7 +36,7 @@ public class GameController implements GameOverListener, AutoOperationListener{
     private List<KeyCode> DASChargedKeys = new LinkedList<KeyCode>();
     private boolean isSoftDropping = false;
     private double DAS = 5;
-    private double ARR = 2;
+    private double ARR = 0;
 
     public GameController(Controllable engine, GameWindow window) {
         this.engine = engine;
@@ -120,6 +120,10 @@ public class GameController implements GameOverListener, AutoOperationListener{
         handleSoftDropEvent();
     }
 
+    public void onAutoMoveDown() {
+        handleDASEvent();
+    }
+
     private void startCharging(KeyCode key, Direction direction) {
         Timeline t = new Timeline(
             new KeyFrame(
@@ -153,7 +157,12 @@ public class GameController implements GameOverListener, AutoOperationListener{
             gravityTimeline.stop();
         }
 
-        gravityTimeline = new Timeline(new KeyFrame(Duration.seconds(1/gravity), event -> engine.move(Direction.DOWN)));
+        // UPDATED RUNABLE: inside Timeline, (+)  handleDASEvent(); 
+        gravityTimeline = new Timeline(new KeyFrame(Duration.seconds(1/gravity), event -> {
+            engine.move(Direction.DOWN);
+            if (ARR == 0)
+                handleDASEvent(); 
+        }));
         gravityTimeline.setCycleCount(Timeline.INDEFINITE);
         gravityTimeline.play();
     }

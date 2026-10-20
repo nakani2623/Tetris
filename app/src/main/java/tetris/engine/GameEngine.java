@@ -133,6 +133,8 @@ public class GameEngine implements Observable, Controllable{
             }
             if (direction != Direction.DOWN)
                 {autoOperationListener.onAutoHorizontalMove();}
+            else if (direction == Direction.DOWN)
+                {autoOperationListener.onAutoMoveDown();}
         }
         if (direction != Direction.DOWN)
             updateShadow();
