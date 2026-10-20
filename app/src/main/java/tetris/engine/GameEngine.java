@@ -22,6 +22,7 @@ import tetris.engine.observers.Observer;
 import tetris.engine.operator.MoveDownOperator;
 import tetris.engine.operator.MoveLeftOperator;
 import tetris.engine.operator.MoveRightOperator;
+import tetris.engine.operator.MoveUpOperator;
 import tetris.engine.operator.Operator;
 import tetris.engine.operator.RotateClockwiseOperator;
 import tetris.engine.operator.RotateCounterClockwiseOperator;
@@ -105,7 +106,12 @@ public class GameEngine implements Observable, Controllable{
     }
 
     public void rotate(Rotation rotation) {
-        superRotate(rotation);
+        if (!superRotate(rotation)) {
+            return;
+        }
+        if (isImmobile()) {
+            System.out.printf("%s spin mini\n", currentTetromino.type);
+        }
         updateShadow();
     }
 
@@ -238,19 +244,27 @@ public class GameEngine implements Observable, Controllable{
      * @return true if operation success
      */
     boolean tryOperate(Operator op) {
-        Tetromino clone = new Tetromino(currentTetromino);
-        op.operate(clone);
-        if (hasCollision(clone)) {
+       
+        if (!canOperate(op)) {
             return false;
         }
-
         op.operate(currentTetromino);
         checkLanded();
         notifyObservers();
         return true;
     }
 
-    void superRotate(Rotation rotation) {
+    boolean canOperate(Operator op) {
+        Tetromino clone = new Tetromino(currentTetromino);
+        op.operate(clone);
+        if (hasCollision(clone)) {
+            return false;
+        }
+        return true;
+    }
+
+
+    boolean superRotate(Rotation rotation) {
         Operator op;
         if (rotation == Rotation.CLOCKWISE)              {op = new RotateClockwiseOperator();}
         else if (rotation == Rotation.COUNTER_CLOCKWISE) {op = new RotateCounterClockwiseOperator();}
@@ -258,7 +272,7 @@ public class GameEngine implements Observable, Controllable{
         
         // try without kick
         if (tryOperate(op)) {
-            return ;
+            return true;
         }
 
         // failed without kick
@@ -275,7 +289,7 @@ public class GameEngine implements Observable, Controllable{
         Point oriPos = new Point(currentTetromino.centre);
         int currentIndex = allTetrominos.indexOf(currentTetromino);
         if (kickList == null) {
-            return;
+            return false;
         }
         for (Point shift: kickList) {
             // 2. move to next position (to try every position 1 by 1)
@@ -297,7 +311,7 @@ public class GameEngine implements Observable, Controllable{
             // 3. try rotate at this position
 
             if (tryOperate(op)) {
-                return;
+                return true;
             }
 
             
@@ -308,8 +322,21 @@ public class GameEngine implements Observable, Controllable{
         if (currentIndex >= 0) {
             allTetrominos.set(currentIndex, currentTetromino);
         }
+        return false;
     }
 
+    /**
+     * 
+     * @return true if current tetromino is immobile
+     */
+    boolean isImmobile() {
+        Operator[] operators = {new MoveDownOperator(), new MoveLeftOperator(), new MoveRightOperator(), new MoveUpOperator()};
+        for (Operator operator : operators) {
+            if (canOperate(operator))
+                return false;
+        }
+        return true;
+    }
     void lock() {
         checkCompletedLines(currentTetromino);
         lockTimer.stop();
