@@ -25,7 +25,7 @@ import tetris.graphics.GameWindow;
  * Handles user inputs, timing
  * GameController
  */
-public class GameController implements GameOverListener, AutoOperationListener{
+public class GameController implements GameOverListener {
     private Controllable engine;
     private GameWindow window;
     private MainThreadDispatcher dispatcher;
@@ -129,25 +129,8 @@ public class GameController implements GameOverListener, AutoOperationListener{
     }
 
     private void startCharging(UnifiedKey key, Direction direction) {
-        // Timeline t = new Timeline(
-        //     new KeyFrame(
-        //         Duration.seconds(DAS/60), event -> {
-        //             DASCharges.put(direction, DASCharges.get(direction) + 1);
-        //             DASChargedKeys.add(key);
-        //             handleDASEvent();
-        //         }
-        //     )
-        // );
-        // t.setOnFinished(event -> {
-        //     DASChargingKeys.remove(key);
-        // });
-        // t.play();
-        // DASChargingKeys.put(key, t);
-
-
-    // new
-    long delay = (long)(DAS * 1000 / 60);
-    // long delay = (long)(DAS * 1000000000 / 60);
+        long delay = (long)(DAS * 1000 / 60);
+        // long delay = (long)(DAS * 1000000000 / 60);
         ScheduledFuture chargeDAS = scheduler.schedule(() -> {
             dispatcher.dispatch(() -> {            
                 DASCharges.put(direction, DASCharges.get(direction) + 1);
