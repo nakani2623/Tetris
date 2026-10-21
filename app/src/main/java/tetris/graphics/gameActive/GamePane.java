@@ -13,10 +13,12 @@ public class GamePane extends StackPane {
     private final ScorePane scorePane = new ScorePane();
     private final HoldPane holdPane = new HoldPane();
     private final NextQueuePane nextQueuePane = new NextQueuePane();
+    private SpinClearPane spinClearPane = new SpinClearPane();
+
 
     private GameOverPane gameOverModal;
     public GamePane() {
-        VBox leftBox = new VBox(holdPane, scorePane);
+        VBox leftBox = new VBox(holdPane, scorePane, spinClearPane);
 
         HBox content = new HBox(16, leftBox, boardPane, nextQueuePane);
         content.setAlignment(Pos.TOP_CENTER);
@@ -58,6 +60,10 @@ public class GamePane extends StackPane {
 
     public ScorePane getScorePane() {
         return scorePane;
+    }
+
+    public SpinClearPane getSpinClearPane() {
+        return spinClearPane;
     }
 
     public HoldPane getHoldPane() {
