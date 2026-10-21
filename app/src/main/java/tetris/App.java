@@ -5,13 +5,11 @@ package tetris;
 
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
 import tetris.controller.GameController;
 import tetris.controller.input.JavaFXKeyboardAdapter;
 import tetris.controller.input.KeyBinds;
-import tetris.controller.input.KeyboardAdapter;
 import tetris.engine.GameEngine;
 import tetris.engine.observers.BoardDisplayManager;
 import tetris.engine.observers.HoldDisplayManager;
@@ -23,15 +21,13 @@ import tetris.graphics.GameWindow;
 
 
 public class App extends Application {
+    private KeyBinds keyBinds = new KeyBinds();
     private final GameEngine engine = new GameEngine();
-    private final GameWindow window = new GameWindow();
+    private final GameWindow window = new GameWindow(keyBinds);
     private final GameController controller = new GameController(engine, window);
-    private final KeyboardAdapter<KeyCode> jKeyboardAdapter = new JavaFXKeyboardAdapter();
-    private KeyBinds keyBinds;
     @Override
     public void start(Stage stage) {
         // load config
-        keyBinds = new KeyBinds(controller::getGameState);
         addKeyboardControl();
 
         new BoardDisplayManager(engine, window.getBoardPane());
@@ -65,9 +61,9 @@ public class App extends Application {
         window.getScene().addEventHandler(KeyEvent.KEY_PRESSED, event -> {
             controller.handleGameInput(
                 new GameInput( 
-                    keyBinds.map(jKeyboardAdapter.mapUnified(event.getCode())),
+                    keyBinds.map(JavaFXKeyboardAdapter.toUnifiedKey(event.getCode()), controller.getGameState()),
                     KeyAction.PRESS, 
-                    jKeyboardAdapter.mapUnified(event.getCode())
+                    JavaFXKeyboardAdapter.toUnifiedKey(event.getCode())
                 )
             );          
                 
@@ -77,9 +73,9 @@ public class App extends Application {
         window.getScene().addEventHandler(KeyEvent.KEY_RELEASED, event -> {
             controller.handleGameInput(
                 new GameInput( 
-                    keyBinds.map(jKeyboardAdapter.mapUnified(event.getCode())),
+                    keyBinds.map(JavaFXKeyboardAdapter.toUnifiedKey(event.getCode()), controller.getGameState()),
                     KeyAction.RELEASE, 
-                    jKeyboardAdapter.mapUnified(event.getCode())
+                    JavaFXKeyboardAdapter.toUnifiedKey(event.getCode())
                 )
             );          
                 
