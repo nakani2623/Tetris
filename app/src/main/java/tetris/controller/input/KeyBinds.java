@@ -6,29 +6,27 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-import java.util.function.Supplier;
 
 import tetris.engine.type.GameState;
 import tetris.engine.type.UnifiedKey;
 import tetris.engine.type.Input.GameKey;
 
 public class KeyBinds {
-    public Map<GameState, Map<UnifiedKey, GameKey>> binds;
-    private Supplier<GameState> stateSupplier;
+    public  Map<GameState, Map<UnifiedKey, GameKey>> binds;
+    
 
-    public KeyBinds(Supplier<GameState> stateSupplier) {
-        this.stateSupplier = stateSupplier;
+    public KeyBinds() {
         binds = new HashMap<>();
         for (GameState state : GameState.values()) {
             Map bindOfState = new HashMap<UnifiedKey, GameKey>();
             binds.put(state, bindOfState);
         }
         try {load();} catch (Exception e) {}
-        try {save();} catch (Exception e) {}
+        // try {save();} catch (Exception e) {}
     }
 
-    public GameKey map(UnifiedKey unifiedKey) {
-        return binds.get(stateSupplier.get()).get(unifiedKey);
+    public GameKey map(UnifiedKey unifiedKey, GameState state) {
+        return binds.get(state).get(unifiedKey);
     }
 
     public void addBind(UnifiedKey unifiedKey, GameKey gameKey, GameState state) {
@@ -56,6 +54,8 @@ public class KeyBinds {
 
         try (FileOutputStream out = new FileOutputStream(FILE_NAME)) {
             properties.store(out, "Tetris Key Bindings");
+        } catch (Exception e) {
+            System.out.println(e);
         }
     }
 
