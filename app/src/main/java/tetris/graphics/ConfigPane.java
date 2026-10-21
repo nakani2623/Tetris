@@ -9,15 +9,18 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import tetris.controller.input.KeyBinds;
+import tetris.engine.type.GameState;
+import tetris.engine.type.Input.GameKey;
 
 public class ConfigPane extends StackPane {
     private Button returnMenu = new Button("Back");
 
-    public ConfigPane() {
+    public ConfigPane(KeyBinds keyBinds) {
         Label title = new Label("Config");
 
         Label moveLeftLabel = new Label("Move Left");
-        Button moveLeftButton = new Button();
+        KeyBindButton moveLeftButton = new KeyBindButton(GameKey.MOVE_LEFT, GameState.active, keyBinds);
         HBox moveLeftConfig = new HBox(moveLeftLabel, moveLeftButton);
 
         Label moveRightLabel = new Label("Move Right");
