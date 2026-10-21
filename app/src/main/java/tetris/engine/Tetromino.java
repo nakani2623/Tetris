@@ -12,16 +12,16 @@ import tetris.engine.type.TetrominoType;
 /**
  * Polyomino that consists of 4 Minoes 
  */
-public class Tetromino {
+public class Tetromino extends Piece {
     final int order = 4;
     public Point centre;
-    public List<Mino> children;
+    // public List<Mino> children;
     public TetrominoType type; 
     public RotationState rotationState; // direction after n CW rotation, 0: origin, 1: CW-ed, 2: r-180-ed, 3: CCW-ed 
 //    Mino[] children;
 
     public Tetromino(Point centre, TetrominoType type) {
-        this(type);
+        this.type = type;
         this.centre = centre;
         children = new ArrayList<>();
         this.rotationState = RotationState.ZERO;
@@ -77,11 +77,6 @@ public class Tetromino {
         }
     }
 
-    public Tetromino(TetrominoType type) {
-        this.type = type;
-        this.rotationState = RotationState.ZERO;
-    }
-
     /**
      * duplicates a Tetromino (deep copy)
      * @param t
@@ -100,41 +95,25 @@ public class Tetromino {
     public void moveLeft() {
         double originalX = this.centre.getX();
         this.centre.setX(originalX - 1);
-
-        for (Mino m : children) {
-            double x = m.getPosition().getX();
-            m.getPosition().setX(x-1);
-        }
+        super.moveLeft();
     }
 
     public void moveRight() {
         double originalX = this.centre.getX();
         this.centre.setX(originalX + 1);
-
-        for (Mino m : children) {
-            double x = m.getPosition().getX();
-            m.getPosition().setX(x+1);
-        }
+        super.moveRight();
     }
 
     public void moveDown() {
         double originalY = this.centre.getY();
         this.centre.setY(originalY + 1);
-
-        for (Mino m : children) {
-            double y = m.getPosition().getY();
-            m.getPosition().setY(y + 1);
-        }
+        super.moveDown();
     }
 
     public void moveUp() {
         double originalY = this.centre.getY();
         this.centre.setY(originalY - 1);
-
-        for (Mino m : children) {
-            double y = m.getPosition().getY();
-            m.getPosition().setY(y - 1);
-        }
+        super.moveUp();
     }
 
     /**
@@ -171,8 +150,6 @@ public class Tetromino {
             p.setY(newY);
         }
         rotationState = rotationState.changeState(Rotation.CLOCKWISE);
-        
-
     }
 
     /**
@@ -190,23 +167,14 @@ public class Tetromino {
             p.setY(newY);
         }
         rotationState = rotationState.changeState(Rotation.R_180);
-
-
-    }
-
-    public boolean collidesWith(Tetromino t) {
-        for (Mino thisM : children) {
-            for (Mino tM : t.children) {
-                if (thisM.getPosition().equals(tM.getPosition())) {
-                    return true;
-                }
-            }
-        }
-        return false;
     }
 
     public int getOrder() {
         return this.order;
+    }
+
+    public Point getCentre() {
+        return centre;
     }
 
     // debug helpers
