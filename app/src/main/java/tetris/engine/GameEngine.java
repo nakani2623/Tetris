@@ -31,6 +31,8 @@ import tetris.engine.rotationStrategy.RotationStrategy;
 import tetris.engine.rotationStrategy.classicRotation;
 import tetris.engine.type.Direction;
 import tetris.engine.type.Rotation;
+import tetris.engine.type.RotationState;
+import tetris.engine.type.SpinState;
 import tetris.engine.type.TetrominoType;
 import tetris.utils.KickTable;
 import tetris.utils.Point;
@@ -49,6 +51,7 @@ public class GameEngine implements Observable, Controllable{
     private Tetromino currentTetromino;
     private Tetromino shadowTetromino;
     private TetrominoType holdTetrominoType;
+    private SpinState currentSpinState;
     private List<Observer> observers;
 
     private double gravity; // move down num per sec
@@ -58,6 +61,7 @@ public class GameEngine implements Observable, Controllable{
     private int lockResets;
     private boolean lockTimerFinished;
     private AutoOperationListener autoOperationListener;
+    // private 
     /**
      * Constructs game bord with specific dimension
      * @param width
@@ -109,10 +113,14 @@ public class GameEngine implements Observable, Controllable{
         if (!superRotate(rotation)) {
             return;
         }
-        if (isImmobile()) {
-            System.out.printf("%s spin mini\n", currentTetromino.type);
-        }
         updateShadow();
+
+        // detect & write currentSpinState
+        if (isImmobile())
+            currentSpinState = SpinState.MINI_SPIN;
+
+        if (currentTetromino.type == TetrominoType.T)
+            currentSpinState = detectTSpin();
     }
 
     public void move(Direction direction){
@@ -207,6 +215,7 @@ public class GameEngine implements Observable, Controllable{
         allTetrominos.add(currentTetromino);
         lockResets = 0;
 
+        currentSpinState = SpinState.NOT_SPIN;
         checkLanded();
         
         // when auto-spawned, notify controller
@@ -337,8 +346,63 @@ public class GameEngine implements Observable, Controllable{
         }
         return true;
     }
+    
+    /**
+     * standard 3 corners detection, ref: https://tetris.wiki/T-Spin
+     * impl by: spawn a single at 4 corners of T, then do collison tests, 
+     * if 3/4 corners colide, is T spin, then if 2/2 front corners colide, is proper T spin 
+     * @return SpinState: (NOT/MINI/PROPER)_SPIN
+     */
+    SpinState detectTSpin() { 
+        // spawn single mino piece at top-left corner
+        Point centre = currentTetromino.getCentre();
+        Piece corner = new Piece(new Mino((int)centre.getX() - 1, (int)centre.getY() - 1));
+
+        // rotate to be front-left corner of current T
+        int cwRotationForCorner = 0;
+        if (currentTetromino.rotationState == RotationState.ZERO)
+            ;
+        else if (currentTetromino.rotationState == RotationState.RIGHT)
+            cwRotationForCorner = 1;
+        else if (currentTetromino.rotationState == RotationState.TWO)
+            cwRotationForCorner = 2;
+        else if (currentTetromino.rotationState == RotationState.LEFT)
+            cwRotationForCorner = 3;
+        for (int i = 0; i < cwRotationForCorner; i++)
+            corner.rotateClockwise(centre);
+
+        // collision tests, (test & rotatecw of corner & next test, 4 in total)
+        // first 2: front, last 2: other corners
+        int nBlockedFrontCorner = 0;
+        int nBlockedOtherCorner = 0;
+        for (int i = 0; i < 4; i++) {
+            // collision test
+            if (hasCollision(corner)) {
+                if (i < 2) {
+                    nBlockedFrontCorner++;
+                } else {
+                    nBlockedOtherCorner++;
+                }
+            }
+            corner.rotateClockwise(centre);
+        }
+
+        if (nBlockedFrontCorner + nBlockedOtherCorner >= 3) {
+            // is a T-spin! then decide proper or mini:
+            if (nBlockedFrontCorner == 2) 
+                return SpinState.PROPER_SPIN;
+            else
+                return SpinState.MINI_SPIN;
+        }
+        return SpinState.NOT_SPIN;
+    }
+
     void lock() {
-        checkCompletedLines(currentTetromino);
+        int cleared = checkCompletedLines(currentTetromino);
+        // display spin info
+        if (!(currentSpinState == SpinState.NOT_SPIN && cleared == 0))
+            System.out.printf("%s spin %s, clear: %d\n", currentTetromino.type, currentSpinState, cleared);
+
         lockTimer.stop();
         spawn();
         notifyObservers();
@@ -349,8 +413,8 @@ public class GameEngine implements Observable, Controllable{
      * @param m
      * @return
      */
-    boolean hasCollision(Tetromino t) {
-        for (Tetromino other : allTetrominos) {
+    boolean hasCollision(Piece t) {
+        for (Piece other : allTetrominos) {
             if (other == t || other == currentTetromino)
                 continue;
 
@@ -366,7 +430,7 @@ public class GameEngine implements Observable, Controllable{
         return false;
     }
 
-    boolean hasWallCollision(Tetromino t) {
+    boolean hasWallCollision(Piece t) {
         for (Mino m : t.children) {
             double x = m.getPosition().getX();
             double y = m.getPosition().getY();
@@ -483,7 +547,7 @@ public class GameEngine implements Observable, Controllable{
      * lock tetromino trigger this, check for any lines to clear, if exist then clear.
      * @param lastLocked, the tetromino just locked, possible line clears should related with position of it
      */
-    void checkCompletedLines(Tetromino lastLocked) {
+    int checkCompletedLines(Tetromino lastLocked) {
   
         //
         // group to lower/around/upper
@@ -514,6 +578,7 @@ public class GameEngine implements Observable, Controllable{
                 mino.getPosition().setY(mino.getPosition().getY() + cleared);
             }
         }
+        return cleared;
     }
     /**
      * everything need to do beside removing from allTetrominos list
