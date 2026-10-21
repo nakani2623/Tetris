@@ -10,6 +10,9 @@ build
 # Ignore Gradle GUI config
 gradle-app.setting
 
+# Ignore app output keybind config
+app/keybinds.properties
+
 # Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
 !gradle-wrapper.jar
 
