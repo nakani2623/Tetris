@@ -17,12 +17,14 @@ import tetris.engine.GameEngine;
 import tetris.engine.observers.BoardDisplayManager;
 import tetris.engine.observers.HoldDisplayManager;
 import tetris.engine.observers.NextQueueDisplayManager;
+import tetris.engine.observers.SpinClearDisplayManager;
 import tetris.engine.observers.StatsDisplayManager;
 import tetris.engine.score.ScoreManager;
 import tetris.engine.score.ZenScore;
 import tetris.engine.type.Input.GameInput;
 import tetris.engine.type.Input.KeyAction;
 import tetris.graphics.GameWindow;
+// import tetris.graphics.gameActive.SpinClearPane;
 
 
 public class App extends Application {
@@ -44,6 +46,7 @@ public class App extends Application {
         new StatsDisplayManager(engine.getScoreManager(), window.getScorePane());
         new HoldDisplayManager(engine, window.getHoldPane());   
         new NextQueueDisplayManager(engine, window.getNextQueuePane());
+        new SpinClearDisplayManager(engine.getScoreManager(), window.getSpinClearPane());
 
 
         // controller.setSoftDropFactor(15);
