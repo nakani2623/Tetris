@@ -10,10 +10,12 @@ import tetris.engine.type.Input.GameKey;
 public class KeyBindButton extends Button {
     GameKey bindingGameKey; 
     GameState gamestate;
+    KeyBinds keyBinds;
 
-    public KeyBindButton(GameKey bindingGameKey, GameState gamestate) {
+    public KeyBindButton(GameKey bindingGameKey, GameState gamestate, KeyBinds keyBinds) {
         this.bindingGameKey = bindingGameKey;
         this.gamestate = gamestate;
+        this.keyBinds = keyBinds;
 
         this.setOnAction(event -> {
             this.setText("Press a key ...");
@@ -24,7 +26,7 @@ public class KeyBindButton extends Button {
     public void startBind() {
         this.setOnKeyPressed(keyEvent -> {
             UnifiedKey uKey = JavaFXKeyboardAdapter.toUnifiedKey(keyEvent.getCode());
-            KeyBinds.addBind(uKey, bindingGameKey, gamestate);
+            keyBinds.addBind(uKey, bindingGameKey, gamestate);
             this.setText(keyEvent.getCode().toString());
             this.setOnKeyPressed(null);
         });
