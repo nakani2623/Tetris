@@ -3,7 +3,7 @@ package tetris.engine.observers;
 
 import javafx.application.Platform;
 import tetris.engine.Score;
-import tetris.graphics.ScorePane;
+import tetris.graphics.gameActive.ScorePane;
 
 public class ScoreDisplayManager implements Observer {
     private final Observable observable;

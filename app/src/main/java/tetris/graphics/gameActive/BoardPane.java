@@ -1,4 +1,4 @@
-package tetris.graphics;
+package tetris.graphics.gameActive;
 
 import java.util.List;
 
@@ -8,6 +8,7 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.StrokeType;
 import tetris.engine.Mino;
 import tetris.engine.Tetromino;
+import tetris.graphics.VisualConfig;
 
 public class BoardPane extends GridPane {
 

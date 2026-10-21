@@ -1,4 +1,4 @@
-package tetris.graphics;
+package tetris.graphics.gameActive;
 
 import javafx.scene.Group;
 import javafx.scene.layout.StackPane;

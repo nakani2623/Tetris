@@ -2,7 +2,7 @@ package tetris.engine.observers;
 
 
 import tetris.engine.GameEngine;
-import tetris.graphics.NextQueuePane;
+import tetris.graphics.gameActive.NextQueuePane;
 
 public class NextQueueDisplayManager implements Observer {
     private GameEngine engine;

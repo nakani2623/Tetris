@@ -1,4 +1,4 @@
-package tetris.graphics;
+package tetris.graphics.gameActive;
 
 import javafx.scene.paint.Color;
 import tetris.engine.type.TetrominoType;
