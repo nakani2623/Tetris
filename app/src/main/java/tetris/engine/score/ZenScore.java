@@ -1,4 +1,4 @@
-package tetris.engine;
+package tetris.engine.score;
 
 import java.util.List;
 import java.util.concurrent.Executors;
@@ -6,12 +6,15 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.ArrayList;
 
-import tetris.engine.observers.Observable;
-import tetris.engine.observers.Observer;
+import tetris.engine.observers.ScoreObserver;
+import tetris.engine.score.scoreEvent.ScoreEvent;
+import tetris.engine.score.scoreEvent.SpinClearEvent;
+import tetris.engine.score.scoreEvent.StatsEvent;
+import tetris.engine.type.SpinState;
+import tetris.engine.type.TetrominoType;
 
-public class Score implements Observable{
+public class ZenScore implements ScoreManager {
     // score tracking
-    private GameEngine engine;
     private static final int refreshRate_Hz = 30;
     private int score;
     private int linesCleared;
@@ -24,9 +27,9 @@ public class Score implements Observable{
     private final ScheduledExecutorService exec =
         Executors.newSingleThreadScheduledExecutor();
 
-    private List<Observer> observers;
+    private List<ScoreObserver> observers;
 
-    public Score(GameEngine engine) {
+    public ZenScore() {
         this.score = 0;
         this.linesCleared = 0;
         this.piecesPlaced = 0;
@@ -37,7 +40,6 @@ public class Score implements Observable{
 
         exec.scheduleAtFixedRate(this::updateStats, 0, 1000 / refreshRate_Hz, TimeUnit.MILLISECONDS);
         this.observers = new ArrayList<>();
-        this.engine = engine;
     }
 
     /**
@@ -60,7 +62,13 @@ public class Score implements Observable{
             this.piecesPerSecond = piecesPlaced / elapsedTime;
             this.attackPerMinute = (piecesPlaced / elapsedTime) * 60;
         }
-        notifyObservers();
+        notifyObservers(new StatsEvent());
+    }
+
+    public void onSpinOrClear(TetrominoType currentTetrominoType, SpinState currentSpinState, int cleared) { // default
+        // update internal state
+        // notify graphics
+        notifyObservers(new SpinClearEvent(cleared, currentSpinState, currentTetrominoType));
     }
 
     public int getScore() {
@@ -88,20 +96,18 @@ public class Score implements Observable{
         return elapsedTime;
     }
 
-    @Override
-    public void addObserver(Observer observer) {
+
+    public void addObserver(ScoreObserver observer) {
         observers.add(observer);
     }
 
-    @Override
-    public void removeObserver(Observer observer) {
+    public void removeObserver(ScoreObserver observer) {
         observers.remove(observer);
     }
 
-    @Override
-    public void notifyObservers() {
-        for (Observer observer : observers) {
-            observer.update();
+    public void notifyObservers(ScoreEvent e) {
+        for (ScoreObserver observer : observers) {
+            observer.update(e);
         }
     }
 

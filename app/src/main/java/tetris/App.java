@@ -14,7 +14,9 @@ import tetris.engine.GameEngine;
 import tetris.engine.observers.BoardDisplayManager;
 import tetris.engine.observers.HoldDisplayManager;
 import tetris.engine.observers.NextQueueDisplayManager;
-import tetris.engine.observers.ScoreDisplayManager;
+import tetris.engine.observers.StatsDisplayManager;
+import tetris.engine.score.ScoreManager;
+import tetris.engine.score.ZenScore;
 import tetris.engine.type.Input.GameInput;
 import tetris.engine.type.Input.KeyAction;
 import tetris.graphics.GameWindow;
@@ -22,7 +24,7 @@ import tetris.graphics.GameWindow;
 
 public class App extends Application {
     private KeyBinds keyBinds = new KeyBinds();
-    private final GameEngine engine = new GameEngine();
+    private final GameEngine engine = new GameEngine(10, 20);
     private final GameWindow window = new GameWindow(keyBinds);
     private final GameController controller = new GameController(engine, window);
     @Override
@@ -30,8 +32,11 @@ public class App extends Application {
         // load config
         addKeyboardControl();
 
+        // set game mode
+        engine.setScoreManager(new ZenScore());
+
         new BoardDisplayManager(engine, window.getBoardPane());
-        new ScoreDisplayManager(engine.getScore(), window.getScorePane());
+        new StatsDisplayManager(engine.getScoreManager(), window.getScorePane());
         new HoldDisplayManager(engine, window.getHoldPane());   
         new NextQueueDisplayManager(engine, window.getNextQueuePane());
 
