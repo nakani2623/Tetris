@@ -5,6 +5,12 @@ import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import tetris.controller.input.KeyBinds;
+import tetris.graphics.configPage.ConfigPane;
+import tetris.graphics.gameActive.BoardPane;
+import tetris.graphics.gameActive.GamePane;
+import tetris.graphics.gameActive.HoldPane;
+import tetris.graphics.gameActive.NextQueuePane;
+import tetris.graphics.gameActive.ScorePane;
 
 /**
  * Manages In-Game contents, including a gameboard

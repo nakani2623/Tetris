@@ -1,4 +1,4 @@
-package tetris.graphics;
+package tetris.graphics.gameActive;
 import java.util.Locale;
 
 import javafx.geometry.Insets;

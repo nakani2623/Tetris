@@ -1,4 +1,4 @@
-package tetris.graphics;
+package tetris.graphics.configPage;
 
 
 import javafx.geometry.Insets;
