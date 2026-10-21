@@ -1,4 +1,4 @@
-package tetris.graphics;
+package tetris.graphics.gameActive;
 
 import java.util.List;
 
