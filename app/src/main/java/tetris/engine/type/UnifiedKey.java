@@ -1,0 +1,61 @@
+package tetris.engine.type;
+
+public enum UnifiedKey {
+    // Letters
+    A, B, C, D, E, F, G, H, I, J, K, L, M,
+    N, O, P, Q, R, S, T, U, V, W, X, Y, Z,
+
+    // Numbers (top row)
+    DIGIT_0, DIGIT_1, DIGIT_2, DIGIT_3, DIGIT_4,
+    DIGIT_5, DIGIT_6, DIGIT_7, DIGIT_8, DIGIT_9,
+
+    // Function keys
+    F1, F2, F3, F4, F5, F6, F7, F8, F9, F10,
+    F11, F12, F13, F14, F15, F16, F17, F18,
+    F19, F20, F21, F22, F23, F24,
+
+    // Modifier keys
+    LEFT_SHIFT, RIGHT_SHIFT,
+    LEFT_CTRL, RIGHT_CTRL,
+    LEFT_ALT, RIGHT_ALT,
+    LEFT_META, RIGHT_META,
+
+    // Navigation keys
+    UP, DOWN, LEFT, RIGHT,
+    HOME, END, PAGE_UP, PAGE_DOWN,
+    INSERT, DELETE,
+
+    // Editing and control keys
+    ENTER, BACKSPACE, TAB, SPACE, ESCAPE,
+    CAPS_LOCK, NUM_LOCK, SCROLL_LOCK,
+    PRINT_SCREEN, PAUSE,
+
+    // Punctuation and symbols
+    MINUS, EQUALS,
+    LEFT_BRACKET, RIGHT_BRACKET,
+    BACKSLASH, SEMICOLON, APOSTROPHE,
+    COMMA, PERIOD, SLASH, GRAVE,
+
+    // Numeric keypad
+    NUMPAD_0, NUMPAD_1, NUMPAD_2, NUMPAD_3, NUMPAD_4,
+    NUMPAD_5, NUMPAD_6, NUMPAD_7, NUMPAD_8, NUMPAD_9,
+    NUMPAD_ADD, NUMPAD_SUBTRACT,
+    NUMPAD_MULTIPLY, NUMPAD_DIVIDE,
+    NUMPAD_DECIMAL, NUMPAD_ENTER, NUMPAD_EQUALS,
+
+    // Additional keys
+    MENU, FN,
+    HELP, CLEAR,
+    VOLUME_UP, VOLUME_DOWN, VOLUME_MUTE,
+    MEDIA_PLAY_PAUSE, MEDIA_STOP,
+    MEDIA_NEXT, MEDIA_PREVIOUS,
+
+    // International / language-specific keys
+    INTERNATIONAL_1, INTERNATIONAL_2, INTERNATIONAL_3,
+    INTERNATIONAL_4, INTERNATIONAL_5, INTERNATIONAL_6,
+    INTERNATIONAL_7, INTERNATIONAL_8, INTERNATIONAL_9,
+    LANG_1, LANG_2, LANG_3, LANG_4, LANG_5,
+
+    // Unrecognized key
+    UNKNOWN
+}

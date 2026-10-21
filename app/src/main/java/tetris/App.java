@@ -5,22 +5,31 @@ package tetris;
 
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
 import tetris.controller.GameController;
+import tetris.controller.input.JavaFXKeyboardAdapter;
+import tetris.controller.input.KeyBinds;
 import tetris.engine.GameEngine;
 import tetris.engine.observers.BoardDisplayManager;
 import tetris.engine.observers.HoldDisplayManager;
 import tetris.engine.observers.NextQueueDisplayManager;
 import tetris.engine.observers.ScoreDisplayManager;
+import tetris.engine.type.Input.GameInput;
+import tetris.engine.type.Input.KeyAction;
 import tetris.graphics.GameWindow;
 
-public class App extends Application {
-    private final GameEngine engine = new GameEngine();
-    private final GameWindow window = new GameWindow();
-    private final GameController controller = new GameController(engine, window);
 
+public class App extends Application {
+    private KeyBinds keyBinds = new KeyBinds();
+    private final GameEngine engine = new GameEngine();
+    private final GameWindow window = new GameWindow(keyBinds);
+    private final GameController controller = new GameController(engine, window);
     @Override
     public void start(Stage stage) {
+        // load config
+        addKeyboardControl();
+
         new BoardDisplayManager(engine, window.getBoardPane());
         new ScoreDisplayManager(engine.getScore(), window.getScorePane());
         new HoldDisplayManager(engine, window.getHoldPane());   
@@ -47,9 +56,32 @@ public class App extends Application {
     public void stop() {
         engine.dispose();
     }
+    
+    public void addKeyboardControl() {
+        window.getScene().addEventHandler(KeyEvent.KEY_PRESSED, event -> {
+            controller.handleGameInput(
+                new GameInput( 
+                    keyBinds.map(JavaFXKeyboardAdapter.toUnifiedKey(event.getCode()), controller.getGameState()),
+                    KeyAction.PRESS, 
+                    JavaFXKeyboardAdapter.toUnifiedKey(event.getCode())
+                )
+            );          
+                
+        });
 
-    public static void main(String[] args) {
-        launch();
+
+        window.getScene().addEventHandler(KeyEvent.KEY_RELEASED, event -> {
+            controller.handleGameInput(
+                new GameInput( 
+                    keyBinds.map(JavaFXKeyboardAdapter.toUnifiedKey(event.getCode()), controller.getGameState()),
+                    KeyAction.RELEASE, 
+                    JavaFXKeyboardAdapter.toUnifiedKey(event.getCode())
+                )
+            );          
+                
+        });
+
     }
 
+    
 }

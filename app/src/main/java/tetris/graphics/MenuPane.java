@@ -11,12 +11,14 @@ import javafx.scene.layout.VBox;
 public class MenuPane extends StackPane {
     private Button startButton;
     private Button exitButton;
+    private Button configButton;
     public MenuPane() {
         Label title = new Label("Tetris");
         startButton = new Button("Start game");
         exitButton = new Button("Exit");
+        configButton = new Button("Config");
 
-        VBox content = new VBox(title, startButton, exitButton);
+        VBox content = new VBox(title, startButton, configButton, exitButton);
         this.getChildren().add(content);
 
         content.setAlignment(Pos.TOP_CENTER);
@@ -36,6 +38,10 @@ public class MenuPane extends StackPane {
 
     public void setOnExit(Runnable action) {
         this.exitButton.setOnAction(event -> action.run());
+    }
+
+    public void setOnConfig(Runnable action) {
+        this.configButton.setOnAction(event -> action.run());
     }
 
 }
