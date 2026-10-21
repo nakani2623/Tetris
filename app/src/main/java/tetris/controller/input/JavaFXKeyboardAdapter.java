@@ -3,10 +3,9 @@ package tetris.controller.input;
 import javafx.scene.input.KeyCode;
 import tetris.engine.type.UnifiedKey;
 
-public class JavaFXKeyboardAdapter implements KeyboardAdapter<KeyCode> {
+public class JavaFXKeyboardAdapter {
 
-    @Override
-    public UnifiedKey mapUnified(KeyCode key) {
+    public static UnifiedKey toUnifiedKey(KeyCode key) {
         if (key == null) {
             return UnifiedKey.UNKNOWN;
         }
@@ -79,7 +78,7 @@ public class JavaFXKeyboardAdapter implements KeyboardAdapter<KeyCode> {
         };
     }
 
-    private UnifiedKey mapSameName(KeyCode key) {
+    private static UnifiedKey mapSameName(KeyCode key) {
         try {
             return UnifiedKey.valueOf(key.name());
         } catch (IllegalArgumentException e) {
