@@ -29,6 +29,7 @@ import tetris.engine.operator.RotateCounterClockwiseOperator;
 import tetris.engine.operator.RotateR180Operator;
 import tetris.engine.rotationStrategy.RotationStrategy;
 import tetris.engine.rotationStrategy.classicRotation;
+import tetris.engine.score.ScoreManager;
 import tetris.engine.type.Direction;
 import tetris.engine.type.Rotation;
 import tetris.engine.type.RotationState;
@@ -38,7 +39,7 @@ import tetris.utils.KickTable;
 import tetris.utils.Point;
 
 public class GameEngine implements Observable, Controllable{
-    private Score score;
+    private ScoreManager scoreManager;
     private Queue<TetrominoType> nextQueue;
     private TetrominoGenerator tetrominoGenerator;
     private LockStrategy lockStrategy;
@@ -75,7 +76,6 @@ public class GameEngine implements Observable, Controllable{
         // configure game, todo: create and use initEngine(JSON? configFile) instead below
         tetrominoGenerator = new BagGenerator();
         rotationStrategy = new classicRotation();
-        score = new Score(this);
 
         nextQueue = new LinkedList<TetrominoType>();
         allTetrominos = new ArrayList<Tetromino>();
@@ -89,15 +89,15 @@ public class GameEngine implements Observable, Controllable{
     /**
      * Constructs default game board 10x20 dimension
      */
-    public GameEngine() {
-        this(10, 20);
-    }
+    // public GameEngine() {
+    //     this(10, 20);
+    // }
 
     /**
      * Reset the board state into initial
      */
     public void reset() {
-        score.reset();
+        scoreManager.reset();
         allTetrominos = new ArrayList<Tetromino>();
         currentTetromino = null;
         holdTetrominoType = null;
@@ -400,9 +400,9 @@ public class GameEngine implements Observable, Controllable{
     void lock() {
         int cleared = checkCompletedLines(currentTetromino);
         // display spin info
-        if (!(currentSpinState == SpinState.NOT_SPIN && cleared == 0))
+        if (currentSpinState != SpinState.NOT_SPIN)
             System.out.printf("%s spin %s, clear: %d\n", currentTetromino.type, currentSpinState, cleared);
-
+        scoreManager.onSpinOrClear(currentTetromino.type, currentSpinState, cleared);
         lockTimer.stop();
         spawn();
         notifyObservers();
@@ -600,8 +600,8 @@ public class GameEngine implements Observable, Controllable{
         return this.height;
     }
 
-    public Score getScore() {
-        return score;
+    public ScoreManager getScoreManager() {
+        return scoreManager;
     }
 
     public double getGravity() {
@@ -657,7 +657,11 @@ public class GameEngine implements Observable, Controllable{
         return this.shadowTetromino;
     } 
 
+    public void setScoreManager(ScoreManager scoreManager) {
+        this.scoreManager = scoreManager;
+    }
+
     public void dispose() {
-        score.dispose();
+        scoreManager.dispose();
     }
 }
