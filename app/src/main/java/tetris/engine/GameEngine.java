@@ -403,7 +403,7 @@ public class GameEngine implements Observable, Controllable{
 
     void lock() {
         int cleared = checkCompletedLines(currentTetromino);
-        if (!(cleared == 0 && currentSpinState == SpinState.NOT_SPIN))
+        if (cleared != 0 || currentSpinState != SpinState.NOT_SPIN)
             scoreManager.onSpinOrClear(currentTetromino.type, currentSpinState, cleared);
         lockTimer.stop();
         spawn();
