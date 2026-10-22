@@ -21,6 +21,8 @@ public class KeyBindButton extends Button {
             this.setText("Press a key ...");
             startBind();
         });
+
+        this.setMinWidth(100);
     }
 
     public void startBind() {
