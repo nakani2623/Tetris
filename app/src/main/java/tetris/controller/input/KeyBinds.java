@@ -3,7 +3,9 @@ package tetris.controller.input;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
@@ -31,6 +33,25 @@ public class KeyBinds {
 
     public void addBind(UnifiedKey unifiedKey, GameKey gameKey, GameState state) {
         binds.get(state).put(unifiedKey, gameKey);
+    }
+
+    /**
+     * Gets keys that are binded to a Player's action
+     * @param gameKey
+     * @param state
+     * @return
+     */
+    public List<UnifiedKey> getUKeysFor(GameKey gameKey, GameState state) {
+        List <UnifiedKey> result = new ArrayList<UnifiedKey>();
+        
+        Map<UnifiedKey, GameKey> stateFiteredBinds = binds.get(state);
+        for (UnifiedKey uKey : stateFiteredBinds.keySet()) {
+            if (stateFiteredBinds.get(uKey) == gameKey) {
+                result.add(uKey);
+            }
+        }
+
+        return result;
     }
 
     private static final String FILE_NAME = "keybinds.properties";
