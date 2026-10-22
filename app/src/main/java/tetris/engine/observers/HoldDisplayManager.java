@@ -2,7 +2,7 @@ package tetris.engine.observers;
 
 import tetris.engine.GameEngine;
 import tetris.engine.type.TetrominoType;
-import tetris.graphics.HoldPane;
+import tetris.graphics.gameActive.HoldPane;
 
 public class HoldDisplayManager implements Observer {
     private GameEngine engine;
