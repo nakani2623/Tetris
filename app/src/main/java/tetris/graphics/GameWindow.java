@@ -5,6 +5,13 @@ import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import tetris.controller.input.KeyBinds;
+import tetris.graphics.configPage.ConfigPane;
+import tetris.graphics.gameActive.BoardPane;
+import tetris.graphics.gameActive.GamePane;
+import tetris.graphics.gameActive.HoldPane;
+import tetris.graphics.gameActive.NextQueuePane;
+import tetris.graphics.gameActive.ScorePane;
+import tetris.graphics.gameActive.SpinClearPane;
 
 /**
  * Manages In-Game contents, including a gameboard
@@ -50,6 +57,10 @@ public class GameWindow {
 
     public ScorePane getScorePane() {
         return gamePane.getScorePane();
+    }
+
+    public SpinClearPane getSpinClearPane() {
+        return gamePane.getSpinClearPane();
     }
 
     public HoldPane getHoldPane() {

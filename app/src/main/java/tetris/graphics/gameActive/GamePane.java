@@ -1,4 +1,4 @@
-package tetris.graphics;
+package tetris.graphics.gameActive;
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -6,16 +6,19 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import tetris.graphics.GameOverPane;
 
 public class GamePane extends StackPane {
     private final BoardPane boardPane = new BoardPane();
     private final ScorePane scorePane = new ScorePane();
     private final HoldPane holdPane = new HoldPane();
     private final NextQueuePane nextQueuePane = new NextQueuePane();
+    private SpinClearPane spinClearPane = new SpinClearPane();
+
 
     private GameOverPane gameOverModal;
     public GamePane() {
-        VBox leftBox = new VBox(holdPane, scorePane);
+        VBox leftBox = new VBox(holdPane, scorePane, spinClearPane);
 
         HBox content = new HBox(16, leftBox, boardPane, nextQueuePane);
         content.setAlignment(Pos.TOP_CENTER);
@@ -57,6 +60,10 @@ public class GamePane extends StackPane {
 
     public ScorePane getScorePane() {
         return scorePane;
+    }
+
+    public SpinClearPane getSpinClearPane() {
+        return spinClearPane;
     }
 
     public HoldPane getHoldPane() {

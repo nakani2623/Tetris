@@ -1,7 +1,7 @@
 package tetris.engine.observers;
 
 import tetris.engine.GameEngine;
-import tetris.graphics.BoardPane;
+import tetris.graphics.gameActive.BoardPane;
 
 public class BoardDisplayManager implements Observer {
     private GameEngine engine;
