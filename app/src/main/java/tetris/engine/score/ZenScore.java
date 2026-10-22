@@ -65,10 +65,10 @@ public class ZenScore implements ScoreManager {
         notifyObservers(new StatsEvent());
     }
 
-    public void onSpinOrClear(TetrominoType currentTetrominoType, SpinState currentSpinState, int cleared) { // default
+    public void onSpinOrClear(TetrominoType currentTetrominoType, SpinState currentSpinState, int numLineCleared) { // default
         // update internal state
         // notify graphics
-        notifyObservers(new SpinClearEvent(cleared, currentSpinState, currentTetrominoType));
+        notifyObservers(new SpinClearEvent(numLineCleared, currentSpinState, currentTetrominoType));
     }
 
     public int getScore() {
