@@ -119,8 +119,12 @@ public class GameEngine implements Observable, Controllable{
         if (isImmobile())
             currentSpinState = SpinState.MINI_SPIN;
 
-        if (currentTetromino.type == TetrominoType.T)
-            currentSpinState = detectTSpin();
+        if (currentTetromino.type == TetrominoType.T) {
+            SpinState threeCornerTSpinState = detectTSpin();
+            if (threeCornerTSpinState == SpinState.PROPER_SPIN) {
+                currentSpinState = threeCornerTSpinState;
+            }
+        }
     }
 
     public void move(Direction direction){
