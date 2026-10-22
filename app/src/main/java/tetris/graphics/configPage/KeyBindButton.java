@@ -16,12 +16,13 @@ public class KeyBindButton extends Button {
         this.bindingGameKey = bindingGameKey;
         this.gamestate = gamestate;
         this.keyBinds = keyBinds;
-
+        
         this.setOnAction(event -> {
             this.setText("Press a key ...");
             startBind();
         });
 
+        updateButtonText();
         this.setMinWidth(100);
     }
 
@@ -29,8 +30,12 @@ public class KeyBindButton extends Button {
         this.setOnKeyPressed(keyEvent -> {
             UnifiedKey uKey = JavaFXKeyboardAdapter.toUnifiedKey(keyEvent.getCode());
             keyBinds.addBind(uKey, bindingGameKey, gamestate);
-            this.setText(keyEvent.getCode().toString());
+            updateButtonText();
             this.setOnKeyPressed(null);
         });
+    }
+
+    public void updateButtonText() {
+        this.setText(keyBinds.getUKeysFor(bindingGameKey, gamestate).toString());
     }
 }
