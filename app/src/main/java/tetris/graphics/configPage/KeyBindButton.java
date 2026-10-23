@@ -3,14 +3,18 @@ package tetris.graphics.configPage;
 import javafx.scene.control.Button;
 import tetris.controller.input.JavaFXKeyboardAdapter;
 import tetris.controller.input.KeyBinds;
+import tetris.engine.observers.Observable;
+import tetris.engine.observers.Observer;
 import tetris.engine.type.GameState;
 import tetris.engine.type.UnifiedKey;
 import tetris.engine.type.Input.GameKey;
 
-public class KeyBindButton extends Button {
+public class KeyBindButton extends Button implements Observable {
     GameKey bindingGameKey; 
     GameState gamestate;
     KeyBinds keyBinds;
+
+    Observer observer;
 
     public KeyBindButton(GameKey bindingGameKey, GameState gamestate, KeyBinds keyBinds) {
         this.bindingGameKey = bindingGameKey;
@@ -30,7 +34,7 @@ public class KeyBindButton extends Button {
         this.setOnKeyPressed(keyEvent -> {
             UnifiedKey uKey = JavaFXKeyboardAdapter.toUnifiedKey(keyEvent.getCode());
             keyBinds.addBind(uKey, bindingGameKey, gamestate);
-            updateButtonText();
+            notifyObservers();
             this.setOnKeyPressed(null);
         });
     }
@@ -38,4 +42,20 @@ public class KeyBindButton extends Button {
     public void updateButtonText() {
         this.setText(keyBinds.getUKeysFor(bindingGameKey, gamestate).toString());
     }
+
+    @Override
+    public void addObserver(Observer observer) {
+        this.observer = observer;
+    }
+
+    @Override
+    public void removeObserver(Observer observer) {
+        this.observer = null;
+    }
+
+    @Override
+    public void notifyObservers() {
+        observer.update();
+    }
+
 }
