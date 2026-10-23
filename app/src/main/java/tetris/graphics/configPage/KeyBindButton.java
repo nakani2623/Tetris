@@ -26,6 +26,13 @@ public class KeyBindButton extends Button implements Observable {
             startBind();
         });
 
+        this.focusedProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue == false) {
+                updateButtonText();
+                this.setOnKeyPressed(null);
+            }
+        });
+
         updateButtonText();
         this.setMinWidth(100);
     }
