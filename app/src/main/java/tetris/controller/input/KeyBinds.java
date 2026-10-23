@@ -16,15 +16,14 @@ import tetris.engine.type.Input.GameKey;
 public class KeyBinds {
     public  Map<GameState, Map<UnifiedKey, GameKey>> binds;
     
-
     public KeyBinds() {
         binds = new HashMap<>();
         for (GameState state : GameState.values()) {
             Map bindOfState = new HashMap<UnifiedKey, GameKey>();
             binds.put(state, bindOfState);
         }
-        try {load();} catch (Exception e) {}
-        // try {save();} catch (Exception e) {}
+
+        load();
     }
 
     public GameKey map(UnifiedKey unifiedKey, GameState state) {
@@ -56,7 +55,7 @@ public class KeyBinds {
 
     private static final String FILE_NAME = "keybinds.properties";
 
-    public void save() throws IOException {
+    public void save() {
         Properties properties = new Properties();
 
         for (var stateEntry : binds.entrySet()) {
@@ -76,15 +75,17 @@ public class KeyBinds {
         try (FileOutputStream out = new FileOutputStream(FILE_NAME)) {
             properties.store(out, "Tetris Key Bindings");
         } catch (Exception e) {
-            System.out.println(e);
+            System.out.println("Failed to save key bind file: " + e);
         }
     }
 
-    public void load() throws IOException {
+    public void load() {
         Properties properties = new Properties();
 
         try (FileInputStream in = new FileInputStream(FILE_NAME)) {
             properties.load(in);
+        } catch (IOException e) {
+            System.err.print("Failed to load confif file: " + e);
         }
 
         for (String propertyName : properties.stringPropertyNames()) {

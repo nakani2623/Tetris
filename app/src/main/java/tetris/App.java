@@ -63,6 +63,7 @@ public class App extends Application {
     @Override 
     public void stop() {
         engine.dispose();
+        keyBinds.save();
     }
     
     public void addKeyboardControl() {
