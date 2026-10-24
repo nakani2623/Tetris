@@ -68,6 +68,8 @@ public class App extends Application {
     public void stop() {
         controller.dispose();
         engine.dispose();
+        controller.dispose();
+
         keyBinds.save();
     }
 

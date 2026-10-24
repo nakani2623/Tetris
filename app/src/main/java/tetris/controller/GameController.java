@@ -170,10 +170,6 @@ public class GameController implements GameOverListener {
     // public void setSoftDropFactor(double softDropFactor) {
     //     this.softDropFactor = softDropFactor;
     // }
-    
-    public void dispose() {
-        scheduler.shutdown();
-    }
 
     @Override 
     public void onGameOver() {
@@ -218,4 +214,10 @@ public class GameController implements GameOverListener {
         return gameState;
     }
 
+    /**
+     * called when game window closed, stop worker threads to terminate program
+     */
+    public void dispose() {
+        scheduler.shutdown();
+    }
 }
