@@ -127,4 +127,6 @@ public class ZenScore implements ScoreManager {
         exec.shutdownNow();
     }
 
+    public boolean haveAchievedGoal() { return false; }
+
 }
