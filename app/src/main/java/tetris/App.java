@@ -30,7 +30,7 @@ import tetris.graphics.GameWindow;
 
 public class App extends Application {
     private KeyBinds keyBinds = new KeyBinds();
-    private final GameEngine engine = new GameEngine(10, 20);
+    private final GameEngine engine = new GameEngine(10, 20, new JavaFXMainThreadDispatcher());
     private final GameWindow window = new GameWindow(keyBinds);
     private MainThreadDispatcher dispatcher = new JavaFXMainThreadDispatcher();
     private final GameController controller = new GameController(engine, window, dispatcher);
@@ -77,6 +77,7 @@ public class App extends Application {
 
     @Override 
     public void stop() {
+        controller.dispose();
         engine.dispose();
         controller.dispose();
 

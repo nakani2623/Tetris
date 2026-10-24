@@ -5,14 +5,21 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Queue;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
-import javafx.animation.PauseTransition;
-import javafx.util.Duration;
+// import javafx.application.Platform;
+
+// import javafx.animation.PauseTransition;
+// import javafx.util.Duration;
 
 import java.util.Iterator;
 import java.util.LinkedList;
 
 import tetris.controller.GameOverListener;
+import tetris.controller.dispatch.MainThreadDispatcher;
 import tetris.controller.Controllable;
 import tetris.controller.AutoOperationListener;
 import tetris.engine.generatingStrategy.BagGenerator;
@@ -44,6 +51,7 @@ public class GameEngine implements Observable, Controllable{
     private TetrominoGenerator tetrominoGenerator;
     private LockStrategy lockStrategy;
     private RotationStrategy rotationStrategy;
+    private MainThreadDispatcher dispatcher;
     private GameOverListener listener;
 
     private int width;
@@ -55,19 +63,21 @@ public class GameEngine implements Observable, Controllable{
     private List<Observer> observers;
 
     private double gravity; // move down num per sec
-    private final PauseTransition lockTimer =
-        new PauseTransition(Duration.seconds(0.5));
+    // private final PauseTransition lockTimer =
+    //     new PauseTransition(Duration.seconds(0.5));
+
+    private ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+    private ScheduledFuture<?> lockTask;
     private int maxLockResets = 15;
     private int lockResets;
     private boolean lockTimerFinished;
     private AutoOperationListener autoOperationListener;
-    // private 
     /**
      * Constructs game bord with specific dimension
      * @param width
      * @param height
      */
-    public GameEngine(int width, int height) {
+    public GameEngine(int width, int height, MainThreadDispatcher dispatcher) {
         this.height = height;
         this.width = width;
         this.gravity = 1;
@@ -79,10 +89,12 @@ public class GameEngine implements Observable, Controllable{
         nextQueue = new LinkedList<TetrominoType>();
         allTetrominos = new ArrayList<Tetromino>();
         observers = new ArrayList<>();
-        lockTimer.setOnFinished(event -> {
-            this.lockTimerFinished = true;
-            lock();
-        });
+        // lockTimer.setOnFinished(event -> {
+        //     this.lockTimerFinished = true;
+        //     lock();
+        // });
+        this.dispatcher = dispatcher;
+
     }
 
     /**
@@ -247,14 +259,25 @@ public class GameEngine implements Observable, Controllable{
      */
     void checkLanded() {
         if (landed(currentTetromino)) {
-            lockTimer.playFromStart();
+            if (lockTask != null) {
+                lockTask.cancel(false);
+            }
+            lockTask = scheduler.schedule(() -> { 
+                dispatcher.dispatch(() -> {
+                    this.lockTimerFinished = true;
+                    lock();
+                }); 
+                
+            }, 500, TimeUnit.MILLISECONDS);
             lockResets ++;
             if (lockResets > maxLockResets) {
                 lock();
             }
         }
         else {
-            lockTimer.stop();
+            // lockTimer.stop();
+            if (lockTask != null)
+                lockTask.cancel(false);
         }
     }
 
@@ -412,7 +435,7 @@ public class GameEngine implements Observable, Controllable{
     void lock() {
         int nLinesClearedcleared = checkCompletedLines(currentTetromino);
         scoreManager.onLock(nLinesClearedcleared);
-        lockTimer.stop();
+        lockTask.cancel(false);
         spawn();
         notifyObservers();
     }
@@ -481,8 +504,6 @@ public class GameEngine implements Observable, Controllable{
      * @ret int: lines cleared
      */
     int clearLines(ArrayList<Integer> toClear, ArrayList<Tetromino> relatedTetrominos) { 
-
-
         for (Tetromino t : relatedTetrominos) {
             Iterator<Mino> iterator = t.children.iterator();
 
@@ -593,7 +614,8 @@ public class GameEngine implements Observable, Controllable{
      * everything need to do beside removing from allTetrominos list
      */
     void removeCurrentTetromino() {
-        lockTimer.stop();
+        // lockTimer.stop();
+        lockTask.cancel(false);
         allTetrominos.remove(currentTetromino);
     }
 
@@ -671,6 +693,7 @@ public class GameEngine implements Observable, Controllable{
     }
 
     public void dispose() {
+        scheduler.shutdown();
         scoreManager.dispose();
     }
 }
