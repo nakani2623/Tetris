@@ -267,7 +267,7 @@ public class GameController implements GameOverListener {
     
     @Override 
     public void onGameOver() {
-        gravityTask.cancel(false);
+        scheduler.shutdown();
         gameState = GameState.ended;
         window.onGameOver();
     }
@@ -307,4 +307,5 @@ public class GameController implements GameOverListener {
     public GameState getGameState() {
         return gameState;
     }
+    
 }
