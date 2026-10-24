@@ -78,6 +78,8 @@ public class App extends Application {
     @Override 
     public void stop() {
         engine.dispose();
+        controller.dispose();
+
         keyBinds.save();
     }
 
