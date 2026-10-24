@@ -19,14 +19,7 @@ import tetris.engine.generatingStrategy.BagGenerator;
 import tetris.engine.generatingStrategy.TetrominoGenerator;
 import tetris.engine.observers.Observable;
 import tetris.engine.observers.Observer;
-import tetris.engine.operator.MoveDownOperator;
-import tetris.engine.operator.MoveLeftOperator;
-import tetris.engine.operator.MoveRightOperator;
-import tetris.engine.operator.MoveUpOperator;
-import tetris.engine.operator.Operator;
-import tetris.engine.operator.RotateClockwiseOperator;
-import tetris.engine.operator.RotateCounterClockwiseOperator;
-import tetris.engine.operator.RotateR180Operator;
+import tetris.engine.operator.*;
 import tetris.engine.rotationStrategy.RotationStrategy;
 import tetris.engine.rotationStrategy.classicRotation;
 import tetris.engine.score.ScoreManager;
@@ -185,8 +178,6 @@ public class GameEngine implements Observable, Controllable{
 
     void updateShadow() {
         shadowTetromino = new Tetromino(currentTetromino);
-        Tetromino clone = new Tetromino(currentTetromino);
-        Operator op = new MoveDownOperator();
         while (!hasCollision(shadowTetromino)) {
             shadowTetromino.moveDown();
         }
