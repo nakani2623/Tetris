@@ -610,7 +610,7 @@ public class GameEngine implements Observable, Controllable{
         return gravity;
     }
 
-    public void setAutoSpawnListener(AutoOperationListener autoOperationListener){
+    public void setOperationListener(AutoOperationListener autoOperationListener){
         this.autoOperationListener = autoOperationListener;
     }
     
