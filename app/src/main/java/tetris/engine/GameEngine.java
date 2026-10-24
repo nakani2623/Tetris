@@ -222,7 +222,7 @@ public class GameEngine implements Observable, Controllable{
         Tetromino t = new Tetromino(centreTopPoint(), currentTetrominoType);
         currentTetromino = null;
         // when gameover, notify controller
-        if (hasCollision(t)) {
+        if (hasCollision(t) || scoreManager.haveAchievedGoal()) {
             listener.onGameOver();
             return;
         }
