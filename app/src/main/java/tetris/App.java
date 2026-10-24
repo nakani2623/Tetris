@@ -18,6 +18,7 @@ import tetris.engine.observers.NextQueueDisplayManager;
 import tetris.engine.observers.SpinClearDisplayManager;
 import tetris.engine.observers.StatsDisplayManager;
 import tetris.engine.score.ScoreManager;
+import tetris.engine.score.SprintScore;
 import tetris.engine.score.ZenScore;
 import tetris.engine.type.UnifiedKey;
 import tetris.engine.type.Input.GameKey;
@@ -36,7 +37,8 @@ public class App extends Application {
         addKeyboardControl();
 
         // set game mode
-        engine.setScoreManager(new ZenScore());
+        // engine.setScoreManager(new ZenScore());
+        engine.setScoreManager(new SprintScore(10));
 
         new BoardDisplayManager(engine, window.getBoardPane());
         new StatsDisplayManager(engine.getScoreManager(), window.getScorePane());
