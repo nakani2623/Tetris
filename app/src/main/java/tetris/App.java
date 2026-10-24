@@ -22,9 +22,7 @@ import tetris.engine.observers.StatsDisplayManager;
 import tetris.engine.score.ScoreManager;
 import tetris.engine.score.ZenScore;
 import tetris.engine.type.UnifiedKey;
-import tetris.engine.type.Input.GameInput;
 import tetris.engine.type.Input.GameKey;
-import tetris.engine.type.Input.KeyAction;
 import tetris.graphics.GameWindow;
 // import tetris.graphics.gameActive.SpinClearPane;
 
@@ -77,12 +75,11 @@ public class App extends Application {
             UnifiedKey uKey = JavaFXKeyboardAdapter.toUnifiedKey(event.getCode());
             GameKey gameKey = keyBinds.map(uKey, controller.getGameState());
 
-            KeyAction keyAction;
             if (event.getEventType() == KeyEvent.KEY_PRESSED) {
-                keyAction = KeyAction.PRESS;
-            } else {keyAction = KeyAction.RELEASE;}
-
-            controller.handleGameInput(new GameInput(gameKey, keyAction, uKey)); 
+                controller.handleKeyPressed(gameKey, uKey);
+            } else {
+                controller.handleKeyReleased(gameKey, uKey);
+            }
         };
 
         window.getScene().addEventHandler(KeyEvent.KEY_PRESSED, keyEventHandler);

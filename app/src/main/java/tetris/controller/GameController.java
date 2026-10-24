@@ -16,9 +16,7 @@ import tetris.engine.type.Direction;
 import tetris.engine.type.GameState;
 import tetris.engine.type.Rotation;
 import tetris.engine.type.UnifiedKey;
-import tetris.engine.type.Input.GameInput;
 import tetris.engine.type.Input.GameKey;
-import tetris.engine.type.Input.KeyAction;
 import tetris.graphics.GameWindow;
 
 /**
@@ -188,28 +186,14 @@ public class GameController implements GameOverListener {
             resetGravityTimeline(engine.getGravity());
     }
 
-    // keyboard controller, triggers tetromino movement functions
-    public void handleGameInput(GameInput input) {
-        GameKey key = input.gameKey();
-        UnifiedKey physicalKey = input.unifiedKey();
-        if (key == null) {
+    public void handleKeyPressed(GameKey key, UnifiedKey physicalKey) {
+        if (!pressedKeys.add(physicalKey)) { // Ignore repeated KEY_DOWN events
             return;
         }
-        if (input.keyAction() == KeyAction.PRESS) {
 
-            // Ignore repeated KEY_DOWN events
-            if (!pressedKeys.add(physicalKey)) {
-                return;
-            }
-            handleKeyPressed(input.gameKey(), input.unifiedKey());
+        if (key == null)
+            return;
 
-        } else {
-            pressedKeys.remove(physicalKey);
-            handleKeyReleased(key, physicalKey);
-        }
-    }
-
-    private void handleKeyPressed(GameKey key, UnifiedKey physicalKey) {
         if (gameState == GameState.ended) {
             if (key == GameKey.RESTART) {
                 restart();
@@ -252,10 +236,15 @@ public class GameController implements GameOverListener {
         handleSoftDropEvent();
     }
 
-    private void handleKeyReleased(GameKey key, UnifiedKey physicalKey) {
+    public void handleKeyReleased(GameKey key, UnifiedKey physicalKey) {
+        pressedKeys.remove(physicalKey);
+
         if (gameState != GameState.active) {
             return;
         }
+
+        if (key == null)
+            return;
 
         switch (key) {
             case SOFTDROP ->
@@ -270,8 +259,6 @@ public class GameController implements GameOverListener {
             default -> {}
         }
     }
-
-    
 
     public void setSoftDropFactor(double softDropFactor) {
         this.softDropFactor = softDropFactor;
