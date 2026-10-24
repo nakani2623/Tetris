@@ -328,4 +328,11 @@ public class GameController implements GameOverListener, AutoOperationListener{
     public GameState getGameState() {
         return gameState;
     }
+
+    /**
+     * called when game window closed, stop worker threads to terminate program
+     */
+    public void dispose() {
+        scheduler.shutdown();
+    }
 }
