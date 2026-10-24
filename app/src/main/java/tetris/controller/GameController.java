@@ -71,6 +71,7 @@ public class GameController implements GameOverListener {
     }
 
     private void reset() {
+        pressedKeys.clear();
         engine.reset();
         window.onStart();
     }
