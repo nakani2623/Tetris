@@ -286,9 +286,13 @@ public class GameController implements GameOverListener, AutoOperationListener{
         this.softDropFactor = softDropFactor;
     }
     
+    public void dispose() {
+        scheduler.shutdown();
+    }
+
     @Override 
     public void onGameOver() {
-        gravityTask.cancel(false);
+        dispose();
         gameState = GameState.ended;
         window.onGameOver();
     }
@@ -329,10 +333,4 @@ public class GameController implements GameOverListener, AutoOperationListener{
         return gameState;
     }
 
-    /**
-     * called when game window closed, stop worker threads to terminate program
-     */
-    public void dispose() {
-        scheduler.shutdown();
-    }
 }
