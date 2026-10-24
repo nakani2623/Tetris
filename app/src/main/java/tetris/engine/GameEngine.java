@@ -206,16 +206,29 @@ public class GameEngine implements Observable, Controllable{
         }
         updateShadow();
 
-        // detect & write currentSpinState
-        if (isImmobile())
-            currentSpinState = SpinState.MINI_SPIN;
-
-        if (currentTetromino.type == TetrominoType.T) {
+        SpinState currentSpinState = SpinState.NOT_SPIN;
+        // detect & let score handle spins
+        if (currentTetromino.type == TetrominoType.T) { // detect T-spin
             SpinState threeCornerTSpinState = detectTSpin();
-            if (threeCornerTSpinState == SpinState.PROPER_SPIN) {
-                currentSpinState = threeCornerTSpinState;
-            }
+            if (isImmobile()) {
+                switch (threeCornerTSpinState) {
+                    case SpinState.PROPER_SPIN:
+                        currentSpinState = SpinState.PROPER_SPIN;
+                    case SpinState.MINI_SPIN:
+                        currentSpinState = SpinState.MINI_SPIN;
+                    case SpinState.NOT_SPIN:
+                        currentSpinState = SpinState.MINI_SPIN;
+                    default:
+                        currentSpinState = SpinState.NOT_SPIN;
+                }
+            } else currentSpinState = threeCornerTSpinState;
+            
+        } else { // detect other spin
+            if (isImmobile())
+                currentSpinState = SpinState.MINI_SPIN;
         }
+
+        scoreManager.onSpin(currentSpinState, currentTetromino.type);
     }
 
     public void move(Direction direction){
@@ -319,7 +332,7 @@ public class GameEngine implements Observable, Controllable{
         allTetrominos.add(currentTetromino);
         lockResets = 0;
 
-        currentSpinState = SpinState.NOT_SPIN;
+        // currentSpinState = SpinState.NOT_SPIN;
         checkLanded();
         handleDASEvent();
         handleSoftDropEvent();
@@ -510,10 +523,8 @@ public class GameEngine implements Observable, Controllable{
     }
 
     void lock() {
-        int cleared = checkCompletedLines(currentTetromino);
-        if (!(cleared == 0 && currentSpinState == SpinState.NOT_SPIN))
-            scoreManager.onSpinOrClear(currentTetromino.type, currentSpinState, cleared);
-        // lockTimer.stop();
+        int nLinesClearedcleared = checkCompletedLines(currentTetromino);
+        scoreManager.onLock(nLinesClearedcleared);
         lockTask.cancel(false);
         spawn();
         // notifyObservers();
