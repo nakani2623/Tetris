@@ -64,6 +64,7 @@ public class GameController implements GameOverListener, AutoOperationListener{
     }
 
     private void reset() {
+        pressedKeys.clear();
         engine.reset();
         window.onStart();
     }
