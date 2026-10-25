@@ -3,6 +3,7 @@ package tetris.engine.observers;
 
 import javafx.application.Platform;
 import tetris.engine.score.ScoreManager;
+import tetris.engine.score.SprintScore;
 import tetris.engine.score.ZenScore;
 import tetris.engine.score.scoreEvent.ScoreEvent;
 import tetris.engine.score.scoreEvent.StatsEvent;
@@ -13,8 +14,8 @@ public class StatsDisplayManager implements ScoreObserver {
     private final ScorePane panel;
 
 
-    public StatsDisplayManager(ScoreManager observable, ScorePane panel) {
-        this.score = observable;
+    public StatsDisplayManager(ScoreManager scoreManager, ScorePane panel) {
+        this.score = scoreManager;
         this.panel = panel;
         score.addObserver(this);
         // score UI rarely needs 60Hz; consider 100–500ms
@@ -23,17 +24,17 @@ public class StatsDisplayManager implements ScoreObserver {
     @Override
     public void update(ScoreEvent event) {
         if (!(event instanceof StatsEvent e))   return;
-        if (!(score instanceof ZenScore score)) return;
+        // if (!(score instanceof ZenScore score) || !(score instanceof SprintScore score)) return;
 
         // Read engine state (must be thread-safe!)
         double elapsed = score.getElapsedTime();
-        double points = score.getScore();
+        // double points = score.getScore();
         double pps = score.getPiecesPerSecond();
 
         // Update UI on JavaFX thread
         Platform.runLater(() -> {
             panel.updateTime(elapsed);
-            panel.updateScore(points);
+            // panel.updateScore(points);
             panel.updatePPS(pps);
         });
 
