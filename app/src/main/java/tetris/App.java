@@ -53,7 +53,8 @@ public class App extends Application {
         engine.setGameOverListener(controller);
 
         controller.showMenu();
-        window.setOnStart(controller::start);
+        window.setOnSprint(() -> startSinglePlayer(new SprintScore(10)));
+        window.setOnZen(() -> startSinglePlayer(new ZenScore()));
         window.setOnExit(Platform::exit);
         window.setOnReturn(controller::showMenu);
         window.setOnRestart(controller::restart);
@@ -61,6 +62,14 @@ public class App extends Application {
         
         // gameEngine.loop();
         window.execute(stage);
+    }
+
+    private void startSinglePlayer(ScoreManager scoreManager) {
+        engine.getScoreManager().dispose();
+        engine.setScoreManager(scoreManager);
+        new StatsDisplayManager(scoreManager, window.getScorePane());
+        new SpinClearDisplayManager(scoreManager, window.getSpinClearPane());
+        controller.restart();
     }
 
     @Override 
