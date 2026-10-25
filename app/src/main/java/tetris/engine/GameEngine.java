@@ -120,11 +120,11 @@ public class GameEngine implements Observable, Controllable{
             SpinState threeCornerTSpinState = detectTSpin();
             if (isImmobile()) {
                 switch (threeCornerTSpinState) {
-                    case SpinState.PROPER_SPIN:
+                    case PROPER_SPIN:
                         currentSpinState = SpinState.PROPER_SPIN;
-                    case SpinState.MINI_SPIN:
+                    case MINI_SPIN:
                         currentSpinState = SpinState.MINI_SPIN;
-                    case SpinState.NOT_SPIN:
+                    case NOT_SPIN:
                         currentSpinState = SpinState.MINI_SPIN;
                     default:
                         currentSpinState = SpinState.NOT_SPIN;
