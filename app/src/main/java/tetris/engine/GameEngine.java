@@ -52,7 +52,6 @@ public class GameEngine implements Observable, Controllable{
     private Tetromino currentTetromino;
     private Tetromino shadowTetromino;
     private TetrominoType holdTetrominoType;
-    private SpinState currentSpinState;
     private List<Observer> observers;
 
     private double gravity; // move down num per sec
@@ -115,16 +114,25 @@ public class GameEngine implements Observable, Controllable{
         }
         updateShadow();
 
-        // detect & write currentSpinState
-        if (isImmobile())
-            currentSpinState = SpinState.MINI_SPIN;
-
-        if (currentTetromino.type == TetrominoType.T) {
+        SpinState currentSpinState = SpinState.NOT_SPIN;
+        // detect & let score handle spins
+        if (currentTetromino.type == TetrominoType.T) { // detect T-spin
             SpinState threeCornerTSpinState = detectTSpin();
-            if (threeCornerTSpinState == SpinState.PROPER_SPIN) {
-                currentSpinState = threeCornerTSpinState;
-            }
+            if (isImmobile()) {
+                switch (threeCornerTSpinState) {
+                    case PROPER_SPIN -> currentSpinState = SpinState.PROPER_SPIN;
+                    case MINI_SPIN -> currentSpinState = SpinState.MINI_SPIN;
+                    case NOT_SPIN -> currentSpinState = SpinState.MINI_SPIN;
+                    default -> currentSpinState = SpinState.NOT_SPIN;
+                }
+            } else currentSpinState = threeCornerTSpinState;
+            
+        } else { // detect other spin
+            if (isImmobile())
+                currentSpinState = SpinState.MINI_SPIN;
         }
+
+        scoreManager.onSpin(currentSpinState, currentTetromino.type);
     }
 
     public void move(Direction direction){
@@ -210,7 +218,7 @@ public class GameEngine implements Observable, Controllable{
         Tetromino t = new Tetromino(centreTopPoint(), currentTetrominoType);
         currentTetromino = null;
         // when gameover, notify controller
-        if (hasCollision(t)) {
+        if (hasCollision(t) || scoreManager.haveAchievedGoal()) {
             listener.onGameOver();
             return;
         }
@@ -219,7 +227,7 @@ public class GameEngine implements Observable, Controllable{
         allTetrominos.add(currentTetromino);
         lockResets = 0;
 
-        currentSpinState = SpinState.NOT_SPIN;
+        // currentSpinState = SpinState.NOT_SPIN;
         checkLanded();
         
         // when auto-spawned, notify controller
@@ -402,9 +410,8 @@ public class GameEngine implements Observable, Controllable{
     }
 
     void lock() {
-        int cleared = checkCompletedLines(currentTetromino);
-        if (!(cleared == 0 && currentSpinState == SpinState.NOT_SPIN))
-            scoreManager.onSpinOrClear(currentTetromino.type, currentSpinState, cleared);
+        int nLinesClearedcleared = checkCompletedLines(currentTetromino);
+        scoreManager.onLock(nLinesClearedcleared);
         lockTimer.stop();
         spawn();
         notifyObservers();

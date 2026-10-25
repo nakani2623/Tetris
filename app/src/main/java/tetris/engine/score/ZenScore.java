@@ -23,6 +23,8 @@ public class ZenScore implements ScoreManager {
     private double elapsedTime;
     private double piecesPerSecond;
     private double attackPerMinute;
+    private SpinState currentSpinState;
+    private TetrominoType currentTetrominoType;
 
     private final ScheduledExecutorService exec =
         Executors.newSingleThreadScheduledExecutor();
@@ -65,10 +67,20 @@ public class ZenScore implements ScoreManager {
         notifyObservers(new StatsEvent());
     }
 
-    public void onSpinOrClear(TetrominoType currentTetrominoType, SpinState currentSpinState, int cleared) { // default
-        // update internal state
-        // notify graphics
-        notifyObservers(new SpinClearEvent(cleared, currentSpinState, currentTetrominoType));
+    // public void onSpinOrClear(TetrominoType currentTetrominoType, SpinState currentSpinState, int cleared) { // default
+    //     // update internal state
+    //     // notify graphics
+    //     notifyObservers(new SpinClearEvent(cleared, currentSpinState, currentTetrominoType));
+    // }
+    public void onSpin(SpinState spinState, TetrominoType tetrominoType) {
+        currentSpinState = spinState;
+        currentTetrominoType = tetrominoType;
+    }
+
+    public void onLock(int linesCleared) {
+        if (linesCleared != 0 || currentSpinState != SpinState.NOT_SPIN) {
+            notifyObservers(new SpinClearEvent(linesCleared, currentSpinState, currentTetrominoType));
+        }
     }
 
     public int getScore() {
@@ -114,5 +126,7 @@ public class ZenScore implements ScoreManager {
     public void dispose() {
         exec.shutdownNow();
     }
+
+    public boolean haveAchievedGoal() { return false; }
 
 }
