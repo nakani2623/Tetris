@@ -9,16 +9,16 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 
 public class MenuPane extends StackPane {
-    private Button startButton;
+    private Button singlePlayerButton;
     private Button exitButton;
     private Button configButton;
     public MenuPane() {
         Label title = new Label("Tetris");
-        startButton = new Button("Start game");
+        singlePlayerButton = new Button("Single player");
         exitButton = new Button("Exit");
         configButton = new Button("Config");
 
-        VBox content = new VBox(title, startButton, configButton, exitButton);
+        VBox content = new VBox(title, singlePlayerButton, configButton, exitButton);
         this.getChildren().add(content);
 
         content.setAlignment(Pos.TOP_CENTER);
@@ -32,8 +32,8 @@ public class MenuPane extends StackPane {
         content.setStyle("-fx-border-color: gray;");
     }
 
-    public void setOnStart(Runnable action) {
-        this.startButton.setOnAction(event -> action.run());
+    public void setOnSinglePlayer(Runnable action) {
+        this.singlePlayerButton.setOnAction(event -> action.run());
     }
 
     public void setOnExit(Runnable action) {

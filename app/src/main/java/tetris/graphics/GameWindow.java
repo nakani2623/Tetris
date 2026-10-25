@@ -19,6 +19,7 @@ import tetris.graphics.gameActive.SpinClearPane;
 public class GameWindow {
     private final GamePane gamePane = new GamePane();
     private final MenuPane menuPane = new MenuPane();
+    private final SinglePlayerPane singlePlayerPane = new SinglePlayerPane();
     private final ConfigPane configPane ;
     private final Scene scene;
 
@@ -26,6 +27,8 @@ public class GameWindow {
         Pane initialPane = new Pane();
         scene = new Scene(initialPane, 640, 480);
         menuPane.setOnConfig(this::showConfig);
+        menuPane.setOnSinglePlayer(this::showSinglePlayer);
+        singlePlayerPane.setOnReturnMenu(this::showMenu);
         configPane = new ConfigPane(keyBinds);
         configPane.setOnReturnMenu(this::showMenu);
     }
@@ -41,6 +44,10 @@ public class GameWindow {
 
     public void showMenu() {
         showContent(menuPane);
+    }
+
+    public void showSinglePlayer() {
+        showContent(singlePlayerPane);
     }
 
     public void showConfig() {
@@ -75,8 +82,12 @@ public class GameWindow {
         scene.setRoot(content);
     }
 
-    public void setOnStart(Runnable action) {
-        menuPane.setOnStart(action);
+    public void setOnSprint(Runnable action) {
+        singlePlayerPane.setOnSprint(action);
+    }
+
+    public void setOnZen(Runnable action) {
+        singlePlayerPane.setOnZen(action);
     }
 
     public void setOnExit(Runnable action) {
