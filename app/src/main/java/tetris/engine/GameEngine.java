@@ -307,6 +307,7 @@ public class GameEngine implements Observable, Controllable{
         TetrominoType currentTetrominoType = nextQueue.remove();
         Tetromino t = new Tetromino(centreTopPoint(), currentTetrominoType); // duplicate_1 1
         currentTetromino = null;
+        System.out.printf("spawned: %s%n", t.type);
         // when gameover, notify controller
         if (hasCollision(t)) {
             dispose();
