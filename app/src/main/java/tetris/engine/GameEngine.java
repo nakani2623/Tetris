@@ -2,8 +2,10 @@ package tetris.engine;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -12,30 +14,17 @@ import java.util.concurrent.TimeUnit;
 
 // import javafx.application.Platform;
 
-// import javafx.animation.PauseTransition;
-// import javafx.util.Duration;
-
 import java.util.Iterator;
 import java.util.LinkedList;
 
 import tetris.controller.GameOverListener;
 import tetris.controller.dispatch.MainThreadDispatcher;
 import tetris.controller.Controllable;
-import tetris.controller.AutoOperationListener;
 import tetris.engine.generatingStrategy.BagGenerator;
 import tetris.engine.generatingStrategy.TetrominoGenerator;
 import tetris.engine.observers.Observable;
 import tetris.engine.observers.Observer;
-import tetris.engine.operator.MoveDownOperator;
-import tetris.engine.operator.MoveLeftOperator;
-import tetris.engine.operator.MoveRightOperator;
-import tetris.engine.operator.MoveUpOperator;
-import tetris.engine.operator.Operator;
-import tetris.engine.operator.RotateClockwiseOperator;
-import tetris.engine.operator.RotateCounterClockwiseOperator;
-import tetris.engine.operator.RotateR180Operator;
-import tetris.engine.rotationStrategy.RotationStrategy;
-import tetris.engine.rotationStrategy.classicRotation;
+import tetris.engine.operator.*;
 import tetris.engine.score.ScoreManager;
 import tetris.engine.type.Direction;
 import tetris.engine.type.Rotation;
@@ -46,32 +35,53 @@ import tetris.utils.KickTable;
 import tetris.utils.Point;
 
 public class GameEngine implements Observable, Controllable{
+    // low level module references
     private ScoreManager scoreManager;
+
+    // next queue / generate piece
     private Queue<TetrominoType> nextQueue;
     private TetrominoGenerator tetrominoGenerator;
-    private LockStrategy lockStrategy;
-    private RotationStrategy rotationStrategy;
-    private MainThreadDispatcher dispatcher;
-    private GameOverListener listener;
 
+    // board
     private int width;
     private int height;
     private List<Tetromino> allTetrominos;
     private Tetromino currentTetromino;
     private Tetromino shadowTetromino;
-    private TetrominoType holdTetrominoType;
-    private List<Observer> observers;
 
+    // hold
+    private TetrominoType holdTetrominoType;
+    
+    // score? rotation
+    private SpinState currentSpinState;
+
+    // gameplay state & spawn
     private double gravity; // move down num per sec
-    // private final PauseTransition lockTimer =
-    //     new PauseTransition(Duration.seconds(0.5));
+    private double softDropFactor;
+    private boolean isSoftDropping = false;
+    private ScheduledFuture<?> gravityTask;
+    private ScheduledFuture<?> arrTask;
+    private Map<Direction, Integer> DASCharges = new HashMap<>(
+        Map.of(Direction.LEFT, 0, Direction.RIGHT, 0)
+    );
+    // private double DAS = 5;
+    private double ARR = 0;
 
     private ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
     private ScheduledFuture<?> lockTask;
     private int maxLockResets = 15;
     private int lockResets;
-    private boolean lockTimerFinished;
-    private AutoOperationListener autoOperationListener;
+
+    // other self contained field
+    private MainThreadDispatcher dispatcher;
+    private GameOverListener listener;
+
+
+    // plan to remove
+    private List<Observer> observers; // move to low level modules
+    // private boolean lockTimerFinished;
+    // private AutoOperationListener autoOperationListener;
+
     /**
      * Constructs game bord with specific dimension
      * @param width
@@ -84,26 +94,102 @@ public class GameEngine implements Observable, Controllable{
 
         // configure game, todo: create and use initEngine(JSON? configFile) instead below
         tetrominoGenerator = new BagGenerator();
-        rotationStrategy = new classicRotation();
-
         nextQueue = new LinkedList<TetrominoType>();
         allTetrominos = new ArrayList<Tetromino>();
         observers = new ArrayList<>();
-        // lockTimer.setOnFinished(event -> {
-        //     this.lockTimerFinished = true;
-        //     lock();
-        // });
         this.dispatcher = dispatcher;
 
     }
 
-    /**
-     * Constructs default game board 10x20 dimension
-     */
-    // public GameEngine() {
-    //     this(10, 20);
-    // }
+    private void handleDASEvent(){
+        if (ARR != 0 && arrTask != null) {
+            // stop arr timeline
+            arrTask.cancel(false);
+        }
+        // calculate das direction
+        int leftDAS = DASCharges.get(Direction.LEFT);
+        int rightDAS = DASCharges.get(Direction.RIGHT);
+        Direction direction;
+        if (leftDAS - rightDAS == 0) { 
+            return; 
+        } 
+        else if (leftDAS - rightDAS > 0) { direction = Direction.LEFT; }
+        else { direction = Direction.RIGHT; }
 
+        if (ARR == 0) { // 0 ARR
+            try {
+                moveDAS(direction);
+            } catch (Throwable e) {
+                e.printStackTrace();
+            }
+        }
+        else { // non-zero ARR
+            // instantly move one step
+            // horizontalMove(direction);
+            move(direction);
+            handleSoftDropEvent();
+            long duration = (long)(ARR * 1000 / 60);
+            arrTask = scheduler.scheduleAtFixedRate( () -> {
+                dispatcher.dispatch(() -> {
+                    // horizontalMove(direction);
+                    move(direction);
+                    handleSoftDropEvent();
+                });
+            }, 0, duration, TimeUnit.MILLISECONDS);
+        }
+        
+    }
+
+    private void handleSoftDropEvent() {
+        if (isSoftDropping && softDropFactor == Double.MAX_VALUE) {
+            moveDAS(Direction.DOWN);
+        }
+    }
+
+    public void resetGravityTimeline(double gravity){
+        if (gravityTask != null) {
+            gravityTask.cancel(false);
+        }
+        long duration = (long)(1000 / gravity);
+        gravityTask = scheduler.scheduleAtFixedRate( () -> {
+            dispatcher.dispatch(() -> {
+                try {
+                    move(Direction.DOWN);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
+        }, 0, duration, TimeUnit.MILLISECONDS);
+    }
+
+    public void startSoftDrop() {
+        isSoftDropping = true;
+        if (softDropFactor != Double.MAX_VALUE) {
+            resetGravityTimeline(getGravity() * softDropFactor);
+        }
+        handleSoftDropEvent();
+    }
+
+    public void endSoftDrop() {
+        isSoftDropping = false;
+        if (softDropFactor != Double.MAX_VALUE)
+            resetGravityTimeline(getGravity());
+    }
+
+    public void setSoftDropFactor(double softDropFactor) {
+        this.softDropFactor = softDropFactor;
+    }
+
+    public void chargeDAS(Direction direction) {
+        DASCharges.put(direction, DASCharges.get(direction) + 1);
+        handleDASEvent();
+    }  
+    
+    public void unchargeDAS(Direction direction) {
+        DASCharges.put(direction, DASCharges.get(direction) - 1);
+        handleDASEvent();
+    }   
+    
     /**
      * Reset the board state into initial
      */
@@ -118,6 +204,7 @@ public class GameEngine implements Observable, Controllable{
     
     public void start() {
         spawn();
+        resetGravityTimeline(gravity);
     }
 
     public void rotate(Rotation rotation) {
@@ -154,8 +241,10 @@ public class GameEngine implements Observable, Controllable{
         else if (direction == Direction.RIGHT) {op = new MoveRightOperator();}
         else {op = null;}
         tryOperate(op);
-        if (direction != Direction.DOWN)
+        if (direction != Direction.DOWN) {
             updateShadow();
+            // handleSoftDropEvent(); // new
+        }
     }
 
     public void moveDAS(Direction direction) {
@@ -169,10 +258,14 @@ public class GameEngine implements Observable, Controllable{
             if (! tryOperate(op)) {
                 break;
             }
-            if (direction != Direction.DOWN)
-                {autoOperationListener.onAutoHorizontalMove();}
-            else if (direction == Direction.DOWN)
-                {autoOperationListener.onAutoMoveDown();}
+            if (direction != Direction.DOWN) {
+                // {autoOperationListener.onAutoHorizontalMove();}
+                // handleSoftDropEvent();
+            }
+            else if (direction == Direction.DOWN){
+                // {autoOperationListener.onAutoMoveDown();}
+                // handleDASEvent();
+            }
         }
         if (direction != Direction.DOWN)
             updateShadow();
@@ -192,11 +285,14 @@ public class GameEngine implements Observable, Controllable{
         Tetromino currentTetrominoClone = new Tetromino(currentTetromino);
         if (holdTetrominoType == null) {
             spawn();
+
         }
 
         else {
-            currentTetromino = new Tetromino(centreTopPoint(), holdTetrominoType);
+            currentTetromino = new Tetromino(centreTopPoint(), holdTetrominoType); // duplicate_1 2
             allTetrominos.add(currentTetromino);
+            handleSoftDropEvent(); // this is temp quick fix, planned refactor
+            handleDASEvent();
         }
 
         holdTetrominoType = currentTetrominoClone.type;
@@ -217,9 +313,9 @@ public class GameEngine implements Observable, Controllable{
     void spawn() {
         // from previous piece's leftover data, decide isAutoSpawned true/false, 
         // to know if needed to notify controller RIGHT AFTER current piece spawned
-        boolean isAutoSpawned = false;
-        if ((lockResets >= maxLockResets) || lockTimerFinished) 
-            isAutoSpawned = true;        
+        // boolean isAutoSpawned = false;
+        // if ((lockResets >= maxLockResets) || lockTimerFinished) 
+        //     isAutoSpawned = true;        
         // populate next queue
         while (nextQueue.size() < 7) {
             nextQueue.addAll(tetrominoGenerator.generateTetrominos());
@@ -227,7 +323,7 @@ public class GameEngine implements Observable, Controllable{
 
         //spawn a piece
         TetrominoType currentTetrominoType = nextQueue.remove();
-        Tetromino t = new Tetromino(centreTopPoint(), currentTetrominoType);
+        Tetromino t = new Tetromino(centreTopPoint(), currentTetrominoType); // duplicate_1 1
         currentTetromino = null;
         // when gameover, notify controller
         if (hasCollision(t) || scoreManager.haveAchievedGoal()) {
@@ -241,15 +337,9 @@ public class GameEngine implements Observable, Controllable{
 
         // currentSpinState = SpinState.NOT_SPIN;
         checkLanded();
-        
-        // when auto-spawned, notify controller
-        if (isAutoSpawned) {
-            autoOperationListener.onAutoSpawn();
-        }
-
-        lockTimerFinished = false;
+        handleDASEvent();
+        handleSoftDropEvent();
         updateShadow();
-        // notifyObservers();
     }
 
     /**
@@ -264,7 +354,7 @@ public class GameEngine implements Observable, Controllable{
             }
             lockTask = scheduler.schedule(() -> { 
                 dispatcher.dispatch(() -> {
-                    this.lockTimerFinished = true;
+                    // this.lockTimerFinished = true;
                     lock();
                 }); 
                 
@@ -288,13 +378,16 @@ public class GameEngine implements Observable, Controllable{
      * @return true if operation success
      */
     boolean tryOperate(Operator op) {
-       
         if (!canOperate(op)) {
             return false;
         }
         op.operate(currentTetromino);
         checkLanded();
+        handleSoftDropEvent();
+        handleDASEvent();
+
         notifyObservers();
+        
         return true;
     }
 
@@ -437,7 +530,7 @@ public class GameEngine implements Observable, Controllable{
         scoreManager.onLock(nLinesClearedcleared);
         lockTask.cancel(false);
         spawn();
-        notifyObservers();
+        // notifyObservers();
     }
 
     /**
@@ -615,7 +708,8 @@ public class GameEngine implements Observable, Controllable{
      */
     void removeCurrentTetromino() {
         // lockTimer.stop();
-        lockTask.cancel(false);
+        if (lockTask != null)
+            lockTask.cancel(false);
         allTetrominos.remove(currentTetromino);
     }
 
@@ -638,10 +732,6 @@ public class GameEngine implements Observable, Controllable{
     public double getGravity() {
         return gravity;
     }
-
-    public void setOperationListener(AutoOperationListener autoOperationListener){
-        this.autoOperationListener = autoOperationListener;
-    }
     
     public TetrominoType getHoldTetrominoType() {
         return this.holdTetrominoType;
@@ -655,10 +745,6 @@ public class GameEngine implements Observable, Controllable{
         return List.copyOf(allTetrominos);
     }
 
-    public void setRotationStrategy(RotationStrategy rotationStrategy) {
-        this.rotationStrategy = rotationStrategy;
-    }
-    
     public void setGravity(double gravity){
         this.gravity = gravity;
     }

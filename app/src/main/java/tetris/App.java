@@ -50,9 +50,8 @@ public class App extends Application {
         new SpinClearDisplayManager(engine.getScoreManager(), window.getSpinClearPane());
 
 
-        engine.setOperationListener(controller);
         // controller.setSoftDropFactor(15);
-        controller.setSoftDropFactor(Double.MAX_VALUE);
+        engine.setSoftDropFactor(Double.MAX_VALUE);
         engine.setGameOverListener(controller);
 
         controller.showMenu();
