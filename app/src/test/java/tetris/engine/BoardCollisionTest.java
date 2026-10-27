@@ -26,7 +26,7 @@ public class BoardCollisionTest {
     @Test 
     void collisionWithLeftWall() {
         // Arrange
-        GameEngine b = new GameEngine(10, 20);
+        GameEngine b = new GameEngine(10, 20, null);
         Tetromino t = new Tetromino(new Point(9, 4), TetrominoType.T);
 
         // Act
@@ -55,7 +55,7 @@ public class BoardCollisionTest {
     @Test 
     void collisionWithBottomWall() {
         // Arrange
-        GameEngine b = new GameEngine(10, 10);
+        GameEngine b = new GameEngine(10, 10, null);
         Tetromino t = new Tetromino(new Point(5, 9), TetrominoType.T);
         t.rotateCounterClockwise();
 
