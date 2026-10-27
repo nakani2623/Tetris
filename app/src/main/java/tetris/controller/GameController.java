@@ -6,11 +6,13 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
-import javafx.animation.KeyFrame;
-import javafx.animation.Timeline;
-import javafx.util.Duration;
-import tetris.controller.Controllable;
+import tetris.controller.dispatch.MainThreadDispatcher;
+import tetris.engine.GameEngine;
 import tetris.engine.type.Direction;
 import tetris.engine.type.GameState;
 import tetris.engine.type.Rotation;
@@ -22,34 +24,29 @@ import tetris.graphics.GameWindow;
  * Handles user inputs, timing
  * GameController
  */
-public class GameController implements GameOverListener, AutoOperationListener{
-    private Controllable engine;
+public class GameController implements GameOverListener {
+    private GameEngine engine;
     private GameWindow window;
+    private MainThreadDispatcher dispatcher;
 
-    private Timeline gravityTimeline;
-    private Timeline arrTimeline;
-    private double softDropFactor;
-    private GameState gameState;
+    private ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+    private Map<UnifiedKey, ScheduledFuture<?>> DASChargingKeys = new HashMap<UnifiedKey, ScheduledFuture<?>>();
     private Set<UnifiedKey> pressedKeys = new HashSet<>(); 
-    private Map<Direction, Integer> DASCharges = new HashMap<Direction, Integer>();
-    private Map<UnifiedKey, Timeline> DASChargingKeys = new HashMap<UnifiedKey, Timeline>();
     private List<UnifiedKey> DASChargedKeys = new LinkedList<UnifiedKey>();
-    private boolean isSoftDropping = false;
     private double DAS = 5;
-    private double ARR = 0;
 
-    public GameController(Controllable engine, GameWindow window) {
+    private GameState gameState;
+
+    public GameController(GameEngine engine, GameWindow window, MainThreadDispatcher dispatcher) {
         this.engine = engine;
         this.window = window;
-        DASCharges.put(Direction.LEFT, 0);
-        DASCharges.put(Direction.RIGHT, 0);
+        this.dispatcher = dispatcher;
     }
 
     public void start() {
         gameState = GameState.active;
         engine.start();
         window.showGame();
-        resetGravityTimeline(engine.getGravity());
     }
 
     public void restart() {
@@ -69,121 +66,32 @@ public class GameController implements GameOverListener, AutoOperationListener{
         window.onStart();
     }
 
-
-    /**
-     * called when das staus changed or new piece spawned and notified by engine
-     */
-    private void handleDASEvent(){
-        if (ARR != 0 && arrTimeline != null) {
-            // stop arr timeline
-            arrTimeline.stop();
-        }
-        // calculate das direction
-        int leftDAS = DASCharges.get(Direction.LEFT);
-        int rightDAS = DASCharges.get(Direction.RIGHT);
-        Direction direction;
-        if (leftDAS - rightDAS == 0) { 
-            return; 
-        } 
-        else if (leftDAS - rightDAS > 0) { direction = Direction.LEFT; }
-        else { direction = Direction.RIGHT; }
-        
-        if (ARR == 0) { // 0 ARR
-            engine.moveDAS(direction);
-        }
-        else { // non-zero ARR
-            // instantly move one step
-            horizontalMove(direction);
-            arrTimeline = new Timeline(
-                new KeyFrame(
-                    Duration.seconds(ARR/60), event -> {
-                        horizontalMove(direction);
-                    }
-                )
-            );
-            arrTimeline.setCycleCount(Timeline.INDEFINITE);
-            arrTimeline.play();
-        }
-        
-    }
-    /**
-     * controller need to handle das for next current piece
-     * when engine lock piece by timer, engine call this method onSpawn
-     */
-    public void onAutoSpawn() {
-        handleDASEvent();
-        handleSoftDropEvent();
-    }
-    
-    public void onAutoHorizontalMove() {
-        handleSoftDropEvent();
-    }
-
-    public void onAutoMoveDown() {
-        handleDASEvent();
-    }
-
     private void startCharging(UnifiedKey key, Direction direction) {
-        Timeline t = new Timeline(
-            new KeyFrame(
-                Duration.seconds(DAS/60), event -> {
-                    DASCharges.put(direction, DASCharges.get(direction) + 1);
-                    DASChargedKeys.add(key);
-                    handleDASEvent();
-                }
-            )
-        );
-        t.setOnFinished(event -> {
-            DASChargingKeys.remove(key);
-        });
-        t.play();
-        DASChargingKeys.put(key, t);
+        long delay = (long)(DAS * 1000 / 60);
+        ScheduledFuture chargeDAS = scheduler.schedule(() -> {
+         
+            dispatcher.dispatch(() -> {
+                engine.chargeDAS(direction);
+                DASChargedKeys.add(key);
+                // handleDASEvent();
+                DASChargingKeys.remove(key);
+            });
+        }, delay, TimeUnit.MILLISECONDS);
+        DASChargingKeys.put(key, chargeDAS);
+
     }
     private void endCharging(UnifiedKey key, Direction direction) {
         if (DASChargingKeys.containsKey(key)) {
-            this.DASChargingKeys.get(key).stop();
+            this.DASChargingKeys.get(key).cancel(false);
         }
 
         if (DASChargedKeys.contains(key)) {
-            DASCharges.put(direction, DASCharges.get(direction) - 1);
+            engine.unchargeDAS(direction);
             DASChargedKeys.remove(key);
         }
-        handleDASEvent();
-        
-    }
-    public void resetGravityTimeline(double gravity){
-        if (gravityTimeline != null) {
-            gravityTimeline.stop();
-        }
-
-        // UPDATED RUNABLE: inside Timeline, (+)  handleDASEvent(); 
-        gravityTimeline = new Timeline(new KeyFrame(Duration.seconds(1/gravity), event -> {
-            engine.move(Direction.DOWN);
-            if (ARR == 0)
-                handleDASEvent(); 
-        }));
-        gravityTimeline.setCycleCount(Timeline.INDEFINITE);
-        gravityTimeline.play();
-    }
-
-    private void handleSoftDropEvent() {
-        if (isSoftDropping && softDropFactor == Double.MAX_VALUE) {
-            engine.moveDAS(Direction.DOWN);
-        }
-    }
-    private void startSoftDrop() {
-        isSoftDropping = true;
-        if (softDropFactor != Double.MAX_VALUE) {
-            resetGravityTimeline(engine.getGravity() * softDropFactor);
-        }
         
     }
 
-    private void endSoftDrop() {
-        isSoftDropping = false;
-        if (softDropFactor != Double.MAX_VALUE)
-            resetGravityTimeline(engine.getGravity());
-    }
 
     public void handleKeyPressed(GameKey key, UnifiedKey physicalKey) {
         if (!pressedKeys.add(physicalKey)) { // Ignore repeated KEY_DOWN events
@@ -215,7 +123,7 @@ public class GameController implements GameOverListener, AutoOperationListener{
                 engine.hardDrop();
 
             case SOFTDROP ->
-                startSoftDrop();
+                engine.startSoftDrop();
 
             case HOLD ->
                 engine.hold();
@@ -231,8 +139,8 @@ public class GameController implements GameOverListener, AutoOperationListener{
         }
 
         // Must execute after each newly pressed key
-        handleDASEvent();
-        handleSoftDropEvent();
+        // handleDASEvent();
+        // handleSoftDropEvent();
     }
 
     public void handleKeyReleased(GameKey key, UnifiedKey physicalKey) {
@@ -247,7 +155,7 @@ public class GameController implements GameOverListener, AutoOperationListener{
 
         switch (key) {
             case SOFTDROP ->
-                endSoftDrop();
+                engine.endSoftDrop();
 
             case MOVE_LEFT ->
                 horizontalMoveReleased(physicalKey, Direction.LEFT);
@@ -259,13 +167,17 @@ public class GameController implements GameOverListener, AutoOperationListener{
         }
     }
 
-    public void setSoftDropFactor(double softDropFactor) {
-        this.softDropFactor = softDropFactor;
-    }
+    // public void setSoftDropFactor(double softDropFactor) {
+    //     this.softDropFactor = softDropFactor;
+    // }
     
+    public void dispose() {
+        scheduler.shutdown();
+    }
+
     @Override 
     public void onGameOver() {
-        gravityTimeline.stop();
+        dispose();
         gameState = GameState.ended;
         window.onGameOver();
     }
@@ -299,10 +211,11 @@ public class GameController implements GameOverListener, AutoOperationListener{
     private void horizontalMove(Direction direction) {
         engine.move(direction);
         // check if needed to repeat softdrop event
-        handleSoftDropEvent();
+        // handleSoftDropEvent();
     }
 
     public GameState getGameState() {
         return gameState;
     }
+
 }
