@@ -10,8 +10,12 @@ import java.util.Queue;
 import tetris.engine.operator.MoveDownOperator;
 import tetris.engine.operator.MoveLeftOperator;
 import tetris.engine.operator.MoveRightOperator;
+import tetris.engine.operator.MoveUpOperator;
 import tetris.engine.operator.Operator;
+import tetris.engine.rotator.Rotator;
+import tetris.engine.rotator.SuperRotator;
 import tetris.engine.type.Direction;
+import tetris.engine.type.Rotation;
 import tetris.engine.type.TetrominoType;
 import tetris.utils.Point;
 
@@ -23,10 +27,12 @@ public class Board {
     private Tetromino currentTetromino;
     private Tetromino shadowTetromino;
 
+    private Rotator rotator;
     public Board(int width, int height) {
         this.width = width;
         this.height = height;
         allTetrominos = new ArrayList<Tetromino>();
+        rotator = new SuperRotator();
 
     }
 
@@ -60,11 +66,12 @@ public class Board {
      * @param op
      * @return true if operation success
      */
-    boolean tryOperate(Operator op) {
+    public boolean tryOperate(Operator op) {
         if (!canOperate(op)) {
             return false;
         }
         op.operate(currentTetromino);
+        updateShadow();
         checkLanded();
         handleSoftDropEvent();
         handleDASEvent();
@@ -73,14 +80,17 @@ public class Board {
         
         return true;
     }
-
-    boolean canOperate(Operator op) {
+    
+    public boolean canOperate(Operator op) {
         Tetromino clone = new Tetromino(currentTetromino);
         op.operate(clone);
         if (hasCollision(clone)) {
             return false;
         }
         return true;
+    }
+    public boolean rotate(Rotation rotation) {
+        return rotator.rotate(rotation, this);
     }
     public void move(Direction direction){
         Operator op;
@@ -89,10 +99,6 @@ public class Board {
         else if (direction == Direction.RIGHT) {op = new MoveRightOperator();}
         else {op = null;}
         tryOperate(op);
-        if (direction != Direction.DOWN) {
-            updateShadow();
-            // handleSoftDropEvent(); // new
-        }
     }
 
     public void moveDAS(Direction direction) {
@@ -115,8 +121,6 @@ public class Board {
                 // handleDASEvent();
             }
         }
-        if (direction != Direction.DOWN)
-            updateShadow();
     }
     void updateShadow() {
         shadowTetromino = new Tetromino(currentTetromino);
@@ -138,7 +142,7 @@ public class Board {
      * @param m
      * @return
      */
-    boolean hasCollision(Piece t) {
+    public boolean hasCollision(Piece t) {
         for (Piece other : allTetrominos) {
             if (other == t || other == currentTetromino)
                 continue;
@@ -208,8 +212,6 @@ public class Board {
                 }
             }
         }
-
-
         return toClear.size();
     }
 
