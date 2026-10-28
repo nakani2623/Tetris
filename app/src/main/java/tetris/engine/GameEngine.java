@@ -25,6 +25,7 @@ import tetris.engine.generatingStrategy.TetrominoGenerator;
 import tetris.engine.observers.Observable;
 import tetris.engine.observers.Observer;
 import tetris.engine.operator.*;
+import tetris.engine.rotator.Rotator;
 import tetris.engine.score.ScoreManager;
 import tetris.engine.type.Direction;
 import tetris.engine.type.Rotation;
@@ -38,17 +39,10 @@ public class GameEngine implements Observable {
     // low level module references
     private ScoreManager scoreManager;
     private Board board;
-    // private int width;
-    // private int height;
-    // private List<Tetromino> allTetrominos;
-    // private Tetromino currentTetromino;
-    // private Tetromino shadowTetromino;
-
+    private Rotator rotator;
     // next queue / generate piece
     private Queue<TetrominoType> nextQueue;
     private TetrominoGenerator tetrominoGenerator;
-
-
 
     // hold
     private TetrominoType holdTetrominoType;
@@ -91,7 +85,6 @@ public class GameEngine implements Observable {
     public GameEngine(Board board, MainThreadDispatcher dispatcher) {
         // this.board = board;
         this.gravity = 1;
-
         // configure game, todo: create and use initEngine(JSON? configFile) instead below
         tetrominoGenerator = new BagGenerator();
         nextQueue = new LinkedList<TetrominoType>();
@@ -206,29 +199,14 @@ public class GameEngine implements Observable {
     }
 
     public void rotate(Rotation rotation) {
-        if (!superRotate(rotation)) {
+        if (!board.rotate(rotation)) {
             return;
         }
-        updateShadow();
 
-        SpinState currentSpinState = SpinState.NOT_SPIN;
+        // SpinState currentSpinState = SpinState.NOT_SPIN;
         // detect & let score handle spins
-        if (board.getcurrentTetromino().type == TetrominoType.T) { // detect T-spin
-            SpinState threeCornerTSpinState = detectTSpin();
-            if (isImmobile()) {
-                switch (threeCornerTSpinState) {
-                    case PROPER_SPIN -> currentSpinState = SpinState.PROPER_SPIN;
-                    case MINI_SPIN -> currentSpinState = SpinState.MINI_SPIN;
-                    case NOT_SPIN -> currentSpinState = SpinState.MINI_SPIN;
-                    default -> currentSpinState = SpinState.NOT_SPIN;
-                }
-            } else currentSpinState = threeCornerTSpinState;
-            
-        } else { // detect other spin
-            if (isImmobile())
-                currentSpinState = SpinState.MINI_SPIN;
-        }
-
+        
+        // if 
         scoreManager.onSpin(currentSpinState, board.getcurrentTetromino().type);
     }
 
@@ -321,69 +299,14 @@ public class GameEngine implements Observable {
         }
     }
 
-    
-    /**
-     * 
-     * @return true if current tetromino is immobile
-     */
-    boolean isImmobile() {
-        Operator[] operators = {new MoveDownOperator(), new MoveLeftOperator(), new MoveRightOperator(), new MoveUpOperator()};
-        for (Operator operator : operators) {
-            if (canOperate(operator))
-                return false;
-        }
-        return true;
-    }
-    
+
     /**
      * standard 3 corners detection, ref: https://tetris.wiki/T-Spin
      * impl by: spawn a single at 4 corners of T, then do collison tests, 
      * if 3/4 corners colide, is T spin, then if 2/2 front corners colide, is proper T spin 
      * @return SpinState: (NOT/MINI/PROPER)_SPIN
      */
-    SpinState detectTSpin() { 
-        // spawn single mino piece at top-left corner
-        Point centre = currentTetromino.getCentre();
-        Piece corner = new Piece(new Mino((int)centre.getX() - 1, (int)centre.getY() - 1));
-
-        // rotate to be front-left corner of current T
-        int cwRotationForCorner = 0;
-        if (currentTetromino.rotationState == RotationState.ZERO)
-            ;
-        else if (currentTetromino.rotationState == RotationState.RIGHT)
-            cwRotationForCorner = 1;
-        else if (currentTetromino.rotationState == RotationState.TWO)
-            cwRotationForCorner = 2;
-        else if (currentTetromino.rotationState == RotationState.LEFT)
-            cwRotationForCorner = 3;
-        for (int i = 0; i < cwRotationForCorner; i++)
-            corner.rotateClockwise(centre);
-
-        // collision tests, (test & rotatecw of corner & next test, 4 in total)
-        // first 2: front, last 2: other corners
-        int nBlockedFrontCorner = 0;
-        int nBlockedOtherCorner = 0;
-        for (int i = 0; i < 4; i++) {
-            // collision test
-            if (hasCollision(corner)) {
-                if (i < 2) {
-                    nBlockedFrontCorner++;
-                } else {
-                    nBlockedOtherCorner++;
-                }
-            }
-            corner.rotateClockwise(centre);
-        }
-
-        if (nBlockedFrontCorner + nBlockedOtherCorner >= 3) {
-            // is a T-spin! then decide proper or mini:
-            if (nBlockedFrontCorner == 2) 
-                return SpinState.PROPER_SPIN;
-            else
-                return SpinState.MINI_SPIN;
-        }
-        return SpinState.NOT_SPIN;
-    }
+    
 
     void lock() {
         int nLinesClearedcleared = checkCompletedLines(currentTetromino);
