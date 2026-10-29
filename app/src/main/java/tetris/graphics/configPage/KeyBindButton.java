@@ -1,6 +1,7 @@
 package tetris.graphics.configPage;
 
 import javafx.scene.control.Button;
+import javafx.scene.input.KeyEvent;
 import tetris.controller.input.JavaFXKeyboardAdapter;
 import tetris.controller.input.KeyBinds;
 import tetris.engine.observers.Observable;
@@ -13,6 +14,7 @@ public class KeyBindButton extends Button implements Observable {
     GameKey bindingGameKey; 
     GameState gamestate;
     KeyBinds keyBinds;
+    private boolean binding;
 
     Observer observer;
 
@@ -26,10 +28,22 @@ public class KeyBindButton extends Button implements Observable {
             startBind();
         });
 
+        this.addEventFilter(KeyEvent.KEY_PRESSED, keyEvent -> {
+            if (!binding) {
+                return;
+            }
+
+            keyEvent.consume();
+            UnifiedKey uKey = JavaFXKeyboardAdapter.toUnifiedKey(keyEvent.getCode());
+            keyBinds.addBind(uKey, bindingGameKey, gamestate);
+            notifyObservers();
+            binding = false;
+        });
+
         this.focusedProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue == false) {
+                binding = false;
                 updateButtonText();
-                this.setOnKeyPressed(null);
             }
         });
 
@@ -38,12 +52,7 @@ public class KeyBindButton extends Button implements Observable {
     }
 
     public void startBind() {
-        this.setOnKeyPressed(keyEvent -> {
-            UnifiedKey uKey = JavaFXKeyboardAdapter.toUnifiedKey(keyEvent.getCode());
-            keyBinds.addBind(uKey, bindingGameKey, gamestate);
-            notifyObservers();
-            this.setOnKeyPressed(null);
-        });
+        binding = true;
     }
 
     public void updateButtonText() {
