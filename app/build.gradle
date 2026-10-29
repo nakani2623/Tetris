@@ -42,5 +42,5 @@ javafx {
 tasks.named('test') {
     // Use JUnit Platform for unit tests.
     useJUnitPlatform()
+    timeout = java.time.Duration.ofMinutes(5)
 }
-
