@@ -27,6 +27,7 @@ import tetris.engine.observers.Observer;
 import tetris.engine.operator.*;
 import tetris.engine.rotator.Rotator;
 import tetris.engine.score.ScoreManager;
+import tetris.engine.softdrop.SoftDropHandler;
 import tetris.engine.type.Direction;
 import tetris.engine.type.Rotation;
 import tetris.engine.type.RotationState;
@@ -39,7 +40,9 @@ public class GameEngine implements Observable {
     // low level module references
     private ScoreManager scoreManager;
     private Board board;
-    private Rotator rotator;
+    private SoftDropHandler softDropHandler;
+
+    private AutoMoveScheduler autoMoveScheduler;
     // next queue / generate piece
     private Queue<TetrominoType> nextQueue;
     private TetrominoGenerator tetrominoGenerator;
@@ -48,19 +51,9 @@ public class GameEngine implements Observable {
     private TetrominoType holdTetrominoType;
     
     // score? rotation
-    private SpinState currentSpinState;
+    // private SpinState currentSpinState;
 
-    // gameplay state & spawn
-    private double gravity; // move down num per sec
-    private double softDropFactor;
-    private boolean isSoftDropping = false;
-    private ScheduledFuture<?> gravityTask;
-    private ScheduledFuture<?> arrTask;
-    private Map<Direction, Integer> DASCharges = new HashMap<>(
-        Map.of(Direction.LEFT, 0, Direction.RIGHT, 0)
-    );
-    // private double DAS = 5;
-    private double ARR = 0;
+    
 
     private ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
     private ScheduledFuture<?> lockTask;
@@ -133,9 +126,7 @@ public class GameEngine implements Observable {
     }
 
     private void handleSoftDropEvent() {
-        if (isSoftDropping && softDropFactor == Double.MAX_VALUE) {
-            moveDAS(Direction.DOWN);
-        }
+        softDropHandler.applyEffect(board);
     }
 
     public void resetGravityTimeline(double gravity){
