@@ -27,7 +27,6 @@ import tetris.engine.observers.Observer;
 import tetris.engine.operator.*;
 import tetris.engine.rotator.Rotator;
 import tetris.engine.score.ScoreManager;
-import tetris.engine.softdrop.SoftDropHandler;
 import tetris.engine.type.Direction;
 import tetris.engine.type.Rotation;
 import tetris.engine.type.RotationState;
@@ -40,7 +39,6 @@ public class GameEngine implements Observable {
     // low level module references
     private ScoreManager scoreManager;
     private Board board;
-    private SoftDropHandler softDropHandler;
 
     private AutoMoveScheduler autoMoveScheduler;
     // next queue / generate piece
@@ -77,100 +75,43 @@ public class GameEngine implements Observable {
      */
     public GameEngine(Board board, MainThreadDispatcher dispatcher) {
         // this.board = board;
-        this.gravity = 1;
         // configure game, todo: create and use initEngine(JSON? configFile) instead below
         tetrominoGenerator = new BagGenerator();
         nextQueue = new LinkedList<TetrominoType>();
         observers = new ArrayList<>();
         this.dispatcher = dispatcher;
 
+        // default components behaviour
+        listener = () -> {};
+        autoMoveScheduler = new AutoMoveScheduler(1, 0);
     }
 
-    private void handleDASEvent(){
-        if (ARR != 0 && arrTask != null) {
-            // stop arr timeline
-            arrTask.cancel(false);
-        }
-        // calculate das direction
-        int leftDAS = DASCharges.get(Direction.LEFT);
-        int rightDAS = DASCharges.get(Direction.RIGHT);
-        Direction direction;
-        if (leftDAS - rightDAS == 0) { 
-            return; 
-        } 
-        else if (leftDAS - rightDAS > 0) { direction = Direction.LEFT; }
-        else { direction = Direction.RIGHT; }
+    
 
-        if (ARR == 0) { // 0 ARR
-            try {
-                moveDAS(direction);
-            } catch (Throwable e) {
-                e.printStackTrace();
-            }
-        }
-        else { // non-zero ARR
-            // instantly move one step
-            // horizontalMove(direction);
-            move(direction);
-            handleSoftDropEvent();
-            long duration = (long)(ARR * 1000 / 60);
-            arrTask = scheduler.scheduleAtFixedRate( () -> {
-                dispatcher.dispatch(() -> {
-                    // horizontalMove(direction);
-                    move(direction);
-                    handleSoftDropEvent();
-                });
-            }, 0, duration, TimeUnit.MILLISECONDS);
-        }
-        
-    }
+    // private void handleSoftDropEvent() {
+    //     softDropHandler.applyEffect(board);
+    // }
 
-    private void handleSoftDropEvent() {
-        softDropHandler.applyEffect(board);
-    }
-
-    public void resetGravityTimeline(double gravity){
-        if (gravityTask != null) {
-            gravityTask.cancel(false);
-        }
-        long duration = (long)(1000 / gravity);
-        gravityTask = scheduler.scheduleAtFixedRate( () -> {
-            dispatcher.dispatch(() -> {
-                try {
-                    move(Direction.DOWN);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            });
-        }, 0, duration, TimeUnit.MILLISECONDS);
-    }
+    
 
     public void startSoftDrop() {
-        isSoftDropping = true;
-        if (softDropFactor != Double.MAX_VALUE) {
-            resetGravityTimeline(getGravity() * softDropFactor);
-        }
-        handleSoftDropEvent();
+        autoMoveScheduler.startSoftDrop();
     }
 
     public void endSoftDrop() {
-        isSoftDropping = false;
-        if (softDropFactor != Double.MAX_VALUE)
-            resetGravityTimeline(getGravity());
+        autoMoveScheduler.endSoftDrop();
     }
 
     public void setSoftDropFactor(double softDropFactor) {
-        this.softDropFactor = softDropFactor;
+        autoMoveScheduler.setSoftDropFactor(softDropFactor);
     }
 
     public void chargeDAS(Direction direction) {
-        DASCharges.put(direction, DASCharges.get(direction) + 1);
-        handleDASEvent();
+        autoMoveScheduler.chargeDAS(direction);
     }  
     
     public void unchargeDAS(Direction direction) {
-        DASCharges.put(direction, DASCharges.get(direction) - 1);
-        handleDASEvent();
+        autoMoveScheduler.chargeDAS(direction);
     }   
     
     /**
@@ -186,7 +127,7 @@ public class GameEngine implements Observable {
     
     public void start() {
         spawn();
-        resetGravityTimeline(gravity);
+        autoMoveScheduler.onStart();
     }
 
     public void rotate(Rotation rotation) {
@@ -223,8 +164,8 @@ public class GameEngine implements Observable {
         else {
             board.setCurrentTetromino(new Tetromino(centreTopPoint(), holdTetrominoType)); // duplicate_1 2
             board.getAllTetrominos().add(board.getcurrentTetromino());
-            handleSoftDropEvent(); // this is temp quick fix, planned refactor
-            handleDASEvent();
+            // handleSoftDropEvent(); // this is temp quick fix, planned refactor
+            // handleDASEvent();
         }
 
         holdTetrominoType = currentTetrominoClone.type;
@@ -245,20 +186,19 @@ public class GameEngine implements Observable {
         }
 
         // when gameover, notify controller
-        if (!board.spawn() || scoreManager.haveAchievedGoal()) {
+        TetrominoType currentTetrominoType = nextQueue.remove();
+        if (!board.spawn(currentTetrominoType) || scoreManager.haveAchievedGoal()) {
             listener.onGameOver();
             return;
         }
-        
+        autoMoveScheduler.onSpawn();
         lockResets = 0;
 
         
 
         // currentSpinState = SpinState.NOT_SPIN;
         checkLanded();
-        handleDASEvent();
-        handleSoftDropEvent();
-        updateShadow();
+        board.updateShadow();
     }
 
     /**
@@ -342,7 +282,7 @@ public class GameEngine implements Observable {
     }
 
     public double getGravity() {
-        return gravity;
+        return autoMoveScheduler.getGravity();
     }
     
     public TetrominoType getHoldTetrominoType() {
@@ -354,7 +294,7 @@ public class GameEngine implements Observable {
     }
 
     public void setGravity(double gravity){
-        this.gravity = gravity;
+        autoMoveScheduler.setGravity(gravity);
     }
 
     public void setGameOverListener(GameOverListener listener) {

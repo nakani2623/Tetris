@@ -45,8 +45,7 @@ public class Board {
      * 
      * @return bool: success or not
      */
-    public boolean spawn() {
-        TetrominoType currentTetrominoType = nextQueue.remove();
+    public boolean spawn(TetrominoType currentTetrominoType) {
         Tetromino t = new Tetromino(centreTopPoint(), currentTetrominoType); // duplicate_1 1
         currentTetromino = null;
         if (hasCollision(t)) {
@@ -315,5 +314,10 @@ public class Board {
 
     public Tetromino getShadowTetromino() {
         return this.shadowTetromino;
+    }
+
+    public double getGravity() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getGravity'");
     } 
 }
