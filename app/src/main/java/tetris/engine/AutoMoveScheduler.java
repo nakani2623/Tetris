@@ -7,11 +7,12 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import tetris.controller.dispatch.JavaFXMainThreadDispatcher;
 import tetris.controller.dispatch.MainThreadDispatcher;
 import tetris.engine.type.Direction;
 
 public class AutoMoveScheduler {
-    private GameEngine board;
+    private GameEngine engine;
     // private SoftDropHandler softDropHandler;
 
     // gameplay state & spawn
@@ -21,14 +22,16 @@ public class AutoMoveScheduler {
     private ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
     private ScheduledFuture<?> gravityTask;
     private ScheduledFuture<?> arrTask;
-    private MainThreadDispatcher dispatcher;
+    private MainThreadDispatcher dispatcher = new JavaFXMainThreadDispatcher();
     private Map<Direction, Integer> DASCharges = new HashMap<>(
         Map.of(Direction.LEFT, 0, Direction.RIGHT, 0)
     );
     private double ARR = 0;
-    public AutoMoveScheduler(double gravity, double arr) {
+    public AutoMoveScheduler(double gravity, double arr, MainThreadDispatcher dispatcher, GameEngine engine) {
         this.gravity = gravity;
         this.ARR = arr;
+        this.engine = engine;
+        this.dispatcher = dispatcher;
     }
 
     public void onStart() {
@@ -44,16 +47,18 @@ public class AutoMoveScheduler {
         handleDASEvent();
     }
     private void applySoftDropEffect() {
+        if (!isSoftDropping) 
+            return ;
         // inf sdf
         if (softDropFactor == Double.MAX_VALUE) {
-            board.moveDAS(Direction.DOWN);
+            engine.moveDAS(Direction.DOWN);
             return;
         }
 
         // non inf sdf
         double tempGravity = softDropFactor * gravity;
         if (tempGravity > 50) {
-            board.moveDAS(Direction.DOWN);
+            engine.moveDAS(Direction.DOWN);
             return;
         }
         resetGravityTimeline(tempGravity);
@@ -75,7 +80,7 @@ public class AutoMoveScheduler {
 
         if (ARR == 0) { // 0 ARR
             try {
-                board.moveDAS(direction);
+                engine.moveDAS(direction);
             } catch (Throwable e) {
                 e.printStackTrace();
             }
@@ -83,13 +88,13 @@ public class AutoMoveScheduler {
         else { // non-zero ARR
             // instantly move one step
             // horizontalMove(direction);
-            board.move(direction);
+            engine.move(direction);
             applySoftDropEffect();
             long duration = (long)(ARR * 1000 / 60);
             arrTask = scheduler.scheduleAtFixedRate( () -> {
                 dispatcher.dispatch(() -> {
                     // horizontalMove(direction);
-                    board.move(direction);
+                    engine.move(direction);
                     applySoftDropEffect();
                 });
             }, 0, duration, TimeUnit.MILLISECONDS);
@@ -98,16 +103,13 @@ public class AutoMoveScheduler {
     }
     public void startSoftDrop() {
         isSoftDropping = true;
-        if (softDropFactor != Double.MAX_VALUE) {
-            resetGravityTimeline(board.getGravity() * softDropFactor);
-        }
         applySoftDropEffect();
     }
 
     public void endSoftDrop() {
         isSoftDropping = false;
         if (softDropFactor != Double.MAX_VALUE)
-            resetGravityTimeline(board.getGravity());
+            resetGravityTimeline(engine.getGravity());
     }
 
     public void setSoftDropFactor(double softDropFactor) {
@@ -120,11 +122,12 @@ public class AutoMoveScheduler {
         long duration = (long)(1000 / gravity);
         gravityTask = scheduler.scheduleAtFixedRate( () -> {
             dispatcher.dispatch(() -> {
-                try {
-                    board.move(Direction.DOWN);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+                engine.move(Direction.DOWN);
+                // try {
+                //     engine.move(Direction.DOWN);
+                // } catch (Exception e) {
+                //     e.printStackTrace();
+                // }
             });
         }, 0, duration, TimeUnit.MILLISECONDS);
     }

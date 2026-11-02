@@ -5,27 +5,24 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Queue;
 
+import tetris.engine.observers.Observable;
+import tetris.engine.observers.Observer;
 import tetris.engine.operator.MoveDownOperator;
-import tetris.engine.operator.MoveLeftOperator;
-import tetris.engine.operator.MoveRightOperator;
-import tetris.engine.operator.MoveUpOperator;
 import tetris.engine.operator.Operator;
-import tetris.engine.rotator.Rotator;
-import tetris.engine.rotator.SuperRotator;
-import tetris.engine.type.Direction;
-import tetris.engine.type.Rotation;
 import tetris.engine.type.TetrominoType;
 import tetris.utils.Point;
 
-public class Board {
+public class Board implements Observable{
     // board
     private int width;
     private int height;
     private List<Tetromino> allTetrominos;
     private Tetromino currentTetromino;
     private Tetromino shadowTetromino;
+
+    private List<Observer> observers = new ArrayList<>();
+
 
     public Board(int width, int height) {
         this.width = width;
@@ -37,6 +34,7 @@ public class Board {
     public void reset() {
         allTetrominos = new ArrayList<Tetromino>();
         currentTetromino = null;
+        notifyObservers();
     }
     
     /**
@@ -51,9 +49,7 @@ public class Board {
         }
         op.operate(getcurrentTetromino());
         updateShadow();
-        
-
-        // notifyObservers();
+        notifyObservers();
         
         return true;
     }
@@ -80,6 +76,7 @@ public class Board {
         }
         currentTetromino = t;
         allTetrominos.add(currentTetromino);
+        notifyObservers();
         return true;
     }
 
@@ -95,7 +92,7 @@ public class Board {
             shadowTetromino.moveDown();
         }
         shadowTetromino.moveUp();
-        // notifyObservers();
+        notifyObservers();
     }
     /*
     -------------
@@ -154,7 +151,6 @@ public class Board {
         if (hasCollision(clone)) {
             return true;
         }
-
         return false;
     }
     /*
@@ -306,4 +302,21 @@ public class Board {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'getGravity'");
     } 
+
+        @Override
+    public void addObserver(Observer observer) {
+        observers.add(observer);
+    }
+
+    @Override
+    public void removeObserver(Observer observer) {
+        observers.remove(observer);
+    }
+
+    @Override
+    public void notifyObservers() {
+        for (Observer observer : observers) {
+            observer.update();
+        }
+    }
 }

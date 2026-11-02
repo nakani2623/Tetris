@@ -2,21 +2,22 @@ package tetris.engine.observers;
 
 
 import tetris.engine.GameEngine;
+import tetris.engine.NextQueue;
 import tetris.graphics.gameActive.NextQueuePane;
 
 public class NextQueueDisplayManager implements Observer {
-    private GameEngine engine;
+    private NextQueue nextQueue;
     private NextQueuePane nextQueuePane;
 
-    public  NextQueueDisplayManager(GameEngine engine, NextQueuePane nextQueuePane) {
-        this.engine = engine;
+    public  NextQueueDisplayManager(NextQueue nextQueue, NextQueuePane nextQueuePane) {
+        this.nextQueue = nextQueue;
         this.nextQueuePane = nextQueuePane;
-        engine.addObserver(this);
+        nextQueue.addObserver(this);
         update();
     }
 
     @Override 
     public void update() {
-        nextQueuePane.showNext(engine.getNextQueue());
+        nextQueuePane.showNext(nextQueue.getNextQueue());
     }
 }

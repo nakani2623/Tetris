@@ -44,14 +44,13 @@ public class App extends Application {
         // engine.setScoreManager(new ZenScore());
         engine.setScoreManager(new SprintScore(10));
 
-        new BoardDisplayManager(engine, window.getBoardPane());
+        new BoardDisplayManager(engine.getBoard(), window.getBoardPane());
         new StatsDisplayManager(engine.getScoreManager(), window.getScorePane());
         new HoldDisplayManager(engine, window.getHoldPane());   
-        new NextQueueDisplayManager(engine, window.getNextQueuePane());
+        new NextQueueDisplayManager(engine.getNextQueueManager(), window.getNextQueuePane());
         new SpinClearDisplayManager(engine.getScoreManager(), window.getSpinClearPane());
 
 
-        // controller.setSoftDropFactor(15);
         engine.setSoftDropFactor(Double.MAX_VALUE);
         engine.setGameOverListener(controller);
 

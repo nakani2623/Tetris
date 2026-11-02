@@ -1,12 +1,7 @@
 package tetris.engine;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Queue;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -14,14 +9,8 @@ import java.util.concurrent.TimeUnit;
 
 // import javafx.application.Platform;
 
-import java.util.Iterator;
-import java.util.LinkedList;
-
 import tetris.controller.GameOverListener;
 import tetris.controller.dispatch.MainThreadDispatcher;
-import tetris.controller.Controllable;
-import tetris.engine.generatingStrategy.BagGenerator;
-import tetris.engine.generatingStrategy.TetrominoGenerator;
 import tetris.engine.observers.Observable;
 import tetris.engine.observers.Observer;
 import tetris.engine.operator.*;
@@ -32,11 +21,8 @@ import tetris.engine.spinDetecter.AllMiniDetecter;
 import tetris.engine.spinDetecter.SpinDetecter;
 import tetris.engine.type.Direction;
 import tetris.engine.type.Rotation;
-import tetris.engine.type.RotationState;
 import tetris.engine.type.SpinState;
 import tetris.engine.type.TetrominoType;
-import tetris.utils.KickTable;
-import tetris.utils.Point;
 
 public class GameEngine implements Observable {
     // low level module references
@@ -44,19 +30,13 @@ public class GameEngine implements Observable {
     private Board board;
     private SpinDetecter spinDetecter; 
     private Rotator rotator;
-
-
+    private NextQueue nextQueue;
     private AutoMoveScheduler autoMoveScheduler;
-    // next queue / generate piece
-    private Queue<TetrominoType> nextQueue;
-    private TetrominoGenerator tetrominoGenerator;
+    // private HoldManager holdManager;
 
     // hold
     private TetrominoType holdTetrominoType;
-    
-    // score? rotation
-    // private SpinState currentSpinState;
-    
+
     private ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
     private ScheduledFuture<?> lockTask;
     private int maxLockResets = 15;
@@ -66,11 +46,8 @@ public class GameEngine implements Observable {
     private MainThreadDispatcher dispatcher;
     private GameOverListener listener;
 
-
     // plan to remove
     private List<Observer> observers; // move to low level modules
-    // private boolean lockTimerFinished;
-    // private AutoOperationListener autoOperationListener;
 
     /**
      * Constructs game bord with specific dimension
@@ -78,21 +55,42 @@ public class GameEngine implements Observable {
      * @param height
      */
     public GameEngine(Board board, MainThreadDispatcher dispatcher) {
-        // this.board = board;
+        this.board = board;
         // configure game, todo: create and use initEngine(JSON? configFile) instead below
-        tetrominoGenerator = new BagGenerator();
-        nextQueue = new LinkedList<TetrominoType>();
         observers = new ArrayList<>();
         this.dispatcher = dispatcher;
 
         // default components behaviour
         listener = () -> {};
-        autoMoveScheduler = new AutoMoveScheduler(1, 0);
+        autoMoveScheduler = new AutoMoveScheduler(1, 0, dispatcher, this);
         spinDetecter = new AllMiniDetecter();
         rotator = new SuperRotator();
-
+        nextQueue = new NextQueue();
+        // holdManager = new HoldManager();
     }
-       
+//  ███████╗████████╗ █████╗ ██████╗ ████████╗
+//  ██╔════╝╚══██╔══╝██╔══██╗██╔══██╗╚══██╔══╝
+//  ███████╗   ██║   ███████║██████╔╝   ██║
+//  ╚════██║   ██║   ██╔══██║██╔══██╗   ██║
+//  ███████║   ██║   ██║  ██║██║  ██║   ██║
+//  ╚══════╝   ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝
+    public void start() {
+        spawn();
+        autoMoveScheduler.onStart();
+    }
+
+    /**
+     * Reset the board state into initial
+     */
+    public void reset() {
+        scoreManager.reset();
+        board.reset();
+        nextQueue.reset();
+        holdTetrominoType = null;
+
+        notifyObservers();
+    }
+
     public void move(Direction direction){
         Operator op;
         if (direction == Direction.DOWN) {op = new MoveDownOperator();}
@@ -120,62 +118,13 @@ public class GameEngine implements Observable {
         }
     }
 
-    public void startSoftDrop() {
-        autoMoveScheduler.startSoftDrop();
-    }
-
-    public void endSoftDrop() {
-        autoMoveScheduler.endSoftDrop();
-    }
-
-    public void setSoftDropFactor(double softDropFactor) {
-        autoMoveScheduler.setSoftDropFactor(softDropFactor);
-    }
-
-    public void chargeDAS(Direction direction) {
-        autoMoveScheduler.chargeDAS(direction);
-    }  
-    
-    public void unchargeDAS(Direction direction) {
-        autoMoveScheduler.chargeDAS(direction);
-    }   
-    
-    /**
-     * Reset the board state into initial
-     */
-    public void reset() {
-        scoreManager.reset();
-        board.reset();
-        holdTetrominoType = null;
-        nextQueue = new LinkedList<TetrominoType>();
-        notifyObservers();
-    }
-    
-    public void start() {
-        spawn();
-        autoMoveScheduler.onStart();
-    }
-
-    public void rotate(Rotation rotation) {
-        if (!rotator.rotate(rotation, board)) {
-            return;
-        }
-        // detect spin
-        SpinState currSpinState = spinDetecter.detectSpin(board);
-
-        // score manager handle spin event
-        scoreManager.onSpin(currSpinState, board.getcurrentTetromino().type);
-    }  
-
-    public void hardDrop() {
-        moveDAS(Direction.DOWN);
-        lock();
-    }
-    
-    /**
-     * Swap holdTetromino and currentTetromino. spawn a new one if hold never used
-     * 
-     */
+//  ██╗  ██╗ ██████╗ ██╗     ██████╗
+//  ██║  ██║██╔═══██╗██║     ██╔══██╗
+//  ███████║██║   ██║██║     ██║  ██║
+//  ██╔══██║██║   ██║██║     ██║  ██║
+//  ██║  ██║╚██████╔╝███████╗██████╔╝
+//  ╚═╝  ╚═╝ ╚═════╝ ╚══════╝╚═════╝
+//            ◀───[ T ]───▶
     public void hold() {
         // remove current tetromino
         if (lockTask != null)
@@ -185,7 +134,6 @@ public class GameEngine implements Observable {
         Tetromino currentTetrominoClone = new Tetromino(board.getcurrentTetromino());
         if (holdTetrominoType == null) {
             spawn();
-
         }
 
         else {
@@ -199,19 +147,71 @@ public class GameEngine implements Observable {
 
         holdTetrominoType = currentTetrominoClone.type;
         board.updateShadow();
+        notifyObservers();
     }
 
-    void spawn() {
-        // from previous piece's leftover data, decide isAutoSpawned true/false, 
-        // to know if needed to notify controller RIGHT AFTER current piece spawned
-       
-        // populate next queue
-        while (nextQueue.size() < 7) {
-            nextQueue.addAll(tetrominoGenerator.generateTetrominos());
-        }
+//  ███████╗ ██████╗ ███████╗████████╗    ██████╗ ██████╗  ██████╗ ██████╗
+//  ██╔════╝██╔═══██╗██╔════╝╚══██╔══╝    ██╔══██╗██╔══██╗██╔═══██╗██╔══██╗
+//  ███████╗██║   ██║█████╗     ██║       ██║  ██║██████╔╝██║   ██║██████╔╝
+//  ╚════██║██║   ██║██╔══╝     ██║       ██║  ██║██╔══██╗██║   ██║██╔═══╝
+//  ███████║╚██████╔╝██║        ██║       ██████╔╝██║  ██║╚██████╔╝██║
+//  ╚══════╝ ╚═════╝ ╚═╝        ╚═╝       ╚═════╝ ╚═╝  ╚═╝ ╚═════╝ ╚═╝
+    public void startSoftDrop() {
+        autoMoveScheduler.startSoftDrop();
+    }
 
-        // when gameover, notify controller
+    public void endSoftDrop() {
+        autoMoveScheduler.endSoftDrop();
+    }
+
+    public void setSoftDropFactor(double softDropFactor) {
+        autoMoveScheduler.setSoftDropFactor(softDropFactor);
+    }
+//  ██████╗  █████╗ ███████╗     ██████╗██╗  ██╗ █████╗ ██████╗  ██████╗ ███████╗
+//  ██╔══██╗██╔══██╗██╔════╝    ██╔════╝██║  ██║██╔══██╗██╔══██╗██╔════╝ ██╔════╝
+//  ██║  ██║███████║███████╗    ██║     ███████║███████║██████╔╝██║  ███╗█████╗
+//  ██║  ██║██╔══██║╚════██║    ██║     ██╔══██║██╔══██║██╔══██╗██║   ██║██╔══╝
+//  ██████╔╝██║  ██║███████║    ╚██████╗██║  ██║██║  ██║██║  ██║╚██████╔╝███████╗
+//  ╚═════╝ ╚═╝  ╚═╝╚══════╝     ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝ ╚══════╝
+    public void chargeDAS(Direction direction) {
+        autoMoveScheduler.chargeDAS(direction);
+    }  
+    
+    public void unchargeDAS(Direction direction) {
+        autoMoveScheduler.unchargeDAS(direction);
+    }   
+    
+
+//  ██████╗  ██████╗ ████████╗ █████╗ ████████╗███████╗
+//  ██╔══██╗██╔═══██╗╚══██╔══╝██╔══██╗╚══██╔══╝██╔════╝
+//  ██████╔╝██║   ██║   ██║   ███████║   ██║   █████╗
+//  ██╔══██╗██║   ██║   ██║   ██╔══██║   ██║   ██╔══╝
+//  ██║  ██║╚██████╔╝   ██║   ██║  ██║   ██║   ███████╗
+//  ╚═╝  ╚═╝ ╚═════╝    ╚═╝   ╚═╝  ╚═╝   ╚═╝   ╚══════╝
+    public void rotate(Rotation rotation) {
+        if (!rotator.rotate(rotation, board)) {
+            return;
+        }
+        autoMoveScheduler.onOperate();
+        // detect spin
+        SpinState currSpinState = spinDetecter.detectSpin(board);
+
+        // score manager handle spin event
+        scoreManager.onSpin(currSpinState, board.getcurrentTetromino().type);
+    }  
+    
+//  ███████╗██████╗  █████╗ ██╗    ██╗███╗   ██╗
+//  ██╔════╝██╔══██╗██╔══██╗██║    ██║████╗  ██║
+//  ███████╗██████╔╝███████║██║ █╗ ██║██╔██╗ ██║
+//  ╚════██║██╔═══╝ ██╔══██║██║███╗██║██║╚██╗██║
+//  ███████║██║     ██║  ██║╚███╔███╔╝██║ ╚████║
+//  ╚══════╝╚═╝     ╚═╝  ╚═╝ ╚══╝╚══╝ ╚═╝  ╚═══╝
+//                        ▼
+    void spawn() {
+        // get tetr type from queue
         TetrominoType currentTetrominoType = nextQueue.remove();
+
+        // try spawn, if gameover, notify controller
         if (!board.spawn(currentTetrominoType) || scoreManager.haveAchievedGoal()) {
             listener.onGameOver();
             return;
@@ -219,11 +219,29 @@ public class GameEngine implements Observable {
         autoMoveScheduler.onSpawn();
         lockResets = 0;
 
-        // currentSpinState = SpinState.NOT_SPIN;
         checkLanded();
         board.updateShadow();
     }
 
+//  ██╗      ██████╗  ██████╗██╗  ██╗
+//  ██║     ██╔═══██╗██╔════╝██║ ██╔╝
+//  ██║     ██║   ██║██║     █████╔╝
+//  ██║     ██║   ██║██║     ██╔═██╗
+//  ███████╗╚██████╔╝╚██████╗██║  ██╗
+//  ╚══════╝ ╚═════╝  ╚═════╝╚═╝  ╚═╝
+//          ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
+    void lock() {
+        int nLinesCleared = board.clearCompleted();
+        scoreManager.onLock(nLinesCleared);
+        if (lockTask != null)
+            lockTask.cancel(false);
+        spawn();
+    }
+
+    public void hardDrop() {
+        moveDAS(Direction.DOWN);
+        lock();
+    }
     /**
      * check if currentTetromino is landed, 
      * then if landed, start lockTimer
@@ -236,7 +254,6 @@ public class GameEngine implements Observable {
             }
             lockTask = scheduler.schedule(() -> { 
                 dispatcher.dispatch(() -> {
-                    // this.lockTimerFinished = true;
                     lock();
                 }); 
                 
@@ -253,21 +270,15 @@ public class GameEngine implements Observable {
         }
     }
 
-
-    /**
-     * standard 3 corners detection, ref: https://tetris.wiki/T-Spin
-     * impl by: spawn a single at 4 corners of T, then do collison tests, 
-     * if 3/4 corners colide, is T spin, then if 2/2 front corners colide, is proper T spin 
-     * @return SpinState: (NOT/MINI/PROPER)_SPIN
-     */
-    
-
-    void lock() {
-        int nLinesCleared = board.clearCompleted();
-        scoreManager.onLock(nLinesCleared);
-        lockTask.cancel(false);
-        spawn();
-        // notifyObservers();
+//   ██████╗ ████████╗██╗  ██╗███████╗██████╗ ███████╗
+//  ██╔═══██╗╚══██╔══╝██║  ██║██╔════╝██╔══██╗██╔════╝
+//  ██║   ██║   ██║   ███████║█████╗  ██████╔╝███████╗
+//  ██║   ██║   ██║   ██╔══██║██╔══╝  ██╔══██╗╚════██║
+//  ╚██████╔╝   ██║   ██║  ██║███████╗██║  ██║███████║
+//   ╚═════╝    ╚═╝   ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚══════╝
+    public void dispose() {
+        scheduler.shutdown();
+        scoreManager.dispose();
     }
 
     public ScoreManager getScoreManager() {
@@ -276,14 +287,10 @@ public class GameEngine implements Observable {
 
     public double getGravity() {
         return autoMoveScheduler.getGravity();
-    }
+     }
     
     public TetrominoType getHoldTetrominoType() {
         return this.holdTetrominoType;
-    }
-
-    public List<TetrominoType> getNextQueue() {
-        return List.copyOf(nextQueue);
     }
 
     public void setGravity(double gravity){
@@ -315,8 +322,11 @@ public class GameEngine implements Observable {
         this.scoreManager = scoreManager;
     }
 
-    public void dispose() {
-        scheduler.shutdown();
-        scoreManager.dispose();
+    public NextQueue getNextQueueManager() {
+        return this.nextQueue;
+    }
+
+    public Board getBoard() {
+        return board;
     }
 }
