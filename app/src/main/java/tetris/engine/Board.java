@@ -27,12 +27,10 @@ public class Board {
     private Tetromino currentTetromino;
     private Tetromino shadowTetromino;
 
-    private Rotator rotator;
     public Board(int width, int height) {
         this.width = width;
         this.height = height;
         allTetrominos = new ArrayList<Tetromino>();
-        rotator = new SuperRotator();
 
     }
 
@@ -41,6 +39,35 @@ public class Board {
         currentTetromino = null;
     }
     
+    /**
+     * operates the current Tetromino with collision detection
+     * operations includes: horizontal movements, rotation
+     * @param op
+     * @return true if operation success
+     */
+    public boolean tryOperate(Operator op) {
+        if (!canOperate(op)) {
+            return false;
+        }
+        op.operate(getcurrentTetromino());
+        updateShadow();
+        
+
+        // notifyObservers();
+        
+        return true;
+    }
+    
+
+    public boolean canOperate(Operator op) {
+        Tetromino clone = new Tetromino(currentTetromino);
+        op.operate(clone);
+        if (hasCollision(clone)) {
+            return false;
+        }
+        return true;
+    }
+
     /**
      * 
      * @return bool: success or not
@@ -59,68 +86,7 @@ public class Board {
     public Point centreTopPoint() {
         return new Point((this.width/2)-1, 1);
     }
-    /**
-     * operates the current Tetromino with collision detection
-     * operations includes: horizontal movements, rotation
-     * @param op
-     * @return true if operation success
-     */
-    public boolean tryOperate(Operator op) {
-        if (!canOperate(op)) {
-            return false;
-        }
-        op.operate(currentTetromino);
-        updateShadow();
-        checkLanded();
-        handleSoftDropEvent();
-        handleDASEvent();
-
-        notifyObservers();
-        
-        return true;
-    }
-    
-    public boolean canOperate(Operator op) {
-        Tetromino clone = new Tetromino(currentTetromino);
-        op.operate(clone);
-        if (hasCollision(clone)) {
-            return false;
-        }
-        return true;
-    }
-    public boolean rotate(Rotation rotation) {
-        return rotator.rotate(rotation, this);
-    }
-    public void move(Direction direction){
-        Operator op;
-        if (direction == Direction.DOWN) {op = new MoveDownOperator();}
-        else if (direction == Direction.LEFT) {op = new MoveLeftOperator();}
-        else if (direction == Direction.RIGHT) {op = new MoveRightOperator();}
-        else {op = null;}
-        tryOperate(op);
-    }
-
-    public void moveDAS(Direction direction) {
-        Operator op;
-        if (direction == Direction.DOWN) {op = new MoveDownOperator();}
-        else if (direction == Direction.LEFT) {op = new MoveLeftOperator();}
-        else if (direction == Direction.RIGHT) {op = new MoveRightOperator();}
-        else {op = null;}
-
-        while (true) {
-            if (! tryOperate(op)) {
-                break;
-            }
-            if (direction != Direction.DOWN) {
-                // {autoOperationListener.onAutoHorizontalMove();}
-                // handleSoftDropEvent();
-            }
-            else if (direction == Direction.DOWN){
-                // {autoOperationListener.onAutoMoveDown();}
-                // handleDASEvent();
-            }
-        }
-    }
+ 
     void updateShadow() {
         shadowTetromino = new Tetromino(currentTetromino);
         Tetromino clone = new Tetromino(currentTetromino);
@@ -129,7 +95,7 @@ public class Board {
             shadowTetromino.moveDown();
         }
         shadowTetromino.moveUp();
-        notifyObservers();
+        // notifyObservers();
     }
     /*
     -------------
@@ -175,11 +141,31 @@ public class Board {
         return false;
     }
     
+    /**
+     * Checks if the current tetromino has touches the gound or other tetrominos on the bottom
+     * @param t
+     * @return
+     */
+    boolean landed(Tetromino t) {
+        // simulate a downward move, check if there is a collision
+        Tetromino clone  = new Tetromino(t);
+        clone.moveDown();
+
+        if (hasCollision(clone)) {
+            return true;
+        }
+
+        return false;
+    }
     /*
     ------------
     -LINE CLEAR-
     ------------
     */
+
+    public int clearCompleted() {
+        return checkCompletedLines(currentTetromino);
+    }
     /**
      * clear specified lines, update board
      * @param toClear: heights of lines to clear, e.g to clear bot 4 lines, to clear = [16, 17, 18, 19]

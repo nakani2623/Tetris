@@ -26,7 +26,10 @@ import tetris.engine.observers.Observable;
 import tetris.engine.observers.Observer;
 import tetris.engine.operator.*;
 import tetris.engine.rotator.Rotator;
+import tetris.engine.rotator.SuperRotator;
 import tetris.engine.score.ScoreManager;
+import tetris.engine.spinDetecter.AllMiniDetecter;
+import tetris.engine.spinDetecter.SpinDetecter;
 import tetris.engine.type.Direction;
 import tetris.engine.type.Rotation;
 import tetris.engine.type.RotationState;
@@ -39,6 +42,9 @@ public class GameEngine implements Observable {
     // low level module references
     private ScoreManager scoreManager;
     private Board board;
+    private SpinDetecter spinDetecter; 
+    private Rotator rotator;
+
 
     private AutoMoveScheduler autoMoveScheduler;
     // next queue / generate piece
@@ -50,9 +56,7 @@ public class GameEngine implements Observable {
     
     // score? rotation
     // private SpinState currentSpinState;
-
     
-
     private ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
     private ScheduledFuture<?> lockTask;
     private int maxLockResets = 15;
@@ -84,15 +88,37 @@ public class GameEngine implements Observable {
         // default components behaviour
         listener = () -> {};
         autoMoveScheduler = new AutoMoveScheduler(1, 0);
+        spinDetecter = new AllMiniDetecter();
+        rotator = new SuperRotator();
+
+    }
+       
+    public void move(Direction direction){
+        Operator op;
+        if (direction == Direction.DOWN) {op = new MoveDownOperator();}
+        else if (direction == Direction.LEFT) {op = new MoveLeftOperator();}
+        else if (direction == Direction.RIGHT) {op = new MoveRightOperator();}
+        else {op = null;}
+        board.tryOperate(op);
+        
     }
 
-    
+    public void moveDAS(Direction direction) {
+        Operator op;
+        if (direction == Direction.DOWN) {op = new MoveDownOperator();}
+        else if (direction == Direction.LEFT) {op = new MoveLeftOperator();}
+        else if (direction == Direction.RIGHT) {op = new MoveRightOperator();}
+        else {op = null;}
 
-    // private void handleSoftDropEvent() {
-    //     softDropHandler.applyEffect(board);
-    // }
-
-    
+        while (true) {
+            if (! board.tryOperate(op)) {
+                break;
+            }
+            checkLanded();
+            // let "auto move scheduler move piece by DAS/SoftDrop state"
+            autoMoveScheduler.onOperate();
+        }
+    }
 
     public void startSoftDrop() {
         autoMoveScheduler.startSoftDrop();
@@ -131,18 +157,15 @@ public class GameEngine implements Observable {
     }
 
     public void rotate(Rotation rotation) {
-        if (!board.rotate(rotation)) {
+        if (!rotator.rotate(rotation, board)) {
             return;
         }
+        // detect spin
+        SpinState currSpinState = spinDetecter.detectSpin(board);
 
-        // SpinState currentSpinState = SpinState.NOT_SPIN;
-        // detect & let score handle spins
-        
-        // if 
-        scoreManager.onSpin(currentSpinState, board.getcurrentTetromino().type);
-    }
-
-    
+        // score manager handle spin event
+        scoreManager.onSpin(currSpinState, board.getcurrentTetromino().type);
+    }  
 
     public void hardDrop() {
         moveDAS(Direction.DOWN);
@@ -154,7 +177,11 @@ public class GameEngine implements Observable {
      * 
      */
     public void hold() {
-        removeCurrentTetromino();
+        // remove current tetromino
+        if (lockTask != null)
+            lockTask.cancel(false);
+        board.getAllTetrominos().remove(board.getcurrentTetromino());
+
         Tetromino currentTetrominoClone = new Tetromino(board.getcurrentTetromino());
         if (holdTetrominoType == null) {
             spawn();
@@ -162,24 +189,22 @@ public class GameEngine implements Observable {
         }
 
         else {
-            board.setCurrentTetromino(new Tetromino(centreTopPoint(), holdTetrominoType)); // duplicate_1 2
-            board.getAllTetrominos().add(board.getcurrentTetromino());
-            // handleSoftDropEvent(); // this is temp quick fix, planned refactor
-            // handleDASEvent();
+            if (!board.spawn(holdTetrominoType) || scoreManager.haveAchievedGoal()) {
+                listener.onGameOver();
+                return;
+            }
+            autoMoveScheduler.onSpawn();
+            lockResets = 0;
         }
 
         holdTetrominoType = currentTetrominoClone.type;
         board.updateShadow();
     }
 
-
-
     void spawn() {
         // from previous piece's leftover data, decide isAutoSpawned true/false, 
         // to know if needed to notify controller RIGHT AFTER current piece spawned
-        // boolean isAutoSpawned = false;
-        // if ((lockResets >= maxLockResets) || lockTimerFinished) 
-        //     isAutoSpawned = true;        
+       
         // populate next queue
         while (nextQueue.size() < 7) {
             nextQueue.addAll(tetrominoGenerator.generateTetrominos());
@@ -194,8 +219,6 @@ public class GameEngine implements Observable {
         autoMoveScheduler.onSpawn();
         lockResets = 0;
 
-        
-
         // currentSpinState = SpinState.NOT_SPIN;
         checkLanded();
         board.updateShadow();
@@ -207,7 +230,7 @@ public class GameEngine implements Observable {
      * otherwise, end lock Timer
      */
     void checkLanded() {
-        if (landed(currentTetromino)) {
+        if (board.landed(board.getcurrentTetromino())) {
             if (lockTask != null) {
                 lockTask.cancel(false);
             }
@@ -240,41 +263,11 @@ public class GameEngine implements Observable {
     
 
     void lock() {
-        int nLinesClearedcleared = checkCompletedLines(currentTetromino);
-        scoreManager.onLock(nLinesClearedcleared);
+        int nLinesCleared = board.clearCompleted();
+        scoreManager.onLock(nLinesCleared);
         lockTask.cancel(false);
         spawn();
         // notifyObservers();
-    }
-
-   
-    
-    /**
-     * Checks if the current tetromino has touches the gound or other tetrominos on the bottom
-     * @param t
-     * @return
-     */
-    boolean landed(Tetromino t) {
-        // simulate a downward move, check if there is a collision
-        Tetromino clone  = new Tetromino(t);
-        clone.moveDown();
-
-        if (hasCollision(clone)) {
-            return true;
-        }
-
-        return false;
-    }
-
-
-    /**
-     * everything need to do beside removing from allTetrominos list
-     */
-    void removeCurrentTetromino() {
-        // lockTimer.stop();
-        if (lockTask != null)
-            lockTask.cancel(false);
-        allTetrominos.remove(currentTetromino);
     }
 
     public ScoreManager getScoreManager() {
