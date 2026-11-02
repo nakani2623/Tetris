@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import tetris.engine.GameEngine;
 import tetris.engine.Mino;
 import tetris.engine.Tetromino;
+import tetris.engine.type.Direction;
 import tetris.engine.type.RotationState;
 import tetris.engine.type.TetrominoType;
 import tetris.utils.Point;
@@ -71,6 +72,8 @@ class GameEngineCopyTest {
         engine.getAllTetrominos().add(lockedPiece);
         engine.getAllTetrominos().add(currentPiece);
         engine.setCurrentTetromino(currentPiece);
+        engine.move(Direction.LEFT);
+        engine.move(Direction.RIGHT);
         return engine;
     }
 
