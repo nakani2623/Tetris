@@ -68,6 +68,16 @@ public class GameEngine implements Observable {
         nextQueue = new NextQueue();
         // holdManager = new HoldManager();
     }
+    
+    public GameEngine(int width, int height, MainThreadDispatcher dispatcher) {
+        this(new Board(width, height), dispatcher);
+    }
+
+    public GameEngine(GameEngine source) {
+        this(new Board(source.board), source.dispatcher);
+        this.holdTetrominoType = source.holdTetrominoType;
+        this.scoreManager = source.scoreManager;
+    }
 //  ███████╗████████╗ █████╗ ██████╗ ████████╗
 //  ██╔════╝╚══██╔══╝██╔══██╗██╔══██╗╚══██╔══╝
 //  ███████╗   ██║   ███████║██████╔╝   ██║
@@ -341,4 +351,5 @@ public class GameEngine implements Observable {
     public Board getBoard() {
         return board;
     }
+
 }
