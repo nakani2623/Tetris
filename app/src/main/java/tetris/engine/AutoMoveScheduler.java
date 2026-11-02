@@ -11,7 +11,7 @@ import tetris.controller.dispatch.MainThreadDispatcher;
 import tetris.engine.type.Direction;
 
 public class AutoMoveScheduler {
-    private Board board;
+    private GameEngine board;
     // private SoftDropHandler softDropHandler;
 
     // gameplay state & spawn
@@ -36,6 +36,10 @@ public class AutoMoveScheduler {
     }
 
     public void onSpawn() {
+        applySoftDropEffect();
+        handleDASEvent();
+    }
+    public void onOperate() {
         applySoftDropEffect();
         handleDASEvent();
     }
