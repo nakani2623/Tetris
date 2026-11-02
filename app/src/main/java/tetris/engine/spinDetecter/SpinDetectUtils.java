@@ -16,7 +16,7 @@ import tetris.engine.type.SpinState;
 import tetris.utils.Point;
 
 public class SpinDetectUtils {
-        /**
+    /**
      * 
      * @return true if current tetromino is immobile
      */
@@ -28,6 +28,13 @@ public class SpinDetectUtils {
         }
         return true;
     }
+
+    /**
+     * standard 3 corners detection, ref: https://tetris.wiki/T-Spin
+     * impl by: spawn a single at 4 corners of T, then do collison tests, 
+     * if 3/4 corners colide, is T spin, then if 2/2 front corners colide, is proper T spin 
+     * @return SpinState: (NOT/MINI/PROPER)_SPIN
+     */
     public static SpinState detectTSpin(Board board) { 
         // (optional)TODO: re-implement this method not depend on board
         // 1. get 4 corner postions
