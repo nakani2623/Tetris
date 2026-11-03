@@ -99,7 +99,6 @@ public class GameEngine implements Observable {
         holdTetrominoType = null;
         notifyObservers();
     }
-
 //  ███╗   ███╗ ██████╗ ██╗   ██╗███████╗
 //  ████╗ ████║██╔═══██╗██║   ██║██╔════╝
 //  ██╔████╔██║██║   ██║██║   ██║█████╗
