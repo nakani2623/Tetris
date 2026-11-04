@@ -27,8 +27,9 @@ public class HoleFinder {
         // Initialize each Node in the grid
         for (int x = 0; x < engine.getWidth(); x++) {
             for (int y = 0; y < engine.getHeight(); y++) {
-                grid[x][y] = new Node();
-                this.nodes.add(grid[x][y]);
+                Node node = new Node();
+                grid[x][y] = node;
+                this.nodes.add(node);
             }
         }
 
@@ -38,7 +39,7 @@ public class HoleFinder {
                 if (x > 0) 
                     grid[x][y].neighbors.add(grid[x - 1][y]); // left
                 if (x < engine.getWidth() - 1) 
-                    grid[x][y].neighbors.add(grid[x + 1][y]); // right
+                    grid[x][y].neighbors.add(grid[x + 1][y]); // right  
                 if (y > 0) 
                     grid[x][y].neighbors.add(grid[x][y - 1]); // up
                 if (y < engine.getHeight() - 1) 
@@ -95,4 +96,10 @@ class Node {
     boolean isVisited;
     Mino mino;
     List<Node> neighbors;
+
+    public Node() {
+        this.isVisited = false;
+        this.mino = null;
+        this.neighbors = new ArrayList<>();
+    }
 }
