@@ -69,7 +69,6 @@ public class GameController implements GameOverListener {
     private void startCharging(UnifiedKey key, Direction direction) {
         long delay = (long)(DAS * 1000 / 60);
         ScheduledFuture chargeDAS = scheduler.schedule(() -> {
-         
             dispatcher.dispatch(() -> {
                 engine.chargeDAS(direction);
                 DASChargedKeys.add(key);
@@ -173,6 +172,7 @@ public class GameController implements GameOverListener {
     
     public void dispose() {
         scheduler.shutdown();
+        engine.dispose();
     }
 
     @Override 

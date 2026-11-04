@@ -13,6 +13,7 @@ import tetris.controller.dispatch.JavaFXMainThreadDispatcher;
 import tetris.controller.dispatch.MainThreadDispatcher;
 import tetris.controller.input.JavaFXKeyboardAdapter;
 import tetris.controller.input.KeyBinds;
+import tetris.engine.Board;
 import tetris.engine.GameEngine;
 import tetris.engine.observers.BoardDisplayManager;
 import tetris.engine.observers.HoldDisplayManager;
@@ -30,7 +31,7 @@ import tetris.graphics.GameWindow;
 
 public class App extends Application {
     private KeyBinds keyBinds = new KeyBinds();
-    private final GameEngine engine = new GameEngine(10, 20, new JavaFXMainThreadDispatcher());
+    private final GameEngine engine = new GameEngine(new Board(10, 20), new JavaFXMainThreadDispatcher());
     private final GameWindow window = new GameWindow(keyBinds);
     private MainThreadDispatcher dispatcher = new JavaFXMainThreadDispatcher();
     private final GameController controller = new GameController(engine, window, dispatcher);
@@ -43,14 +44,13 @@ public class App extends Application {
         // engine.setScoreManager(new ZenScore());
         engine.setScoreManager(new SprintScore(10));
 
-        new BoardDisplayManager(engine, window.getBoardPane());
+        new BoardDisplayManager(engine.getBoard(), window.getBoardPane());
         new StatsDisplayManager(engine.getScoreManager(), window.getScorePane());
         new HoldDisplayManager(engine, window.getHoldPane());   
-        new NextQueueDisplayManager(engine, window.getNextQueuePane());
+        new NextQueueDisplayManager(engine.getNextQueueManager(), window.getNextQueuePane());
         new SpinClearDisplayManager(engine.getScoreManager(), window.getSpinClearPane());
 
 
-        // controller.setSoftDropFactor(15);
         engine.setSoftDropFactor(Double.MAX_VALUE);
         engine.setGameOverListener(controller);
 
@@ -78,8 +78,6 @@ public class App extends Application {
     public void stop() {
         controller.dispose();
         engine.dispose();
-        controller.dispose();
-
         keyBinds.save();
     }
 

@@ -1,25 +1,26 @@
 package tetris.engine.observers;
 
+import tetris.engine.Board;
 import tetris.engine.GameEngine;
 import tetris.graphics.gameActive.BoardPane;
 
 public class BoardDisplayManager implements Observer {
-    private GameEngine engine;
+    private Board board;
     private BoardPane boardPane;
 
-    public BoardDisplayManager(GameEngine engine, BoardPane boardPane) {
-        this.engine = engine;
+    public BoardDisplayManager(Board board, BoardPane boardPane) {
+        this.board = board;
         this.boardPane = boardPane;
-        engine.addObserver(this);
+        board.addObserver(this);
     }
 
     @Override
     public void update() {
         boardPane.render(
-            engine.getAllTetrominos(),
-            engine.getShadowTetromino(),
-            (int)engine.getWidth(),
-            (int)engine.getHeight());
+            board.getAllTetrominos(),
+            board.getShadowTetromino(),
+            (int)board.getWidth(),
+            (int)board.getHeight());
     }
 }
 
