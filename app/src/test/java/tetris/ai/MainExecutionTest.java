@@ -14,6 +14,7 @@ import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.Test;
 
 import tetris.controller.dispatch.MainThreadDispatcher;
+import tetris.engine.Board;
 import tetris.engine.GameEngine;
 import tetris.engine.Tetromino;
 import tetris.engine.type.TetrominoType;
@@ -30,7 +31,8 @@ class MainExecutionTest {
         };
         GameEngine engine = new GameEngine(10, 20, null);
         Tetromino current = new Tetromino(new Point(5, 5), TetrominoType.T);
-        engine.setCurrentTetromino(current);
+        Board board = engine.getBoard();
+        board.setCurrentTetromino(current);
         double originalX = current.centre.getX();
         DropPoint dropPoint = new DropPoint();
         dropPoint.executionOrder = new ArrayList<>();
@@ -53,12 +55,12 @@ class MainExecutionTest {
             Runnable dispatchedTask = dispatchedTasks.poll(1, TimeUnit.SECONDS);
             assertNotNull(dispatchedTask, "Expected the action sequence to be dispatched");
             assertFalse(execution.isDone(), "execute must wait for the dispatched action sequence");
-            assertEquals(originalX, engine.getCurrentTetromino().centre.getX());
+            assertEquals(originalX, board.getcurrentTetromino().centre.getX());
 
             dispatchedTask.run();
             execution.get(1, TimeUnit.SECONDS);
 
-            assertEquals(originalX - 1, engine.getCurrentTetromino().centre.getX());
+            assertEquals(originalX - 1, board.getcurrentTetromino().centre.getX());
         } finally {
             worker.shutdownNow();
         }

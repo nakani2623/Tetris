@@ -2,13 +2,12 @@ package tetris.ai;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.lang.reflect.Field;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
+import tetris.engine.Board;
 import tetris.engine.GameEngine;
 import tetris.engine.Tetromino;
 import tetris.engine.type.Direction;
@@ -61,22 +60,12 @@ class DropPointExporerTest {
 
     private GameEngine engineWithCurrentTetromino(int width, Tetromino current) {
         GameEngine engine = new GameEngine(width, 20, null);
-        boardPieces(engine).add(current);
-        engine.setCurrentTetromino(current);
+        Board board = engine.getBoard();
+        board.getAllTetrominos().add(current);
+        board.setCurrentTetromino(current);
         engine.move(Direction.LEFT);
         engine.move(Direction.RIGHT);
         return engine;
-    }
-
-    @SuppressWarnings("unchecked")
-    private List<Tetromino> boardPieces(GameEngine engine) {
-        try {
-            Field field = GameEngine.class.getDeclaredField("allTetrominos");
-            field.setAccessible(true);
-            return (List<Tetromino>) field.get(engine);
-        } catch (ReflectiveOperationException e) {
-            throw new AssertionError("Could not access test engine board", e);
-        }
     }
 
     private Position positionOf(Tetromino tetromino) {

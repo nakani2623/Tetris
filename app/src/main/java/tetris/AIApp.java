@@ -33,7 +33,7 @@ public class AIApp extends Application {
         new BoardDisplayManager(engine.getBoard(), window.getBoardPane());
         new StatsDisplayManager(engine.getScoreManager(), window.getScorePane());
         new HoldDisplayManager(engine, window.getHoldPane());   
-        new NextQueueDisplayManager(engine, window.getNextQueuePane());
+        new NextQueueDisplayManager(engine.getNextQueueManager(), window.getNextQueuePane());
         new SpinClearDisplayManager(engine.getScoreManager(), window.getSpinClearPane());
 
 
@@ -45,13 +45,13 @@ public class AIApp extends Application {
         window.execute(stage);
 
         System.out.println("Starting AI");
-        System.out.println("Current Tetromino: " + engine.getCurrentTetromino());
+        System.out.println("Current Tetromino: " + engine.getBoard().getcurrentTetromino());
 
 
         Main ai = new Main(engine, dispatcher);
         Thread aiThread = new Thread(() -> {
             try {
-                while (engine.getCurrentTetromino() != null) {
+                while (engine.getBoard().getcurrentTetromino() != null) {
                     ai.run();
                     Thread.sleep(1000);
                 }

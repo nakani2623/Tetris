@@ -3,7 +3,7 @@ package tetris.ai;
 import java.util.ArrayList;
 import java.util.List;
 
-import tetris.engine.GameEngine;
+import tetris.engine.Board;
 import tetris.engine.Mino;
 import tetris.engine.Tetromino;
 
@@ -18,15 +18,15 @@ import tetris.engine.Tetromino;
 public class HoleFinder {
     private List<Node> nodes; 
 
-    public HoleFinder(GameEngine engine) {
+    public HoleFinder(Board board) {
         this.nodes = new ArrayList<>();
 
         // Initialize the grid array
-        Node[][] grid = new Node[(int)engine.getWidth()][(int)engine.getHeight()];
+        Node[][] grid = new Node[(int)board.getWidth()][(int)board.getHeight()];
         
         // Initialize each Node in the grid
-        for (int x = 0; x < engine.getWidth(); x++) {
-            for (int y = 0; y < engine.getHeight(); y++) {
+        for (int x = 0; x < board.getWidth(); x++) {
+            for (int y = 0; y < board.getHeight(); y++) {
                 Node node = new Node();
                 grid[x][y] = node;
                 this.nodes.add(node);
@@ -34,21 +34,21 @@ public class HoleFinder {
         }
 
         // Connect neighbors for each Node
-        for (int x = 0; x < engine.getWidth(); x++) {
-            for (int y = 0; y < engine.getHeight(); y++) {
+        for (int x = 0; x < board.getWidth(); x++) {
+            for (int y = 0; y < board.getHeight(); y++) {
                 if (x > 0) 
                     grid[x][y].neighbors.add(grid[x - 1][y]); // left
-                if (x < engine.getWidth() - 1) 
+                if (x < board.getWidth() - 1)
                     grid[x][y].neighbors.add(grid[x + 1][y]); // right  
                 if (y > 0) 
                     grid[x][y].neighbors.add(grid[x][y - 1]); // up
-                if (y < engine.getHeight() - 1) 
+                if (y < board.getHeight() - 1)
                     grid[x][y].neighbors.add(grid[x][y + 1]); // down
             }
         }
 
-        for (Tetromino tetromino : engine.getAllTetrominos()) {
-            if (tetromino == engine.getCurrentTetromino())
+        for (Tetromino tetromino : board.getAllTetrominos()) {
+            if (tetromino == board.getcurrentTetromino())
                 continue;
             for (Mino m : tetromino.children) {
                 int x = (int)m.getPosition().getX();

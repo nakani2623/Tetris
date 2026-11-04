@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import tetris.engine.Board;
 import tetris.engine.GameEngine;
 import tetris.engine.Tetromino;
 
@@ -14,11 +15,13 @@ import tetris.engine.Tetromino;
  */
 public class DropPointExporer {
     GameEngine engine;
+    private Board board;
     private Set<AIAction> actions = new HashSet<>();
     private Set<DropPoint> dropPoints = new HashSet<>();
 
     public DropPointExporer(GameEngine engine) {
         this.engine = engine;
+        this.board = engine.getBoard();
         actions.add(AIAction.MOVE_LEFT);
         actions.add(AIAction.MOVE_RIGHT);
         actions.add(AIAction.ROTATE_CLOCKWISE);
@@ -33,15 +36,15 @@ public class DropPointExporer {
         dropPoints.add(baseline);
 
         for (AIAction action : actions) {
-            engine.resetCurrentTetromino(baseline.tetromino);
+            board.resetCurrentTetromino(baseline.tetromino);
             action.execute(engine);
 
             DropPoint newDropPoint = new DropPoint();
             List<AIAction> executionOrder = new ArrayList<>(baseline.executionOrder);
             executionOrder.add(action);
             newDropPoint.executionOrder = executionOrder;
-            newDropPoint.tetromino = new Tetromino(engine.getCurrentTetromino());
-            newDropPoint.ghost = new Tetromino(engine.getShadowTetromino());
+            newDropPoint.tetromino = new Tetromino(board.getcurrentTetromino());
+            newDropPoint.ghost = new Tetromino(board.getShadowTetromino());
 
             exploreFrom(newDropPoint);
         }
@@ -58,8 +61,8 @@ public class DropPointExporer {
     public Set<DropPoint> get() {
         DropPoint origin = new DropPoint();
         origin.executionOrder = new ArrayList<>();
-        origin.tetromino = new Tetromino(engine.getCurrentTetromino());
-        origin.ghost = new Tetromino(engine.getShadowTetromino());
+        origin.tetromino = new Tetromino(board.getcurrentTetromino());
+        origin.ghost = new Tetromino(board.getShadowTetromino());
 
         exploreFrom(origin);
 

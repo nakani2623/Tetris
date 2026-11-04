@@ -214,7 +214,9 @@ public class GameEngine implements Observable {
         SpinState currSpinState = spinDetecter.detectSpin(board);
 
         // score manager handle spin event
-        scoreManager.onSpin(currSpinState, board.getcurrentTetromino().type);
+        if (scoreManager != null) {
+            scoreManager.onSpin(currSpinState, board.getcurrentTetromino().type);
+        }
 
         // check lock timer
         checkLanded();

@@ -5,6 +5,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 
 import tetris.controller.dispatch.MainThreadDispatcher;
+import tetris.engine.Board;
 import tetris.engine.GameEngine;
 import tetris.engine.Mino;
 import tetris.engine.Tetromino;
@@ -48,7 +49,7 @@ public class Main {
         for (DropPoint dp : dropPoints) {
             GameEngine simulatedEngine = new GameEngine(this.engine);
             execute(dp, simulatedEngine);
-            int holes = new HoleFinder(simulatedEngine).run();
+            int holes = new HoleFinder(simulatedEngine.getBoard()).run();
             int stackHeight = stackHeight(simulatedEngine);
             System.out.println("Drop point " + dp + ": holes=" + holes + ", stack height=" + stackHeight);
             if (stackHeight < lowestStackHeight || (stackHeight == lowestStackHeight && holes < minHoles)) {
@@ -61,12 +62,13 @@ public class Main {
     }
 
     private int stackHeight(GameEngine engine) {
+        Board board = engine.getBoard();
         int maxHeight = 0;
-        for (Tetromino tetromino : engine.getAllTetrominos()) {
-            if (tetromino == engine.getCurrentTetromino())
+        for (Tetromino tetromino : board.getAllTetrominos()) {
+            if (tetromino == board.getcurrentTetromino())
                 continue;
             for (Mino m : tetromino.children) {
-                int height = (int)engine.getHeight() - (int)m.getPosition().getY();
+                int height = (int)board.getHeight() - (int)m.getPosition().getY();
                 if (height > maxHeight)
                     maxHeight = height;
             }

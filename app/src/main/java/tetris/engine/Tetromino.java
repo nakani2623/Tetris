@@ -177,6 +177,25 @@ public class Tetromino extends Piece {
         return centre;
     }
 
+    public boolean isSamePosition(Tetromino other) {
+        if (children.size() != other.children.size()) {
+            return false;
+        }
+        for (Mino mino : children) {
+            boolean found = false;
+            for (Mino otherMino : other.children) {
+                if (mino.getPosition().equals(otherMino.getPosition())) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     // debug helpers
     public String toString() {
         String str = "tetromino: "+this.type+" at:";
