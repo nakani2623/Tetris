@@ -19,7 +19,7 @@ public class AutoMoveScheduler {
     private double gravity; // move down num per sec
     private double softDropFactor;
     private boolean isSoftDropping = false;
-    private ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+    private ScheduledExecutorService scheduler;
     private ScheduledFuture<?> gravityTask;
     private ScheduledFuture<?> arrTask;
     private MainThreadDispatcher dispatcher = new JavaFXMainThreadDispatcher();
@@ -34,7 +34,8 @@ public class AutoMoveScheduler {
         this.dispatcher = dispatcher;
     }
 
-    public void onStart() {
+    public void start() {
+        scheduler = Executors.newSingleThreadScheduledExecutor();
         resetGravityTimeline(gravity);
     }
 
@@ -150,5 +151,7 @@ public class AutoMoveScheduler {
         return gravity;
     }
 
-
+    public void dispose() {
+        scheduler.shutdown();
+    }
 }
