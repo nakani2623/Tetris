@@ -25,9 +25,9 @@ public class Main {
             return;
         }
 
-        DropPoint lowestStack = chooselowestStack(dropPoints);
-        System.out.println("Got Lowest stack drop point: " + lowestStack);
-        execute(lowestStack, engine);
+        DropPoint bestPlacement = chooseBestPlacement(dropPoints);
+        System.out.println("Got best placement: " + bestPlacement);
+        execute(bestPlacement, engine);
     }
 
     public void execute(DropPoint dropPoint, GameEngine engine) throws InterruptedException, ExecutionException {
@@ -41,20 +41,23 @@ public class Main {
         actionTask.get();
     }
 
-    private DropPoint chooselowestStack(Set<DropPoint> dropPoints) throws InterruptedException, ExecutionException{
-        DropPoint lowestStack = null;
-        int minHeight = Integer.MAX_VALUE;
+    private DropPoint chooseBestPlacement(Set<DropPoint> dropPoints) throws InterruptedException, ExecutionException {
+        DropPoint bestPlacement = null;
+        int lowestStackHeight = Integer.MAX_VALUE;
+        int minHoles = Integer.MAX_VALUE;
         for (DropPoint dp : dropPoints) {
-            GameEngine engine = new GameEngine(this.engine);
-            execute(dp, engine);
-            int stackHeight = stackHeight(engine);
-            System.out.println("Stack height for drop point " + dp + ": " + stackHeight);
-            if (stackHeight < minHeight) {
-                minHeight = stackHeight;
-                lowestStack = dp;
+            GameEngine simulatedEngine = new GameEngine(this.engine);
+            execute(dp, simulatedEngine);
+            int holes = new HoleFinder(simulatedEngine).run();
+            int stackHeight = stackHeight(simulatedEngine);
+            System.out.println("Drop point " + dp + ": holes=" + holes + ", stack height=" + stackHeight);
+            if (stackHeight < lowestStackHeight || (stackHeight == lowestStackHeight && holes < minHoles)) {
+                lowestStackHeight = stackHeight;
+                minHoles = holes;
+                bestPlacement = dp;
             }
         }
-        return lowestStack;
+        return bestPlacement;
     }
 
     private int stackHeight(GameEngine engine) {
