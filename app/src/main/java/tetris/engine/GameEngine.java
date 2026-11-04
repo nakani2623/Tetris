@@ -98,6 +98,9 @@ public class GameEngine implements Observable {
         else if (direction == Direction.RIGHT) {op = new MoveRightOperator();}
         else {op = null;}
         board.tryOperate(op);
+
+        // check for start/reset of lock timer
+        checkLanded();
         
     }
 
@@ -198,6 +201,9 @@ public class GameEngine implements Observable {
 
         // score manager handle spin event
         scoreManager.onSpin(currSpinState, board.getcurrentTetromino().type);
+
+        // check lock timer
+        checkLanded();
     }  
     
 //  ███████╗██████╗  █████╗ ██╗    ██╗███╗   ██╗
