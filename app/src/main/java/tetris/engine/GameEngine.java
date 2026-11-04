@@ -76,7 +76,7 @@ public class GameEngine implements Observable {
 //  ╚══════╝   ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝
     public void start() {
         spawn();
-        autoMoveScheduler.onStart();
+        autoMoveScheduler.start();
     }
 
     /**
@@ -87,10 +87,15 @@ public class GameEngine implements Observable {
         board.reset();
         nextQueue.reset();
         holdTetrominoType = null;
-
         notifyObservers();
     }
 
+//  ███╗   ███╗ ██████╗ ██╗   ██╗███████╗
+//  ████╗ ████║██╔═══██╗██║   ██║██╔════╝
+//  ██╔████╔██║██║   ██║██║   ██║█████╗
+//  ██║╚██╔╝██║██║   ██║╚██╗ ██╔╝██╔══╝
+//  ██║ ╚═╝ ██║╚██████╔╝ ╚████╔╝ ███████╗
+//  ╚═╝     ╚═╝ ╚═════╝   ╚═══╝  ╚══════╝
     public void move(Direction direction){
         Operator op;
         if (direction == Direction.DOWN) {op = new MoveDownOperator();}
@@ -285,6 +290,7 @@ public class GameEngine implements Observable {
     public void dispose() {
         scheduler.shutdown();
         scoreManager.dispose();
+        autoMoveScheduler.dispose();
     }
 
     public ScoreManager getScoreManager() {

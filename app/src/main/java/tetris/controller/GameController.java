@@ -172,6 +172,7 @@ public class GameController implements GameOverListener {
     
     public void dispose() {
         scheduler.shutdown();
+        engine.dispose();
     }
 
     @Override 
