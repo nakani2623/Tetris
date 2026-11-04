@@ -3,8 +3,10 @@ package tetris.engine;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import tetris.engine.observers.Observable;
 import tetris.engine.observers.Observer;
@@ -29,6 +31,24 @@ public class Board implements Observable{
         this.height = height;
         allTetrominos = new ArrayList<Tetromino>();
 
+    }
+
+    public Board(Board source) {
+        this.width = source.width;
+        this.height = source.height;
+        this.allTetrominos = new ArrayList<>(source.allTetrominos.size());
+        Map<Tetromino, Tetromino> copies = new IdentityHashMap<>();
+        for (Tetromino tetromino : source.allTetrominos) {
+            Tetromino copy = new Tetromino(tetromino);
+            this.allTetrominos.add(copy);
+            copies.putIfAbsent(tetromino, copy);
+        }
+        this.currentTetromino = source.currentTetromino == null
+            ? null
+            : copies.computeIfAbsent(source.currentTetromino, Tetromino::new);
+        this.shadowTetromino = source.shadowTetromino == null
+            ? null
+            : new Tetromino(source.shadowTetromino);
     }
 
     public void reset() {
