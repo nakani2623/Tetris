@@ -29,7 +29,7 @@ public class SprintScore implements ScoreManager {
 
     public SprintScore(int goalLines) {
         this.goalLines = goalLines;
-        exec.scheduleAtFixedRate(this::updateStats, 0, 1000 / refreshRate_Hz, TimeUnit.MILLISECONDS);
+        exec.scheduleAtFixedRate(this::updateStats, 0, TimeUnit.SECONDS.toNanos(1) / refreshRate_Hz, TimeUnit.NANOSECONDS);
         this.observers = new ArrayList<>();
     }
 
