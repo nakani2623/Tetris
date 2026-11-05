@@ -108,7 +108,7 @@ public class GameEngine implements Observable {
         if (board.tryOperate(op)) 
             // only if current piece moved, check for start/reset of lock timer
             checkLanded();
-        
+        autoMoveScheduler.onOperate();
     }
 
     public void moveDAS(Direction direction) {

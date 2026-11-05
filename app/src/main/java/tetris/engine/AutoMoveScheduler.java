@@ -27,8 +27,8 @@ public class AutoMoveScheduler {
     private Map<Direction, Integer> DASCharges = new HashMap<>(
         Map.of(Direction.LEFT, 0, Direction.RIGHT, 0)
     );
-    private double ARR = 601;
-    // private double ARR = 0;
+    // private double ARR = 601;
+    private double ARR;
     public AutoMoveScheduler(double gravity, double arr, MainThreadDispatcher dispatcher, GameEngine engine) {
         this.gravity = gravity;
         this.ARR = arr;
@@ -49,7 +49,7 @@ public class AutoMoveScheduler {
         applyAutoMoveEffects();
     }
     private void applyAutoMoveEffects() {
-        System.out.println();
+        // System.out.println();
         if (softDropFactor * gravity > INSTANT_MOVE_THRESHOLD && ARR > INSTANT_MOVE_THRESHOLD) { 
             // both instant move, choose order
             if (softDropFactor * gravity >= ARR) { // vertical first
@@ -66,14 +66,14 @@ public class AutoMoveScheduler {
         // one or zero instant move, order doesn't matter
         handleDASEvent();
         applySoftDropEffect();
-        System.out.println();
+        // System.out.println();
     }
     private void applySoftDropEffect() {
-        System.out.println("sd");
+        // System.out.println("sd");
         if (!isSoftDropping) 
             return ;
         // inf sdf
-        if (softDropFactor == Double.MAX_VALUE) {
+        if (softDropFactor > INSTANT_MOVE_THRESHOLD) {
             engine.moveDAS(Direction.DOWN);
             return;
         }
@@ -87,8 +87,8 @@ public class AutoMoveScheduler {
         resetGravityTimeline(tempGravity);
     }
     private void handleDASEvent(){
-        System.out.println("das");
-        if (ARR != 0 && arrTask != null) {
+        // System.out.println("das");
+        if (ARR <= INSTANT_MOVE_THRESHOLD && arrTask != null) {
             // stop arr timeline
             arrTask.cancel(false);
         }
