@@ -13,7 +13,7 @@ public final class DelayedLock implements LockPolicy {
     private final int maxResets;
     private final ScheduledThreadPoolExecutor scheduler;
     private ScheduledFuture<?> pending;
-    private long generation;
+    private long lockTimerGeneration;
     private int resets;
     private boolean closed;
 
@@ -36,17 +36,17 @@ public final class DelayedLock implements LockPolicy {
             lock.run();
             return;
         }
-        long ticket = generation;
+        long ticket = lockTimerGeneration;
         pending = scheduler.schedule(() -> dispatcher.dispatch(() -> {
             // A cancelled timer may already have queued a callback on the game thread.
-            if (closed || ticket != generation) return;
+            if (closed || ticket != lockTimerGeneration) return;
             reset();
             lock.run();
         }), delayMillis, TimeUnit.MILLISECONDS);
     }
 
     private void cancelPending() {
-        generation++;
+        lockTimerGeneration++;
         if (pending != null) {
             pending.cancel(false);
             pending = null;

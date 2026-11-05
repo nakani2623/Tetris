@@ -15,6 +15,7 @@ public class AutoMoveScheduler {
     // private SoftDropHandler softDropHandler;
 
     // gameplay state & spawn
+    public static double INSTANT_MOVE_THRESHOLD = 600.0; // grid per second
     private double gravity; // move down num per sec
     private double softDropFactor;
     private boolean isSoftDropping = false;
@@ -22,11 +23,12 @@ public class AutoMoveScheduler {
     private ScheduledFuture<?> gravityTask;
     private ScheduledFuture<?> arrTask;
     private final MainThreadDispatcher dispatcher;
-    private long generation;
+    private long gameGeneration; // ++when game started/restarted
     private Map<Direction, Integer> DASCharges = new HashMap<>(
         Map.of(Direction.LEFT, 0, Direction.RIGHT, 0)
     );
-    private double ARR = 0;
+    private double ARR = 601;
+    // private double ARR = 0;
     public AutoMoveScheduler(double gravity, double arr, MainThreadDispatcher dispatcher, GameEngine engine) {
         this.gravity = gravity;
         this.ARR = arr;
@@ -41,14 +43,33 @@ public class AutoMoveScheduler {
     }
 
     public void onSpawn() {
-        applySoftDropEffect();
-        handleDASEvent();
+        applyAutoMoveEffects();
     }
     public void onOperate() {
-        applySoftDropEffect();
+        applyAutoMoveEffects();
+    }
+    private void applyAutoMoveEffects() {
+        System.out.println();
+        if (softDropFactor * gravity > INSTANT_MOVE_THRESHOLD && ARR > INSTANT_MOVE_THRESHOLD) { 
+            // both instant move, choose order
+            if (softDropFactor * gravity >= ARR) { // vertical first
+                applySoftDropEffect();
+                handleDASEvent();
+                return ;
+            }
+            else { // horizontal first
+                handleDASEvent();
+                applySoftDropEffect();
+                return ;
+            }
+        }
+        // one or zero instant move, order doesn't matter
         handleDASEvent();
+        applySoftDropEffect();
+        System.out.println();
     }
     private void applySoftDropEffect() {
+        System.out.println("sd");
         if (!isSoftDropping) 
             return ;
         // inf sdf
@@ -59,13 +80,14 @@ public class AutoMoveScheduler {
 
         // non inf sdf
         double tempGravity = softDropFactor * gravity;
-        if (tempGravity > 50) {
+        if (tempGravity > INSTANT_MOVE_THRESHOLD) {
             engine.moveDAS(Direction.DOWN);
             return;
         }
         resetGravityTimeline(tempGravity);
     }
     private void handleDASEvent(){
+        System.out.println("das");
         if (ARR != 0 && arrTask != null) {
             // stop arr timeline
             arrTask.cancel(false);
@@ -80,7 +102,7 @@ public class AutoMoveScheduler {
         else if (leftDAS - rightDAS > 0) { direction = Direction.LEFT; }
         else { direction = Direction.RIGHT; }
 
-        if (ARR == 0) { // 0 ARR
+        if (ARR > INSTANT_MOVE_THRESHOLD ) { // ->0 ARR
             try {
                 engine.moveDAS(direction);
             } catch (Throwable e) {
@@ -89,20 +111,19 @@ public class AutoMoveScheduler {
         }
         else { // non-zero ARR
             // instantly move one step
-            // horizontalMove(direction);
             engine.move(direction);
-            applySoftDropEffect();
-            long duration = (long)(ARR * 1000 / 60);
-            if (scheduler == null || scheduler.isShutdown()) return;
-            long ticket = generation;
+            // applySoftDropEffect();
+            long periodNanos = (long) (TimeUnit.SECONDS.toNanos(1) / ARR);
+            if (scheduler == null || scheduler.isShutdown()) 
+                return;
+            long ticket = gameGeneration;
             arrTask = scheduler.scheduleAtFixedRate( () -> {
                 dispatcher.dispatch(() -> {
-                    if (ticket != generation) return;
-                    // horizontalMove(direction);
+                    if (ticket != gameGeneration) // ignore a task from last game before reset
+                        return;
                     engine.move(direction);
-                    applySoftDropEffect();
                 });
-            }, 0, duration, TimeUnit.MILLISECONDS);
+            }, periodNanos, periodNanos, TimeUnit.NANOSECONDS);
         }
         
     }
@@ -125,19 +146,15 @@ public class AutoMoveScheduler {
         if (gravityTask != null) {
             gravityTask.cancel(false);
         }
-        long duration = (long)(1000 / gravity);
-        long ticket = generation;
+        long ticket = gameGeneration;
+        long periodNanos = (long) (TimeUnit.SECONDS.toNanos(1) / gravity);
         gravityTask = scheduler.scheduleAtFixedRate( () -> {
             dispatcher.dispatch(() -> {
-                if (ticket != generation || engine.getBoard().getcurrentTetromino() == null) return;
+                if (ticket != gameGeneration) return; // ignore task from last game
+                if (engine.getBoard().getcurrentTetromino() == null) return; // for some forgotten reason, check current piece is not null
                 engine.move(Direction.DOWN);
-                // try {
-                //     engine.move(Direction.DOWN);
-                // } catch (Exception e) {
-                //     e.printStackTrace();
-                // }
             });
-        }, 0, duration, TimeUnit.MILLISECONDS);
+        }, 0, periodNanos, TimeUnit.NANOSECONDS);
     }
 
     public void chargeDAS(Direction direction) {
@@ -159,7 +176,7 @@ public class AutoMoveScheduler {
     }
 
     public void reset() {
-        generation++;
+        gameGeneration++;
         isSoftDropping = false;
         DASCharges.replaceAll((direction, charge) -> 0);
         if (arrTask != null) arrTask.cancel(false);
@@ -167,7 +184,7 @@ public class AutoMoveScheduler {
     }
 
     public void dispose() {
-        generation++;
+        gameGeneration++;
         if (scheduler != null) scheduler.shutdownNow();
     }
 }

@@ -105,10 +105,9 @@ public class GameEngine implements Observable {
         else if (direction == Direction.LEFT) {op = new MoveLeftOperator();}
         else if (direction == Direction.RIGHT) {op = new MoveRightOperator();}
         else {op = null;}
-        board.tryOperate(op);
-
-        // check for start/reset of lock timer
-        checkLanded();
+        if (board.tryOperate(op)) 
+            // only if current piece moved, check for start/reset of lock timer
+            checkLanded();
         
     }
 
@@ -261,7 +260,10 @@ public class GameEngine implements Observable {
     /**
      * check if currentTetromino is landed, 
      * then if landed, start lockTimer
-     * otherwise, end lock Timer
+     * otherwise, end lock Timer.
+     * 
+     * This function ++resetCount and force lock if resetCount > maxResets, 
+     * unnecessary calls to this func consume extra resets.
      */
     void checkLanded() {
         if (lockPolicy != null && board.getcurrentTetromino() != null) {
