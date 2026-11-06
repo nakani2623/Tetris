@@ -3,6 +3,7 @@ package tetris.engine.rotator;
 import java.util.List;
 
 import tetris.engine.Board;
+import tetris.engine.Piece;
 import tetris.engine.Tetromino;
 import tetris.engine.operator.Operator;
 import tetris.engine.operator.RotateClockwiseOperator;
@@ -25,14 +26,14 @@ public class SuperRotator implements Rotator {
         // failed without kick
         // 1.  get kick table
         Tetromino currentTetromino = board.getcurrentTetromino();
-        List<Tetromino> allTetrominos = board.getAllTetrominos();
+        List<Piece> allTetrominos = board.getAllTetrominos();
         List<Point> kickList = KickTable.getKickList(
             currentTetromino.type,
             currentTetromino.rotationState,
             currentTetromino.rotationState.changeState(rotation)
         );
         
-        Tetromino backup = new Tetromino(currentTetromino);
+        Tetromino backup = currentTetromino.deepCopy();
         Point oriPos = new Point(currentTetromino.centre);
         int currentIndex = allTetrominos.indexOf(currentTetromino);
         if (kickList == null) {
@@ -61,7 +62,7 @@ public class SuperRotator implements Rotator {
             }
         }
         // failed all attempts: move currTetro to origin
-        currentTetromino = new Tetromino(backup);
+        currentTetromino = backup.deepCopy();
         if (currentIndex >= 0) {
             allTetrominos.set(currentIndex, currentTetromino);
         }

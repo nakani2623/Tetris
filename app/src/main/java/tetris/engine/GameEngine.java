@@ -142,7 +142,7 @@ public class GameEngine implements Observable {
         resetLockPolicy();
         board.getAllTetrominos().remove(board.getcurrentTetromino());
 
-        Tetromino currentTetrominoClone = new Tetromino(board.getcurrentTetromino());
+        Tetromino currentTetrominoClone = board.getcurrentTetromino().deepCopy();
         if (holdTetrominoType == null) {
             spawn();
         }
@@ -323,6 +323,10 @@ public class GameEngine implements Observable {
         if (autoMoveScheduler != null) autoMoveScheduler.setGravity(gravity);
     }
 
+    public void setARR(double ARR) {
+        autoMoveScheduler.setARR(ARR);
+    }
+
     public void setGameOverListener(GameOverListener listener) {
         this.listener = listener;
     }
@@ -354,5 +358,9 @@ public class GameEngine implements Observable {
 
     public Board getBoard() {
         return board;
+    }
+
+    public AutoMoveScheduler getAutoMoveScheduler() {
+        return autoMoveScheduler;
     }
 }

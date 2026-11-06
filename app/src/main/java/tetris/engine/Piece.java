@@ -12,7 +12,18 @@ public class Piece {
     public Piece(Mino mino) {
         children.add(mino);
     }
-
+    /**
+     * duplicates a Tetromino (deep copy)
+     * @param t
+     */
+    public Piece deepCopy() {
+        Piece copy = new Piece();
+        copy.children = new ArrayList<Mino>();
+        for (Mino m : this.children) {
+            copy.children.add(new Mino(m));
+        }
+        return copy;
+    }
     public void moveLeft() {
         for (Mino m : children) {
             double x = m.getPosition().getX();
