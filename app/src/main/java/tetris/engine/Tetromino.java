@@ -81,15 +81,15 @@ public class Tetromino extends Piece {
      * duplicates a Tetromino (deep copy)
      * @param t
      */
-    public Tetromino(Tetromino t) {
-        this.centre = new Point(t.centre);
-        this.children = new ArrayList<Mino>();
-        for (Mino m : t.children) {
-            this.children.add(new Mino(m));
+    @Override 
+    public Tetromino deepCopy() {
+        Tetromino copy = new Tetromino(new Point(this.centre), this.type);
+        copy.children = new ArrayList<Mino>();
+        for (Mino m : this.children) {
+            copy.children.add(new Mino(m));
         }
-
-        this.type = t.type;
-        this.rotationState = t.rotationState;
+        copy.rotationState = this.rotationState;
+        return copy;
     }
 
     public void moveLeft() {

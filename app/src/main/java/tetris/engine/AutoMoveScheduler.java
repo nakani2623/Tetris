@@ -171,6 +171,10 @@ public class AutoMoveScheduler {
         this.gravity = gravity;
     }
 
+    public void setARR(double ARR) {
+        this.ARR = ARR;
+    } 
+
     public double getGravity() {
         return gravity;
     }
