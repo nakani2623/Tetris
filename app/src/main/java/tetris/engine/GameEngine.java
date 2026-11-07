@@ -77,7 +77,11 @@ public class GameEngine implements Observable {
     public void start() {
         started = true;
         spawn();
-        if (autoMoveScheduler != null) autoMoveScheduler.start();
+        // board.allTetrominos.add(new Piece(new Mino(0, 19)));
+        Piece initialGround = new Piece(List.of(new Mino(0, 18), new Mino(1, 18), new Mino(3, 19)));
+        board.allTetrominos.add(initialGround);
+        if (autoMoveScheduler != null) 
+            autoMoveScheduler.start();
     }
 
     /**
@@ -136,7 +140,6 @@ public class GameEngine implements Observable {
 //  ██╔══██║██║   ██║██║     ██║  ██║
 //  ██║  ██║╚██████╔╝███████╗██████╔╝
 //  ╚═╝  ╚═╝ ╚═════╝ ╚══════╝╚═════╝
-//            ◀───[ T ]───▶
     public void hold() {
         // remove current tetromino
         resetLockPolicy();
@@ -157,7 +160,7 @@ public class GameEngine implements Observable {
         }
 
         holdTetrominoType = currentTetrominoClone.type;
-        board.updateShadow();
+        // board.updateShadow();
         notifyObservers();
     }
 
@@ -208,9 +211,8 @@ public class GameEngine implements Observable {
         SpinState currSpinState = spinDetecter.detectSpin(board);
 
         // score manager handle spin event
-        if (scoreManager != null) {
+        if (scoreManager != null) 
             scoreManager.onSpin(currSpinState, board.getcurrentTetromino().type);
-        }
 
         // check lock timer
         checkLanded();
@@ -236,7 +238,7 @@ public class GameEngine implements Observable {
         if (autoMoveScheduler != null) autoMoveScheduler.onSpawn();
 
         checkLanded();
-        board.updateShadow();
+        // board.updateShadow();
     }
 
 //  ██╗      ██████╗  ██████╗██╗  ██╗
@@ -249,7 +251,8 @@ public class GameEngine implements Observable {
     void lock() {
         resetLockPolicy();
         int nLinesCleared = board.clearCompleted();
-        if (scoreManager != null) scoreManager.onLock(nLinesCleared);
+        if (scoreManager != null) 
+            scoreManager.onLock(nLinesCleared);
         spawn();
     }
     public void hardDrop() {
@@ -324,6 +327,8 @@ public class GameEngine implements Observable {
     }
 
     public void setARR(double ARR) {
+        if (autoMoveScheduler == null) 
+            return;
         autoMoveScheduler.setARR(ARR);
     }
 
