@@ -12,6 +12,11 @@ public class Piece {
     public Piece(Mino mino) {
         children.add(mino);
     }
+    public Piece(List<Mino> minos) {
+        for (Mino mino : minos) {
+            children.add(mino);
+        }
+    }
     /**
      * duplicates a Tetromino (deep copy)
      * @param t

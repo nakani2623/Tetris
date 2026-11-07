@@ -33,7 +33,10 @@ public class AutoMoveScheduler {
         this.gravity = gravity;
         this.ARR = arr;
         this.engine = engine;
-        this.dispatcher = dispatcher;
+        if (dispatcher == null)
+            this.dispatcher = task -> task.run();
+        else
+            this.dispatcher = dispatcher;
     }
 
     public void start() {
@@ -190,5 +193,9 @@ public class AutoMoveScheduler {
     public void dispose() {
         gameGeneration++;
         if (scheduler != null) scheduler.shutdownNow();
+    }
+
+    public void setDASCharges(Map<Direction, Integer> charges) {
+        this.DASCharges = charges;
     }
 }

@@ -20,7 +20,7 @@ public class Board implements Observable{
     private int width;
     private int height;
     List<Piece> allTetrominos;
-    private Tetromino currentTetromino;
+    Tetromino currentTetromino;
     private Tetromino shadowTetromino;
 
     private List<Observer> observers = new ArrayList<>();
@@ -92,7 +92,7 @@ public class Board implements Observable{
         }
         currentTetromino = t;
         allTetrominos.add(currentTetromino);
-        notifyObservers();
+        updateShadow();
         return true;
     }
 
