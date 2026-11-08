@@ -91,7 +91,8 @@ public class Board implements Observable{
      * @return bool: success or not
      */
     public boolean spawn(TetrominoType currentTetrominoType) {
-        Tetromino t = new Tetromino(centreTopPoint(), currentTetrominoType); // duplicate_1 1
+        Point spawnPoint = spawnPoint(currentTetrominoType);
+        Tetromino t = new Tetromino(spawnPoint, currentTetrominoType); // duplicate_1 1
         currentTetromino = null;
         if (hasCollision(t)) {
             return false;
@@ -102,8 +103,18 @@ public class Board implements Observable{
         return true;
     }
 
-    public Point centreTopPoint() {
-        return new Point((this.width/2)-1, 1);
+    public Point spawnPoint(TetrominoType type) {
+        Point centre = new Point((this.width/2)-1, 1);
+        if (type == TetrominoType.I) {
+            centre.setX(centre.getX() + 0.5);
+            centre.setY(centre.getY() + 0.5);
+
+        } else if (type == TetrominoType.O) {
+            centre.setX(centre.getX() + 0.5);
+            centre.setY(centre.getY() - 0.5);
+        }
+
+        return centre;
     }
  
     void updateShadow() {
