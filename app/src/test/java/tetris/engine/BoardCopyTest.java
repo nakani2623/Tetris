@@ -18,11 +18,11 @@ class BoardCopyTest {
         Tetromino sourceCurrent = source.getcurrentTetromino();
         Board copy = new Board(source);
         Tetromino copiedCurrent = copy.getcurrentTetromino();
-        Piece copiedBoardTetromino = copy.getAllTetrominos().get(0);
+        Piece copiedBoardFirstTetromino = copy.getAllTetrominos().get(0);
 
         assertNotSame(source.getAllTetrominos(), copy.getAllTetrominos());
         assertNotSame(sourceCurrent, copiedCurrent);
-        assertSame(copiedBoardTetromino, copiedCurrent);
+        assertSame(copiedBoardFirstTetromino, copiedCurrent);
         assertNotSame(sourceCurrent.getCentre(), copiedCurrent.getCentre());
         assertEquals(sourceCurrent.getCentre(), copiedCurrent.getCentre());
         assertEquals(sourceCurrent.children.size(), copiedCurrent.children.size());
