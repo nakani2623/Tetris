@@ -39,12 +39,18 @@ public class Board implements Observable{
         this.allTetrominos = new ArrayList<>(source.allTetrominos.size());
         Map<Piece, Piece> copies = new IdentityHashMap<>();
         for (Piece piece : source.allTetrominos) {
+            if (piece == source.currentTetromino) {
+                Tetromino currentTetrominoCopy = source.currentTetromino.deepCopy();
+                this.currentTetromino = currentTetrominoCopy;
+                this.allTetrominos.add(currentTetrominoCopy);
+                continue;
+            }
             Piece copy = piece.deepCopy();
             this.allTetrominos.add(copy);
             copies.putIfAbsent(piece, copy);
         }
-        this.currentTetromino = source.currentTetromino.deepCopy();
-        this.shadowTetromino = source.shadowTetromino.deepCopy();
+        if (source.shadowTetromino != null)
+            this.shadowTetromino = source.shadowTetromino.deepCopy();
     }
 
     public void reset() {
