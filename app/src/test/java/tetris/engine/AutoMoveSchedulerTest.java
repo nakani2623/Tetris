@@ -80,6 +80,7 @@ public class AutoMoveSchedulerTest {
         // Assert
         Tetromino expacted = new Tetromino(new Point(7.5, 17.5), TetrominoType.I);
         expacted.rotateClockwise();
+        expacted.moveRight();
         System.out.println("expected: "+expacted);
         System.out.println(b.currentTetromino);
         assertTrue(b.currentTetromino.isSamePosition(expacted));

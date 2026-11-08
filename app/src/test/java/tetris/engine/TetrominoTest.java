@@ -130,7 +130,7 @@ class TetrominoTest {
     @Test
     void rotateClockwiseSRSPlusTestO() {
         // Arrange
-        Tetromino t = new Tetromino(new Point(1, 2), TetrominoType.O);
+        Tetromino t = new Tetromino(new Point(1.5, 1.5), TetrominoType.O);
 
         // Act
         t.rotateClockwise();
@@ -163,7 +163,7 @@ class TetrominoTest {
     @Test
     void rotateClockwiseSRSPlusTestI() {
         // Arrange
-        Tetromino t = new Tetromino(new Point(2, 1), TetrominoType.I);
+        Tetromino t = new Tetromino(new Point(2.5, 1.5), TetrominoType.I);
 
         // Act
         t.rotateClockwise();

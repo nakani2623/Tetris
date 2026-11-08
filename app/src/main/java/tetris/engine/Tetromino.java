@@ -1,7 +1,6 @@
 package tetris.engine;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import tetris.utils.Point;
 import tetris.engine.type.Rotation;
@@ -15,25 +14,14 @@ import tetris.engine.type.TetrominoType;
 public class Tetromino extends Piece {
     final int order = 4;
     public Point centre;
-    // public List<Mino> children;
     public TetrominoType type; 
     public RotationState rotationState; // direction after n CW rotation, 0: origin, 1: CW-ed, 2: r-180-ed, 3: CCW-ed 
-//    Mino[] children;
 
     public Tetromino(Point centre, TetrominoType type) {
         this.type = type;
         this.centre = centre;
         children = new ArrayList<>();
         this.rotationState = RotationState.ZERO;
-
-        if (type == TetrominoType.I) {
-            centre.setX(centre.getX() + 0.5);
-            centre.setY(centre.getY() + 0.5);
-
-        } else if (type == TetrominoType.O) {
-            centre.setX(centre.getX() + 0.5);
-            centre.setY(centre.getY() - 0.5);
-        }
 
         double x = centre.getX();
         double y = centre.getY();
