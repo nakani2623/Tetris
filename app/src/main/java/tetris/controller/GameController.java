@@ -67,7 +67,7 @@ public class GameController implements GameOverListener {
     }
 
     private void startCharging(UnifiedKey key, Direction direction) {
-        long delay = (long)(DAS * 1000 / 60);
+        long delayNanos = (long) (DAS * TimeUnit.SECONDS.toNanos(1) / 60.0);
         ScheduledFuture chargeDAS = scheduler.schedule(() -> {
             dispatcher.dispatch(() -> {
                 engine.chargeDAS(direction);
@@ -75,7 +75,7 @@ public class GameController implements GameOverListener {
                 // handleDASEvent();
                 DASChargingKeys.remove(key);
             });
-        }, delay, TimeUnit.MILLISECONDS);
+        }, delayNanos, TimeUnit.NANOSECONDS);
         DASChargingKeys.put(key, chargeDAS);
 
     }

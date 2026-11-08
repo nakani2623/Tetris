@@ -7,6 +7,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.StrokeType;
 import tetris.engine.Mino;
+import tetris.engine.Piece;
 import tetris.engine.Tetromino;
 import tetris.graphics.VisualConfig;
 
@@ -16,8 +17,8 @@ public class BoardPane extends GridPane {
         this.setStyle("-fx-border-color: gray;");
     }
 
-    public void render(List<Tetromino> tetrominos, Tetromino shadow, int x, int y) {
-        int rowOffset = getRowOffset(tetrominos, shadow);
+    public void render(List<Piece> pieces, Tetromino shadow, int x, int y) {
+        int rowOffset = getRowOffset(pieces, shadow);
 
         // clear board
         this.getChildren().clear();
@@ -27,24 +28,24 @@ public class BoardPane extends GridPane {
         if (shadow != null)
             renderShadow(shadow, rowOffset);
         // render all placed pieces
-        for (Tetromino t : tetrominos) {
+        for (Piece t : pieces) {
             renderPiece(t, rowOffset);
         }
 
     }
 
-    private int getRowOffset(List<Tetromino> tetrominos, Tetromino shadow) {
+    private int getRowOffset(List<Piece> tetrominos, Tetromino shadow) {
         int minRow = 0;
         if (shadow != null) {
             minRow = getMinRow(shadow, minRow);
         }
-        for (Tetromino tetromino : tetrominos) {
+        for (Piece tetromino : tetrominos) {
             minRow = getMinRow(tetromino, minRow);
         }
         return -minRow;
     }
 
-    private int getMinRow(Tetromino tetromino, int minRow) {
+    private int getMinRow(Piece tetromino, int minRow) {
         for (Mino mino : tetromino.children) {
             minRow = Math.min(minRow, (int) mino.getPosition().getY());
         }
@@ -68,11 +69,16 @@ public class BoardPane extends GridPane {
         renderPiece(tetromino, blendedColor, rowOffset);
     }
 
-    private void renderPiece(Tetromino tetromino, int rowOffset) {
-        renderPiece(tetromino, TetrominoColor.forType(tetromino.type), rowOffset);
+    private void renderPiece(Piece piece, int rowOffset) {
+        if (piece instanceof Tetromino tetromino) {
+            renderPiece(tetromino, TetrominoColor.forType(tetromino.type), rowOffset); 
+        }
+        else { // default: render gray
+            renderPiece(piece, Color.GRAY, rowOffset);
+        }
     }
 
-    private void renderPiece(Tetromino tetromino, Color color, int rowOffset) {
+    private void renderPiece(Piece tetromino, Color color, int rowOffset) {
         for (Mino m : tetromino.children) {
             double x = m.getPosition().getX();
             double y = m.getPosition().getY();
