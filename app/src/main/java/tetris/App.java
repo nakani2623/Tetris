@@ -40,7 +40,7 @@ public class App extends Application {
     @Override
     public void start(Stage stage) {
         engine.setLockPolicy(new DelayedLock(dispatcher, 500, 15));
-        engine.setAutoMoveScheduler(new AutoMoveScheduler(1, 0, dispatcher, engine));
+        engine.setAutoMoveScheduler(new AutoMoveScheduler(1, 601, dispatcher, engine));
         // load config
         addKeyboardControl();
 
@@ -55,7 +55,7 @@ public class App extends Application {
         new SpinClearDisplayManager(engine.getScoreManager(), window.getSpinClearPane());
 
 
-        engine.setSoftDropFactor(Double.MAX_VALUE);
+        engine.setSoftDropFactor(601);
         engine.setGameOverListener(controller);
 
         controller.showMenu();

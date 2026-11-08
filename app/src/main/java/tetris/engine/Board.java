@@ -19,8 +19,8 @@ public class Board implements Observable{
     // board
     private int width;
     private int height;
-    private List<Tetromino> allTetrominos;
-    private Tetromino currentTetromino;
+    List<Piece> allTetrominos;
+    Tetromino currentTetromino;
     private Tetromino shadowTetromino;
 
     private List<Observer> observers = new ArrayList<>();
@@ -29,7 +29,7 @@ public class Board implements Observable{
     public Board(int width, int height) {
         this.width = width;
         this.height = height;
-        allTetrominos = new ArrayList<Tetromino>();
+        allTetrominos = new ArrayList<Piece>();
 
     }
 
@@ -37,22 +37,24 @@ public class Board implements Observable{
         this.width = source.width;
         this.height = source.height;
         this.allTetrominos = new ArrayList<>(source.allTetrominos.size());
-        Map<Tetromino, Tetromino> copies = new IdentityHashMap<>();
-        for (Tetromino tetromino : source.allTetrominos) {
-            Tetromino copy = new Tetromino(tetromino);
+        Map<Piece, Piece> copies = new IdentityHashMap<>();
+        for (Piece piece : source.allTetrominos) {
+            if (piece == source.currentTetromino) {
+                Tetromino currentTetrominoCopy = source.currentTetromino.deepCopy();
+                this.currentTetromino = currentTetrominoCopy;
+                this.allTetrominos.add(currentTetrominoCopy);
+                continue;
+            }
+            Piece copy = piece.deepCopy();
             this.allTetrominos.add(copy);
-            copies.putIfAbsent(tetromino, copy);
+            copies.putIfAbsent(piece, copy);
         }
-        this.currentTetromino = source.currentTetromino == null
-            ? null
-            : copies.computeIfAbsent(source.currentTetromino, Tetromino::new);
-        this.shadowTetromino = source.shadowTetromino == null
-            ? null
-            : new Tetromino(source.shadowTetromino);
+        if (source.shadowTetromino != null)
+            this.shadowTetromino = source.shadowTetromino.deepCopy();
     }
 
     public void reset() {
-        allTetrominos = new ArrayList<Tetromino>();
+        allTetrominos = new ArrayList<Piece>();
         currentTetromino = null;
         notifyObservers();
     }
@@ -76,7 +78,7 @@ public class Board implements Observable{
     
 
     public boolean canOperate(Operator op) {
-        Tetromino clone = new Tetromino(currentTetromino);
+        Tetromino clone = currentTetromino.deepCopy();
         op.operate(clone);
         if (hasCollision(clone)) {
             return false;
@@ -96,7 +98,7 @@ public class Board implements Observable{
         }
         currentTetromino = t;
         allTetrominos.add(currentTetromino);
-        notifyObservers();
+        updateShadow();
         return true;
     }
 
@@ -105,8 +107,7 @@ public class Board implements Observable{
     }
  
     void updateShadow() {
-        shadowTetromino = new Tetromino(currentTetromino);
-        Tetromino clone = new Tetromino(currentTetromino);
+        shadowTetromino = currentTetromino.deepCopy();
         Operator op = new MoveDownOperator();
         while (!hasCollision(shadowTetromino)) {
             shadowTetromino.moveDown();
@@ -165,7 +166,7 @@ public class Board implements Observable{
      */
     boolean landed(Tetromino t) {
         // simulate a downward move, check if there is a collision
-        Tetromino clone  = new Tetromino(t);
+        Tetromino clone  = t.deepCopy();
         clone.moveDown();
 
         if (hasCollision(clone)) {
@@ -189,8 +190,8 @@ public class Board implements Observable{
      * 
      * @ret int: lines cleared
      */
-    int clearLines(ArrayList<Integer> toClear, ArrayList<Tetromino> relatedTetrominos) { 
-        for (Tetromino t : relatedTetrominos) {
+    int clearLines(ArrayList<Integer> toClear, ArrayList<Piece> relatedTetrominos) { 
+        for (Piece t : relatedTetrominos) {
             Iterator<Mino> iterator = t.children.iterator();
 
             while (iterator.hasNext()) {
@@ -216,11 +217,11 @@ public class Board implements Observable{
         return toClear.size();
     }
 
-    ArrayList<Integer> findLinesToClear(ArrayList<Tetromino> relatedTetrominos, HashSet<Double> relatedHeights) {
+    ArrayList<Integer> findLinesToClear(ArrayList<Piece> relatedTetrominos, HashSet<Double> relatedHeights) {
         ArrayList<Integer> linesToClear = new ArrayList<Integer>();
         boolean[][] related_section = new boolean[this.width][relatedHeights.size()]; // true for mino exist, false for empty
         int minHeight = Collections.min(relatedHeights).intValue();
-        for (Tetromino t: relatedTetrominos) {
+        for (Piece t: relatedTetrominos) {
             for (Mino mino: t.children) {
                 int x = (int) mino.getPosition().getX();
                 int y = (int) mino.getPosition().getY(); 
@@ -249,7 +250,7 @@ public class Board implements Observable{
         return linesToClear;
     }
     
-    HashSet<Double> calcSetOfRelatedHeights(Tetromino t) {
+    HashSet<Double> calcSetOfRelatedHeights(Piece t) {
         HashSet<Double> related_heights = new HashSet<Double>();
         for (Mino mino: t.children) {
             related_heights.add(mino.getPosition().getY());
@@ -266,10 +267,10 @@ public class Board implements Observable{
         //
         // group to lower/around/upper
         HashSet<Double> lastLockedHeights = calcSetOfRelatedHeights(lastLocked);
-        ArrayList<Tetromino> lower = new ArrayList<Tetromino>();
-        ArrayList<Tetromino> around = new ArrayList<Tetromino>();
-        ArrayList<Tetromino> upper = new ArrayList<Tetromino>();
-        for (Tetromino t : allTetrominos) {
+        ArrayList<Piece> lower = new ArrayList<Piece>();
+        ArrayList<Piece> around = new ArrayList<Piece>();
+        ArrayList<Piece> upper = new ArrayList<Piece>();
+        for (Piece t : allTetrominos) {
             if (t.children.isEmpty()) {continue;}
             HashSet<Double> tHeights = calcSetOfRelatedHeights(t);
             if (!Collections.disjoint(lastLockedHeights, tHeights)) {
@@ -287,7 +288,7 @@ public class Board implements Observable{
         int cleared = clearLines(findLinesToClear(around, lastLockedHeights), around);
 
         // upper: shift minos
-        for (Tetromino tetromino : upper) {
+        for (Piece tetromino : upper) {
             for (Mino mino : tetromino.children) {
                 mino.getPosition().setY(mino.getPosition().getY() + cleared);
             }
@@ -299,7 +300,7 @@ public class Board implements Observable{
         return currentTetromino;
     }
 
-    public List<Tetromino> getAllTetrominos() {
+    public List<Piece> getAllTetrominos() {
         return allTetrominos;
     }
 

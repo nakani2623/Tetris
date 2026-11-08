@@ -77,7 +77,11 @@ public class GameEngine implements Observable {
     public void start() {
         started = true;
         spawn();
-        if (autoMoveScheduler != null) autoMoveScheduler.start();
+        // board.allTetrominos.add(new Piece(new Mino(0, 19)));
+        Piece initialGround = new Piece(List.of(new Mino(0, 18), new Mino(1, 18), new Mino(3, 19)));
+        board.allTetrominos.add(initialGround);
+        if (autoMoveScheduler != null) 
+            autoMoveScheduler.start();
     }
 
     /**
@@ -105,11 +109,10 @@ public class GameEngine implements Observable {
         else if (direction == Direction.LEFT) {op = new MoveLeftOperator();}
         else if (direction == Direction.RIGHT) {op = new MoveRightOperator();}
         else {op = null;}
-        board.tryOperate(op);
-
-        // check for start/reset of lock timer
-        checkLanded();
-        
+        if (board.tryOperate(op)) 
+            // only if current piece moved, check for start/reset of lock timer
+            checkLanded();
+        autoMoveScheduler.onOperate();
     }
 
     public void moveDAS(Direction direction) {
@@ -137,13 +140,12 @@ public class GameEngine implements Observable {
 //  ██╔══██║██║   ██║██║     ██║  ██║
 //  ██║  ██║╚██████╔╝███████╗██████╔╝
 //  ╚═╝  ╚═╝ ╚═════╝ ╚══════╝╚═════╝
-//            ◀───[ T ]───▶
     public void hold() {
         // remove current tetromino
         resetLockPolicy();
         board.getAllTetrominos().remove(board.getcurrentTetromino());
 
-        Tetromino currentTetrominoClone = new Tetromino(board.getcurrentTetromino());
+        Tetromino currentTetrominoClone = board.getcurrentTetromino().deepCopy();
         if (holdTetrominoType == null) {
             spawn();
         }
@@ -158,7 +160,7 @@ public class GameEngine implements Observable {
         }
 
         holdTetrominoType = currentTetrominoClone.type;
-        board.updateShadow();
+        // board.updateShadow();
         notifyObservers();
     }
 
@@ -209,9 +211,8 @@ public class GameEngine implements Observable {
         SpinState currSpinState = spinDetecter.detectSpin(board);
 
         // score manager handle spin event
-        if (scoreManager != null) {
+        if (scoreManager != null) 
             scoreManager.onSpin(currSpinState, board.getcurrentTetromino().type);
-        }
 
         // check lock timer
         checkLanded();
@@ -237,7 +238,7 @@ public class GameEngine implements Observable {
         if (autoMoveScheduler != null) autoMoveScheduler.onSpawn();
 
         checkLanded();
-        board.updateShadow();
+        // board.updateShadow();
     }
 
 //  ██╗      ██████╗  ██████╗██╗  ██╗
@@ -250,7 +251,8 @@ public class GameEngine implements Observable {
     void lock() {
         resetLockPolicy();
         int nLinesCleared = board.clearCompleted();
-        if (scoreManager != null) scoreManager.onLock(nLinesCleared);
+        if (scoreManager != null) 
+            scoreManager.onLock(nLinesCleared);
         spawn();
     }
     public void hardDrop() {
@@ -261,7 +263,10 @@ public class GameEngine implements Observable {
     /**
      * check if currentTetromino is landed, 
      * then if landed, start lockTimer
-     * otherwise, end lock Timer
+     * otherwise, end lock Timer.
+     * 
+     * This function ++resetCount and force lock if resetCount > maxResets, 
+     * unnecessary calls to this func consume extra resets.
      */
     void checkLanded() {
         if (lockPolicy != null && board.getcurrentTetromino() != null) {
@@ -321,6 +326,12 @@ public class GameEngine implements Observable {
         if (autoMoveScheduler != null) autoMoveScheduler.setGravity(gravity);
     }
 
+    public void setARR(double ARR) {
+        if (autoMoveScheduler == null) 
+            return;
+        autoMoveScheduler.setARR(ARR);
+    }
+
     public void setGameOverListener(GameOverListener listener) {
         this.listener = listener;
     }
@@ -352,5 +363,9 @@ public class GameEngine implements Observable {
 
     public Board getBoard() {
         return board;
+    }
+
+    public AutoMoveScheduler getAutoMoveScheduler() {
+        return autoMoveScheduler;
     }
 }
