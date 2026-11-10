@@ -24,14 +24,15 @@ public class PreviewPane extends StackPane {
             return;
         }
 
-        Tetromino piece = new Tetromino(new Point(4, 4), type);
+        // Reflect the original preview centre; negate y again at the screen boundary.
+        Tetromino piece = new Tetromino(new Point(4, -4), type);
         Group shape = new Group();
         Color color = TetrominoColor.forType(type);
 
 
         for (Mino mino : piece.children) {
             double x = mino.getPosition().getX();
-            double y = mino.getPosition().getY();
+            double y = -mino.getPosition().getY();
 
             shape.getChildren().add(renderMino((int)x, (int)y, color));
         }
