@@ -6,9 +6,9 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.StrokeType;
-import tetris.engine.Mino;
-import tetris.engine.Piece;
-import tetris.engine.Tetromino;
+import tetris.engine.piece.Mino;
+import tetris.engine.piece.Piece;
+import tetris.engine.piece.Tetromino;
 import tetris.graphics.VisualConfig;
 
 public class BoardPane extends GridPane {

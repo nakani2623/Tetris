@@ -3,12 +3,12 @@ package tetris.engine.rotator;
 import java.util.List;
 
 import tetris.engine.Board;
-import tetris.engine.Piece;
-import tetris.engine.Tetromino;
 import tetris.engine.operator.Operator;
 import tetris.engine.operator.RotateClockwiseOperator;
 import tetris.engine.operator.RotateCounterClockwiseOperator;
 import tetris.engine.operator.RotateR180Operator;
+import tetris.engine.piece.Piece;
+import tetris.engine.piece.Tetromino;
 import tetris.engine.type.Rotation;
 import tetris.utils.KickTable;
 import tetris.utils.Point;

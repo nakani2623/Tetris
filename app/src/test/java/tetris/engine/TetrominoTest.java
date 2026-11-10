@@ -7,6 +7,8 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
+import tetris.engine.piece.Mino;
+import tetris.engine.piece.Tetromino;
 import tetris.engine.type.TetrominoType;
 import tetris.utils.Point;
 
