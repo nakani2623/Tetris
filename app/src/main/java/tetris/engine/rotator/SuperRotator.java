@@ -50,10 +50,10 @@ public class SuperRotator implements Rotator {
                     currentTetromino.moveLeft();
                 }
                 else if (currentTetromino.centre.getY() < destination.getY()) {
-                    currentTetromino.moveDown();
+                    currentTetromino.moveUp();
                 }
                 else if (currentTetromino.centre.getY() > destination.getY()) {
-                    currentTetromino.moveUp();
+                    currentTetromino.moveDown();
                 }
             }
             // 3. try rotate at this position

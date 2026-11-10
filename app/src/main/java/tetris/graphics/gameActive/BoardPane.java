@@ -13,11 +13,14 @@ import tetris.graphics.VisualConfig;
 
 public class BoardPane extends GridPane {
 
+    private int boardHeight;
+
     public BoardPane() { 
         this.setStyle("-fx-border-color: gray;");
     }
 
     public void render(List<Piece> pieces, Tetromino shadow, int x, int y) {
+        this.boardHeight = y;
         int rowOffset = getRowOffset(pieces, shadow);
 
         // clear board
@@ -47,7 +50,7 @@ public class BoardPane extends GridPane {
 
     private int getMinRow(Piece tetromino, int minRow) {
         for (Mino mino : tetromino.children) {
-            minRow = Math.min(minRow, (int) mino.getPosition().getY());
+            minRow = Math.min(minRow, boardHeight - 1 - (int) mino.getPosition().getY());
         }
         return minRow;
     }
@@ -82,7 +85,8 @@ public class BoardPane extends GridPane {
         for (Mino m : tetromino.children) {
             double x = m.getPosition().getX();
             double y = m.getPosition().getY();
-            renderMino((int)x, (int)y + rowOffset, color);
+            // JavaFX rows increase downward; engine heights increase upward.
+            renderMino((int)x, boardHeight - 1 - (int)y + rowOffset, color);
         }
     }
 
