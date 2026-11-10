@@ -1,7 +1,8 @@
-package tetris.engine;
+package tetris.engine.piece;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import tetris.utils.Point;
 
 

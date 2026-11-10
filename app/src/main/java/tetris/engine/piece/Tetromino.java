@@ -1,4 +1,4 @@
-package tetris.engine;
+package tetris.engine.piece;
 
 import java.util.ArrayList;
 

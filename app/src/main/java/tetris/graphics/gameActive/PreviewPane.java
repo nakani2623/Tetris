@@ -5,8 +5,8 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.StrokeType;
-import tetris.engine.Mino;
-import tetris.engine.Tetromino;
+import tetris.engine.piece.Mino;
+import tetris.engine.piece.Tetromino;
 import tetris.engine.type.TetrominoType;
 import tetris.utils.Point;
 

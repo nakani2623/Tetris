@@ -12,6 +12,9 @@ import tetris.engine.observers.Observable;
 import tetris.engine.observers.Observer;
 import tetris.engine.operator.MoveDownOperator;
 import tetris.engine.operator.Operator;
+import tetris.engine.piece.Mino;
+import tetris.engine.piece.Piece;
+import tetris.engine.piece.Tetromino;
 import tetris.engine.type.TetrominoType;
 import tetris.utils.Point;
 
