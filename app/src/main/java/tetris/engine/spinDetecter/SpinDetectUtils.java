@@ -43,7 +43,7 @@ public class SpinDetectUtils {
         Tetromino currentTetromino = board.getcurrentTetromino();
         // spawn single mino piece at top-left corner
         Point centre = currentTetromino.getCentre();
-        Piece corner = new Piece(new Mino((int)centre.getX() - 1, (int)centre.getY() - 1));
+        Piece corner = new Piece(new Mino((int)centre.getX() - 1, (int)centre.getY() + 1));
 
         // rotate to be front-left corner of current T
         int cwRotationForCorner = 0;

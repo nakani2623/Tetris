@@ -15,6 +15,7 @@ import tetris.engine.operator.Operator;
 import tetris.engine.type.TetrominoType;
 import tetris.utils.Point;
 
+/** Coordinates increase upward: floor y=0, visible top y=height-1. */
 public class Board implements Observable{
     // board
     private int width;
@@ -104,14 +105,14 @@ public class Board implements Observable{
     }
 
     public Point spawnPoint(TetrominoType type) {
-        Point centre = new Point((this.width/2)-1, 1);
+        Point centre = new Point((this.width/2)-1, height - 2);
         if (type == TetrominoType.I) {
             centre.setX(centre.getX() + 0.5);
-            centre.setY(centre.getY() + 0.5);
+            centre.setY(centre.getY() - 0.5);
 
         } else if (type == TetrominoType.O) {
             centre.setX(centre.getX() + 0.5);
-            centre.setY(centre.getY() - 0.5);
+            centre.setY(centre.getY() + 0.5);
         }
 
         return centre;
@@ -163,7 +164,7 @@ public class Board implements Observable{
                 return true;
             }
             // bottom wall
-            if (y > height - 1) {
+            if (y < 0) {
                 return true;
             }
         }
@@ -196,7 +197,7 @@ public class Board implements Observable{
     }
     /**
      * clear specified lines, update board
-     * @param toClear: heights of lines to clear, e.g to clear bot 4 lines, to clear = [16, 17, 18, 19]
+     * @param toClear: heights of lines to clear, e.g to clear bot 4 lines, to clear = [0, 1, 2, 3]
      * @param relatedTetrominos: all possible tetrominos to clear
      * 
      * @ret int: lines cleared
@@ -217,11 +218,11 @@ public class Board implements Observable{
                 else {
                     int numToShift = 0;
                     for (int lineCleared : toClear) {
-                        if (minoHeight < lineCleared) {
+                        if (minoHeight > lineCleared) {
                             numToShift++;
                         }
                     }
-                    mino.getPosition().setY(minoHeight + numToShift);
+                    mino.getPosition().setY(minoHeight - numToShift);
                 }
             }
         }
@@ -287,7 +288,7 @@ public class Board implements Observable{
             if (!Collections.disjoint(lastLockedHeights, tHeights)) {
                 around.add(t);
             }
-            else if (lastLockedHeights.iterator().next() < tHeights.iterator().next()) {
+            else if (lastLockedHeights.iterator().next() > tHeights.iterator().next()) {
                 lower.add(t);
             }
             else {
@@ -301,7 +302,7 @@ public class Board implements Observable{
         // upper: shift minos
         for (Piece tetromino : upper) {
             for (Mino mino : tetromino.children) {
-                mino.getPosition().setY(mino.getPosition().getY() + cleared);
+                mino.getPosition().setY(mino.getPosition().getY() - cleared);
             }
         }
         return cleared;

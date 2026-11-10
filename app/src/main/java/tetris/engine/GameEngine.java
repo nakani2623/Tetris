@@ -77,8 +77,8 @@ public class GameEngine implements Observable {
     public void start() {
         started = true;
         spawn();
-        // board.allTetrominos.add(new Piece(new Mino(0, 19)));
-        Piece initialGround = new Piece(List.of(new Mino(0, 18), new Mino(1, 18), new Mino(3, 19)));
+        // board.allTetrominos.add(new Piece(new Mino(0, 0)));
+        Piece initialGround = new Piece(List.of(new Mino(0, 1), new Mino(1, 1), new Mino(3, 0)));
         board.allTetrominos.add(initialGround);
         if (autoMoveScheduler != null) 
             autoMoveScheduler.start();

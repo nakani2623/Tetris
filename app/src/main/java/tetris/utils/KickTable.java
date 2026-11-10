@@ -9,70 +9,71 @@ import tetris.engine.type.RotationState;
 import tetris.engine.type.TetrominoType;
 
 public class KickTable {
+    // Kick offsets use positive y upward.
     // I Tetromino Wall Kick Data
 
     private static final ArrayList<Point> I_0_R = new ArrayList<>(List.of(
         new Point(0, 0),
         new Point(-2, 0),
         new Point(1, 0),
-        new Point(-2, 1),
-        new Point(1, -2)
+        new Point(-2, -1),
+        new Point(1, 2)
     ));
 
     private static final ArrayList<Point> I_R_0 = new ArrayList<>(List.of(
         new Point(0, 0),
         new Point(2, 0),
         new Point(-1, 0),
-        new Point(2, -1),
-        new Point(-1, 2)
+        new Point(2, 1),
+        new Point(-1, -2)
     ));
 
     private static final ArrayList<Point> I_R_2 = new ArrayList<>(List.of(
         new Point(0, 0),
         new Point(-1, 0),
         new Point(2, 0),
-        new Point(-1, -2),
-        new Point(2, 1)
+        new Point(-1, 2),
+        new Point(2, -1)
     ));
 
     private static final ArrayList<Point> I_2_R = new ArrayList<>(List.of(
         new Point(0, 0),
         new Point(1, 0),
         new Point(-2, 0),
-        new Point(1, 2),
-        new Point(-2, -1)
+        new Point(1, -2),
+        new Point(-2, 1)
     ));
 
     private static final ArrayList<Point> I_2_L = new ArrayList<>(List.of(
         new Point(0, 0),
         new Point(2, 0),
         new Point(-1, 0),
-        new Point(2, -1),
-        new Point(-1, 2)
+        new Point(2, 1),
+        new Point(-1, -2)
     ));
 
     private static final ArrayList<Point> I_L_2 = new ArrayList<>(List.of(
         new Point(0, 0),
         new Point(-2, 0),
         new Point(1, 0),
-        new Point(-2, 1),
-        new Point(1, -2)
+        new Point(-2, -1),
+        new Point(1, 2)
     ));
 
     private static final ArrayList<Point> I_L_0 = new ArrayList<>(List.of(
         new Point(0, 0),
         new Point(1, 0),
         new Point(-2, 0),
-        new Point(1, 2),
-        new Point(-2, -1)
+        new Point(1, -2),
+        new Point(-2, 1)
     ));
 
     private static final ArrayList<Point> I_0_L = new ArrayList<>(List.of(
         new Point(0, 0),
         new Point(-1, 0),
         new Point(2, 0),
-        new Point(-1, -2),
-        new Point(2, 1)
+        new Point(-1, 2),
+        new Point(2, -1)
     ));
 
     private static final ArrayList<ArrayList<Point>> I_0 = new ArrayList<>(Arrays.asList(
@@ -109,51 +110,35 @@ public class KickTable {
     private static ArrayList<Point> JLSTZ_0_R = new ArrayList<Point>(List.of(
         new Point(0, 0),
         new Point(-1, 0),
-        new Point(-1, -1),
-        new Point(0, 2),
-        new Point(-1, 2)
+        new Point(-1, 1),
+        new Point(0, -2),
+        new Point(-1, -2)
     ));
     private static final ArrayList<Point> JLSTZ_0_L = new ArrayList<>(List.of(
         new Point(0, 0),
         new Point(1, 0),
-        new Point(1, -1),
-        new Point(0, 2),
-        new Point(1, 2)
+        new Point(1, 1),
+        new Point(0, -2),
+        new Point(1, -2)
     ));
 
     private static final ArrayList<Point> JLSTZ_L_0 = new ArrayList<>(List.of(
         new Point(0, 0),
         new Point(-1, 0),
-        new Point(-1, 1),
-        new Point(0, -2),
-        new Point(-1, -2)
+        new Point(-1, -1),
+        new Point(0, 2),
+        new Point(-1, 2)
     ));
 
     private static final ArrayList<Point> JLSTZ_L_2 = new ArrayList<>(List.of(
         new Point(0, 0),
         new Point(-1, 0),
-        new Point(-1, 1),
-        new Point(0, -2),
-        new Point(-1, -2)
+        new Point(-1, -1),
+        new Point(0, 2),
+        new Point(-1, 2)
     ));
 
     private static final ArrayList<Point> JLSTZ_R_0 = new ArrayList<>(List.of(
-        new Point(0, 0),
-        new Point(1, 0),
-        new Point(1, 1),
-        new Point(0, -2),
-        new Point(1, -2)
-    ));
-
-    private static final ArrayList<Point> JLSTZ_R_2 = new ArrayList<>(List.of(
-        new Point(0, 0),
-        new Point(1, 0),
-        new Point(1, 1),
-        new Point(0, -2),
-        new Point(1, -2)
-    ));
-
-    private static final ArrayList<Point> JLSTZ_2_L = new ArrayList<>(List.of(
         new Point(0, 0),
         new Point(1, 0),
         new Point(1, -1),
@@ -161,12 +146,28 @@ public class KickTable {
         new Point(1, 2)
     ));
 
+    private static final ArrayList<Point> JLSTZ_R_2 = new ArrayList<>(List.of(
+        new Point(0, 0),
+        new Point(1, 0),
+        new Point(1, -1),
+        new Point(0, 2),
+        new Point(1, 2)
+    ));
+
+    private static final ArrayList<Point> JLSTZ_2_L = new ArrayList<>(List.of(
+        new Point(0, 0),
+        new Point(1, 0),
+        new Point(1, 1),
+        new Point(0, -2),
+        new Point(1, -2)
+    ));
+
     private static final ArrayList<Point> JLSTZ_2_R = new ArrayList<>(List.of(
         new Point(0, 0),
         new Point(-1, 0),
-        new Point(-1, -1),
-        new Point(0, 2),
-        new Point(-1, 2)
+        new Point(-1, 1),
+        new Point(0, -2),
+        new Point(-1, -2)
     ));
 
     private static final ArrayList<ArrayList<Point>> JLSTZ_0 = new ArrayList<>(Arrays.asList(
