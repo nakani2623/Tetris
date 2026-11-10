@@ -46,14 +46,14 @@ public class Piece {
     public void moveDown() {
         for (Mino m : children) {
             double y = m.getPosition().getY();
-            m.getPosition().setY(y + 1);
+            m.getPosition().setY(y - 1);
         }
     }
 
     public void moveUp() {
         for (Mino m : children) {
             double y = m.getPosition().getY();
-            m.getPosition().setY(y - 1);
+            m.getPosition().setY(y + 1);
         }
     }
 
@@ -77,7 +77,7 @@ public class Piece {
             mino.setPosition(
                 Point.combine(
                     centre, 
-                    new Point(-relative.getY(), relative.getX())
+                    new Point(relative.getY(), -relative.getX())
                 )
             );
         }

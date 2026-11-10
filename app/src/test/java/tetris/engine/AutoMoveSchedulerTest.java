@@ -40,7 +40,7 @@ public class AutoMoveSchedulerTest {
         // Arrange
         GameEngine engine = createEngine(1, 100000, 10000, 600);
         Board b = engine.getBoard();
-        Piece initialGround = new Piece(List.of(new Mino(0, 18), new Mino(1, 18), new Mino(3, 19)));
+        Piece initialGround = new Piece(List.of(new Mino(0, 1), new Mino(1, 1), new Mino(3, 0)));
         b.allTetrominos.add(initialGround);
         b.spawn(TetrominoType.I);
         engine.rotate(Rotation.CLOCKWISE);
@@ -51,8 +51,8 @@ public class AutoMoveSchedulerTest {
         setDASCharge(Direction.RIGHT, engine);
         engine.getAutoMoveScheduler().onOperate();
         // Assert
-        Tetromino expacted = new Tetromino(new Point(1.5, 17.5), TetrominoType.I);
-        expacted.rotateClockwise(new Point(1.5, 17.5));
+        Tetromino expacted = new Tetromino(new Point(1.5, 1.5), TetrominoType.I);
+        expacted.rotateClockwise(new Point(1.5, 1.5));
 
         assertTrue(b.currentTetromino.isSamePosition(expacted));
         
@@ -67,7 +67,7 @@ public class AutoMoveSchedulerTest {
         // Arrange
         GameEngine engine = createEngine(1, 1000, 10000, 600);
         Board b = engine.getBoard();
-        Piece initialGround = new Piece(List.of(new Mino(0, 18), new Mino(1, 18), new Mino(3, 19)));
+        Piece initialGround = new Piece(List.of(new Mino(0, 1), new Mino(1, 1), new Mino(3, 0)));
         b.allTetrominos.add(initialGround);
         b.spawn(TetrominoType.I);
         engine.rotate(Rotation.CLOCKWISE);
@@ -78,7 +78,7 @@ public class AutoMoveSchedulerTest {
         setDASCharge(Direction.RIGHT, engine);
         engine.getAutoMoveScheduler().onOperate();
         // Assert
-        Tetromino expacted = new Tetromino(new Point(7.5, 17.5), TetrominoType.I);
+        Tetromino expacted = new Tetromino(new Point(7.5, 1.5), TetrominoType.I);
         expacted.rotateClockwise();
         expacted.moveRight();
         System.out.println("expected: "+expacted);
