@@ -193,6 +193,23 @@ public class Board implements Observable{
         }
         return false;
     }
+    /* 
+    ------------
+    - Garbage  -
+    ------------
+    */
+    public void insertgarbage(Garbage garbage) {
+        for (Piece piece : allTetrominos) {
+            if (piece == currentTetromino) continue;
+            int garbageHeight = garbage.getHeight();
+            // for (int i = 0; i < garbageHeight; i++) {
+            //     piece.moveUp(); // shift up all pieces
+            // }
+            piece.moveUp();
+        }
+        // add garbage
+        allTetrominos.add(garbage);
+    }
     /*
     ------------
     -LINE CLEAR-
@@ -360,4 +377,7 @@ public class Board implements Observable{
             observer.update();
         }
     }
+
+
 }
+
