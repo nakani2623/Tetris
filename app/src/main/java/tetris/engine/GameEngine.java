@@ -18,6 +18,7 @@ import tetris.engine.score.ScoreManager;
 import tetris.engine.spinDetecter.AllMiniDetecter;
 import tetris.engine.spinDetecter.SpinDetecter;
 import tetris.engine.type.Direction;
+import tetris.engine.type.LineClearResult;
 import tetris.engine.type.Rotation;
 import tetris.engine.type.SpinState;
 import tetris.engine.type.TetrominoType;
@@ -253,9 +254,9 @@ public class GameEngine implements Observable {
 //          ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
     void lock() {
         resetLockPolicy();
-        int nLinesCleared = board.clearCompleted();
+        LineClearResult clearResult = board.clearCompleted();
         if (scoreManager != null) 
-            scoreManager.onLock(nLinesCleared, 0);
+            scoreManager.onLock(clearResult.totalLinesCleared(), clearResult.garbageLinesCleared());
         spawn();
     }
     public void hardDrop() {
