@@ -255,7 +255,7 @@ public class GameEngine implements Observable {
         resetLockPolicy();
         int nLinesCleared = board.clearCompleted();
         if (scoreManager != null) 
-            scoreManager.onLock(nLinesCleared);
+            scoreManager.onLock(nLinesCleared, 0);
         spawn();
     }
     public void hardDrop() {
