@@ -86,6 +86,10 @@ public class GameWindow {
         singlePlayerPane.setOnSprint(action);
     }
 
+    public void setOnCheeseSprint(Runnable action) {
+        singlePlayerPane.setOnCheeseSprint(action);
+    }
+
     public void setOnZen(Runnable action) {
         singlePlayerPane.setOnZen(action);
     }

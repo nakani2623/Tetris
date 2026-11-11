@@ -10,15 +10,17 @@ import javafx.scene.layout.VBox;
 
 public class SinglePlayerPane extends StackPane {
     private Button sprintButton;
+    private Button cheeseSprintButton;
     private Button returnButton;
     private Button zenButton;
     public SinglePlayerPane() {
         Label title = new Label("Single player");
         sprintButton = new Button("Sprint mode");
+        cheeseSprintButton = new Button("Cheese sprint");
         returnButton = new Button("Return to Menu");
         zenButton = new Button("Zen mode");
 
-        VBox content = new VBox(title, sprintButton, zenButton, returnButton);
+        VBox content = new VBox(title, sprintButton, cheeseSprintButton, zenButton, returnButton);
         this.getChildren().add(content);
 
         content.setAlignment(Pos.TOP_CENTER);
@@ -34,6 +36,10 @@ public class SinglePlayerPane extends StackPane {
 
     public void setOnSprint(Runnable action) {
         this.sprintButton.setOnAction(event -> action.run());
+    }
+
+    public void setOnCheeseSprint(Runnable action) {
+        this.cheeseSprintButton.setOnAction(event -> action.run());
     }
 
     public void setOnReturnMenu(Runnable action) {
