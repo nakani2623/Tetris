@@ -1,7 +1,6 @@
 package tetris.engine.observers;
 
 
-import tetris.engine.GameEngine;
 import tetris.engine.NextQueue;
 import tetris.graphics.gameActive.NextQueuePane;
 

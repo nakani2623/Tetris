@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import tetris.engine.type.Rotation;
 import tetris.engine.type.RotationState;
 import tetris.engine.type.TetrominoType;
 

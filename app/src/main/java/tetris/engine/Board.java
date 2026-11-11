@@ -10,7 +10,7 @@ import java.util.Map;
 
 import tetris.engine.observers.Observable;
 import tetris.engine.observers.Observer;
-import tetris.engine.operator.MoveDownOperator;
+// import tetris.engine.operator.MoveDownOperator;
 import tetris.engine.operator.Operator;
 import tetris.engine.piece.Mino;
 import tetris.engine.piece.Piece;
@@ -123,7 +123,7 @@ public class Board implements Observable{
  
     void updateShadow() {
         shadowTetromino = currentTetromino.deepCopy();
-        Operator op = new MoveDownOperator();
+        // Operator op = new MoveDownOperator();
         while (!hasCollision(shadowTetromino)) {
             shadowTetromino.moveDown();
         }

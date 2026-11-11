@@ -3,8 +3,6 @@ package tetris.engine.observers;
 
 import javafx.application.Platform;
 import tetris.engine.score.ScoreManager;
-import tetris.engine.score.SprintScore;
-import tetris.engine.score.ZenScore;
 import tetris.engine.score.scoreEvent.ScoreEvent;
 import tetris.engine.score.scoreEvent.StatsEvent;
 import tetris.graphics.gameActive.ScorePane;
@@ -23,7 +21,7 @@ public class StatsDisplayManager implements ScoreObserver {
 
     @Override
     public void update(ScoreEvent event) {
-        if (!(event instanceof StatsEvent e))   return;
+        if (!(event instanceof StatsEvent))   return;
         // if (!(score instanceof ZenScore score) || !(score instanceof SprintScore score)) return;
 
         // Read engine state (must be thread-safe!)

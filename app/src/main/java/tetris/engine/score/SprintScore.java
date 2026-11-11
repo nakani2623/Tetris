@@ -9,8 +9,6 @@ import java.util.concurrent.TimeUnit;
 import tetris.engine.observers.ScoreObserver;
 import tetris.engine.score.scoreEvent.ScoreEvent;
 import tetris.engine.score.scoreEvent.StatsEvent;
-import tetris.engine.type.SpinState;
-import tetris.engine.type.TetrominoType;
 
 public class SprintScore implements ScoreManager {
 
@@ -21,8 +19,6 @@ public class SprintScore implements ScoreManager {
     protected double startTime;
     protected double elapsedTime;
     protected double piecesPerSecond;
-    // private SpinState currentSpinState;
-    // private TetrominoType currentTetrominoType;
     protected final ScheduledExecutorService exec =
         Executors.newSingleThreadScheduledExecutor();
     protected List<ScoreObserver> observers;
