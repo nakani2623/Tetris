@@ -68,7 +68,7 @@ public class GameController implements GameOverListener {
 
     private void startCharging(UnifiedKey key, Direction direction) {
         long delayNanos = (long) (DAS * TimeUnit.SECONDS.toNanos(1) / 60.0);
-        ScheduledFuture chargeDAS = scheduler.schedule(() -> {
+        ScheduledFuture<?> chargeDAS = scheduler.schedule(() -> {
             dispatcher.dispatch(() -> {
                 engine.chargeDAS(direction);
                 DASChargedKeys.add(key);
@@ -135,6 +135,9 @@ public class GameController implements GameOverListener {
 
             case ROTATE_180 ->
                 engine.rotate(Rotation.R_180);
+            
+            case RESTART ->
+                System.out.println("Can't handle this input: NOT IMPLEMENTED");
         }
 
         // Must execute after each newly pressed key

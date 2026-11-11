@@ -1,6 +1,5 @@
 package tetris.engine.spinDetecter;
 
-import java.util.List;
 
 import tetris.engine.Board;
 import tetris.engine.operator.MoveDownOperator;

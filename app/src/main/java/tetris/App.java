@@ -13,7 +13,6 @@ import tetris.controller.dispatch.JavaFXMainThreadDispatcher;
 import tetris.controller.dispatch.MainThreadDispatcher;
 import tetris.controller.input.JavaFXKeyboardAdapter;
 import tetris.controller.input.KeyBinds;
-import tetris.engine.Board;
 import tetris.engine.GameEngine;
 import tetris.engine.DelayedLock;
 import tetris.engine.AutoMoveScheduler;
