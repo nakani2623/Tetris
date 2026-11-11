@@ -22,6 +22,7 @@ import tetris.engine.observers.HoldDisplayManager;
 import tetris.engine.observers.NextQueueDisplayManager;
 import tetris.engine.observers.SpinClearDisplayManager;
 import tetris.engine.observers.StatsDisplayManager;
+import tetris.engine.score.CheeseSprintScore;
 import tetris.engine.score.ScoreManager;
 import tetris.engine.score.SprintScore;
 import tetris.engine.score.ZenScore;
@@ -46,7 +47,8 @@ public class App extends Application {
 
         // set game mode
         // engine.setScoreManager(new ZenScore());
-        engine.setScoreManager(new SprintScore(10));
+        // engine.setScoreManager(new SprintScore(10));
+        engine.setScoreManager(new CheeseSprintScore(10));
 
         new BoardDisplayManager(engine.getBoard(), window.getBoardPane());
         new StatsDisplayManager(engine.getScoreManager(), window.getScorePane());
@@ -60,6 +62,7 @@ public class App extends Application {
 
         controller.showMenu();
         window.setOnSprint(() -> startSinglePlayer(new SprintScore(10)));
+        window.setOnCheeseSprint(() -> startSinglePlayer(new CheeseSprintScore(10)));
         window.setOnZen(() -> startSinglePlayer(new ZenScore()));
         window.setOnExit(Platform::exit);
         window.setOnReturn(controller::showMenu);
