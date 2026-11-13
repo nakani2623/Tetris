@@ -6,7 +6,7 @@
 let
   libs = with pkgs; [
     gtk3 glib pango cairo gdk-pixbuf atk
-    xorg.libX11 xorg.libXext xorg.libXrender xorg.libXtst xorg.libXi xorg.libXxf86vm
+    libx11 libxext libxrender libxtst libxi libxxf86vm
     mesa libGL
     fontconfig freetype
   ];
