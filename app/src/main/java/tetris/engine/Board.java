@@ -30,7 +30,8 @@ public class Board implements Observable{
     List<Piece> allTetrominos;
     Tetromino currentTetromino;
     private Tetromino shadowTetromino;
-
+    private int lastGarbageHole;
+    private int garbageHeight = 0;
     private List<Observer> observers = new ArrayList<>();
 
 
@@ -38,7 +39,6 @@ public class Board implements Observable{
         this.width = width;
         this.height = height;
         allTetrominos = new ArrayList<Piece>();
-
     }
 
     public Board(Board source) {
@@ -200,15 +200,15 @@ public class Board implements Observable{
     */
     public void insertgarbage(Garbage garbage) {
         for (Piece piece : allTetrominos) {
-            if (piece == currentTetromino) continue;
-            int garbageHeight = garbage.getHeight();
-            // for (int i = 0; i < garbageHeight; i++) {
-            //     piece.moveUp(); // shift up all pieces
-            // }
-            piece.moveUp();
+            // if (piece == currentTetromino) continue; // currentTetromino is locked, next "currentTetromino" no spawned, so all piece move up
+            for (int i = 0; i < garbage.getHeight(); i++) {
+                piece.moveUp(); // shift up all pieces
+            }
         }
         // add garbage
         allTetrominos.add(garbage);
+        lastGarbageHole = garbage.getHole();
+        this.garbageHeight += garbage.getHeight();
     }
     /*
     ------------
@@ -255,7 +255,7 @@ public class Board implements Observable{
         }
         int totalLinesCleared = toClear.size();
         int nGarbageLinesCleared = SimpleMath.intersection(garbageLines, new HashSet<>(toClear)).size(); // to test
-        System.out.printf("cleared garbage: %d%n", nGarbageLinesCleared);
+        garbageHeight -= nGarbageLinesCleared;
         return new LineClearResult(totalLinesCleared, nGarbageLinesCleared);
     }
 
@@ -378,6 +378,13 @@ public class Board implements Observable{
         }
     }
 
+    public int getLastHole() {
+        return lastGarbageHole;
+    }
+
+    public int getGarbageHeight() {
+        return garbageHeight;
+    }
 
 }
 

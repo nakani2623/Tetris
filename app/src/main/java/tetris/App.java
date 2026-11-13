@@ -81,7 +81,7 @@ public class App extends Application {
                 break;
             case CHEESE_SPRINT:
                 engine.setGarbageQueue(new GarbageQueue(engine.getBoard()));
-                scoreManager = new CheeseSprintScore(11, engine.getBoard(), engine.getGarbageQueue());
+                scoreManager = new CheeseSprintScore(15, engine.getBoard(), engine.getGarbageQueue());
                 break;
             default:
                 scoreManager = new ZenScore();
