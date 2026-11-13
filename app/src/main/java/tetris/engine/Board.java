@@ -29,6 +29,7 @@ public class Board implements Observable{
     private int height;
     List<Piece> allTetrominos;
     Tetromino currentTetromino;
+    boolean isCurrTetroLocked;
     private Tetromino shadowTetromino;
     private int lastGarbageHole;
     private int garbageHeight = 0;
@@ -66,7 +67,7 @@ public class Board implements Observable{
         currentTetromino = null;
         notifyObservers();
     }
-    
+
     /**
      * operates the current Tetromino with collision detection
      * operations includes: horizontal movements, rotation
@@ -106,6 +107,7 @@ public class Board implements Observable{
             return false;
         }
         currentTetromino = t;
+        isCurrTetroLocked = false;
         allTetrominos.add(currentTetromino);
         updateShadow();
         return true;
@@ -124,7 +126,10 @@ public class Board implements Observable{
 
         return centre;
     }
- 
+    
+    public void onLock() {
+        isCurrTetroLocked = true;
+    }
     void updateShadow() {
         shadowTetromino = currentTetromino.deepCopy();
         // Operator op = new MoveDownOperator();
@@ -200,7 +205,7 @@ public class Board implements Observable{
     */
     public void insertgarbage(Garbage garbage) {
         for (Piece piece : allTetrominos) {
-            // if (piece == currentTetromino) continue; // currentTetromino is locked, next "currentTetromino" no spawned, so all piece move up
+            if (piece == currentTetromino && isCurrTetroLocked == false) continue; // currentTetromino is locked, next "currentTetromino" no spawned, so all piece move up
             for (int i = 0; i < garbage.getHeight(); i++) {
                 piece.moveUp(); // shift up all pieces
             }
@@ -305,8 +310,6 @@ public class Board implements Observable{
      * @param lastLocked, the tetromino just locked, possible line clears should related with position of it
      */
     LineClearResult checkCompletedLines(Tetromino lastLocked) {
-  
-        //
         // group to lower/around/upper
         HashSet<Double> lastLockedHeights = calcSetOfRelatedHeights(lastLocked);
         ArrayList<Piece> lower = new ArrayList<Piece>();

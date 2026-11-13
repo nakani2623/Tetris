@@ -16,7 +16,7 @@ public class Tetromino extends Piece {
     public Point centre;
     public TetrominoType type; 
     public RotationState rotationState; // direction after n CW rotation, 0: origin, 1: CW-ed, 2: r-180-ed, 3: CCW-ed 
-
+    
     public Tetromino(Point centre, TetrominoType type) {
         this.type = type;
         this.centre = centre;
