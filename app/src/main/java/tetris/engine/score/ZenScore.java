@@ -77,7 +77,7 @@ public class ZenScore implements ScoreManager {
         currentTetrominoType = tetrominoType;
     }
 
-    public void onLock(int linesCleared) {
+    public void onLock(int linesCleared, int garbageCleared) {
         if (linesCleared != 0 || spinState != SpinState.NOT_SPIN) {
             notifyObservers(new SpinClearEvent(linesCleared, spinState, currentTetrominoType));
         }

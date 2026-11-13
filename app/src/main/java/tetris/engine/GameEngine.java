@@ -9,12 +9,14 @@ import tetris.controller.GameOverListener;
 import tetris.engine.observers.Observable;
 import tetris.engine.observers.Observer;
 import tetris.engine.operator.*;
+import tetris.engine.piece.Tetromino;
 import tetris.engine.rotator.Rotator;
 import tetris.engine.rotator.SuperRotator;
 import tetris.engine.score.ScoreManager;
 import tetris.engine.spinDetecter.AllMiniDetecter;
 import tetris.engine.spinDetecter.SpinDetecter;
 import tetris.engine.type.Direction;
+import tetris.engine.type.LineClearResult;
 import tetris.engine.type.Rotation;
 import tetris.engine.type.SpinState;
 import tetris.engine.type.TetrominoType;
@@ -27,6 +29,7 @@ public class GameEngine implements Observable {
     private Rotator rotator;
     private NextQueue nextQueue;
     private AutoMoveScheduler autoMoveScheduler;
+    private GarbageQueue garbageQueue;
     // private HoldManager holdManager;
 
     // hold
@@ -78,10 +81,12 @@ public class GameEngine implements Observable {
         started = true;
         spawn();
         // board.allTetrominos.add(new Piece(new Mino(0, 0)));
-        Piece initialGround = new Piece(List.of(new Mino(0, 1), new Mino(1, 1), new Mino(3, 0)));
-        board.allTetrominos.add(initialGround);
+        // Piece initialGround = new Piece(List.of(new Mino(0, 1), new Mino(1, 1), new Mino(3, 0)));
+        // board.allTetrominos.add(initialGround);
         if (autoMoveScheduler != null) 
             autoMoveScheduler.start();
+        if (scoreManager != null)
+            scoreManager.onStart();
     }
 
     /**
@@ -250,9 +255,10 @@ public class GameEngine implements Observable {
 //          ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
     void lock() {
         resetLockPolicy();
-        int nLinesCleared = board.clearCompleted();
+        board.onLock();
+        LineClearResult clearResult = board.clearCompleted();
         if (scoreManager != null) 
-            scoreManager.onLock(nLinesCleared);
+            scoreManager.onLock(clearResult.totalLinesCleared(), clearResult.garbageLinesCleared());
         spawn();
     }
     public void hardDrop() {
@@ -336,6 +342,9 @@ public class GameEngine implements Observable {
         this.listener = listener;
     }
 
+    public void setGarbageQueue(GarbageQueue queue) {
+        garbageQueue = queue;
+    }
     @Override
     public void addObserver(Observer observer) {
         observers.add(observer);
@@ -367,5 +376,9 @@ public class GameEngine implements Observable {
 
     public AutoMoveScheduler getAutoMoveScheduler() {
         return autoMoveScheduler;
+    }
+
+    public GarbageQueue getGarbageQueue() {
+        return garbageQueue;
     }
 }

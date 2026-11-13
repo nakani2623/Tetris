@@ -19,7 +19,7 @@ public class KeyBinds {
     public KeyBinds() {
         binds = new HashMap<>();
         for (GameState state : GameState.values()) {
-            Map bindOfState = new HashMap<UnifiedKey, GameKey>();
+            Map<UnifiedKey, GameKey> bindOfState = new HashMap<UnifiedKey, GameKey>();
             binds.put(state, bindOfState);
         }
 

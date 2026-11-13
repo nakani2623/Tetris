@@ -1,6 +1,6 @@
 package tetris.engine.operator;
 
-import tetris.engine.Tetromino;
+import tetris.engine.piece.Tetromino;
 
 public class RotateClockwiseOperator implements Operator {
     @Override

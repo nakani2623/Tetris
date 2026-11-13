@@ -13,8 +13,8 @@ import tetris.controller.dispatch.JavaFXMainThreadDispatcher;
 import tetris.controller.dispatch.MainThreadDispatcher;
 import tetris.controller.input.JavaFXKeyboardAdapter;
 import tetris.controller.input.KeyBinds;
-import tetris.engine.Board;
 import tetris.engine.GameEngine;
+import tetris.engine.GarbageQueue;
 import tetris.engine.DelayedLock;
 import tetris.engine.AutoMoveScheduler;
 import tetris.engine.observers.BoardDisplayManager;
@@ -22,9 +22,11 @@ import tetris.engine.observers.HoldDisplayManager;
 import tetris.engine.observers.NextQueueDisplayManager;
 import tetris.engine.observers.SpinClearDisplayManager;
 import tetris.engine.observers.StatsDisplayManager;
+import tetris.engine.score.CheeseSprintScore;
 import tetris.engine.score.ScoreManager;
 import tetris.engine.score.SprintScore;
 import tetris.engine.score.ZenScore;
+import tetris.engine.type.SinglePlayGameMode;
 import tetris.engine.type.UnifiedKey;
 import tetris.engine.type.Input.GameKey;
 import tetris.graphics.GameWindow;
@@ -46,21 +48,19 @@ public class App extends Application {
 
         // set game mode
         // engine.setScoreManager(new ZenScore());
-        engine.setScoreManager(new SprintScore(10));
+        // engine.setScoreManager(new SprintScore(10));
+        // engine.setScoreManager(new CheeseSprintScore(10));
 
-        new BoardDisplayManager(engine.getBoard(), window.getBoardPane());
-        new StatsDisplayManager(engine.getScoreManager(), window.getScorePane());
-        new HoldDisplayManager(engine, window.getHoldPane());   
-        new NextQueueDisplayManager(engine.getNextQueueManager(), window.getNextQueuePane());
-        new SpinClearDisplayManager(engine.getScoreManager(), window.getSpinClearPane());
+        
 
 
         engine.setSoftDropFactor(601);
         engine.setGameOverListener(controller);
 
         controller.showMenu();
-        window.setOnSprint(() -> startSinglePlayer(new SprintScore(10)));
-        window.setOnZen(() -> startSinglePlayer(new ZenScore()));
+        window.setOnSprint(() -> startSinglePlayer(SinglePlayGameMode.SPRINT));
+        window.setOnCheeseSprint(() -> startSinglePlayer(SinglePlayGameMode.CHEESE_SPRINT));
+        window.setOnZen(() -> startSinglePlayer(SinglePlayGameMode.ZEN));
         window.setOnExit(Platform::exit);
         window.setOnReturn(controller::showMenu);
         window.setOnRestart(controller::restart);
@@ -70,11 +70,33 @@ public class App extends Application {
         window.execute(stage);
     }
 
-    private void startSinglePlayer(ScoreManager scoreManager) {
-        engine.getScoreManager().dispose();
+    private void startSinglePlayer(SinglePlayGameMode gameMode) {
+        ScoreManager scoreManager;
+        switch (gameMode) {
+            case SPRINT:
+                scoreManager = new SprintScore(10);
+                break;
+            case ZEN:
+                scoreManager = new ZenScore();
+                break;
+            case CHEESE_SPRINT:
+                engine.setGarbageQueue(new GarbageQueue(engine.getBoard()));
+                scoreManager = new CheeseSprintScore(15, engine.getBoard(), engine.getGarbageQueue());
+                break;
+            default:
+                scoreManager = new ZenScore();
+                break;
+        }
+
+        // engine.getScoreManager().dispose();
         engine.setScoreManager(scoreManager);
         new StatsDisplayManager(scoreManager, window.getScorePane());
         new SpinClearDisplayManager(scoreManager, window.getSpinClearPane());
+        new BoardDisplayManager(engine.getBoard(), window.getBoardPane());
+        new StatsDisplayManager(engine.getScoreManager(), window.getScorePane());
+        new HoldDisplayManager(engine, window.getHoldPane());   
+        new NextQueueDisplayManager(engine.getNextQueueManager(), window.getNextQueuePane());
+        new SpinClearDisplayManager(engine.getScoreManager(), window.getSpinClearPane());
         controller.restart();
     }
 

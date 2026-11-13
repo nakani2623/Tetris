@@ -5,10 +5,11 @@ import tetris.engine.type.SpinState;
 import tetris.engine.type.TetrominoType;
 
 public interface ScoreManager {
+    default void onStart() {}
     void reset();
     // void onSpinOrClear(TetrominoType currentTetrominoType, SpinState currentSpinState, int cleared);
     default void onSpin(SpinState spin, TetrominoType type) { return; }
-    void onLock(int nLinesCleared);
+    void onLock(int nAllLinesCleared, int nGarbageLinesCleared);
     default void onSoftDrop(int nLinesMoved) { return; }
     default void onHardDrop(int nLinesMoved) { return; }
     void addObserver(ScoreObserver observer);
