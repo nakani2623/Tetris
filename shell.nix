@@ -1,10 +1,7 @@
-{ pkgs ? let
-    localNixpkgs = builtins.tryEval <nixpkgs>;
-    source = if localNixpkgs.success then localNixpkgs.value
-      else builtins.fetchTarball {
+{ pkgs ? import (builtins.fetchTarball {
         url = "https://github.com/NixOS/nixpkgs/archive/2074cc672349f14240fb7ea90d509e0b643e9dd4.tar.gz";
-      };
-  in import source {} }:
+    sha256 = "0x2cbp7qi17ll07dlns0bq6401r6563bvkv3bqvd6lia5ai5hj0k";
+  }) {} }:
 
 let
   libs = with pkgs; [
