@@ -6,13 +6,13 @@ import tetris.engine.piece.Garbage;
 
 public class GarbageGenerator {
     private Random random = new Random();
-    private int lastHole;
-    public Garbage generate(int nLines, int width) {
+    public Garbage generateAvoidSameHole(int nLines, int width, int lastHole) {
         int hole;
         while ((hole = random.nextInt(width)) == lastHole);
         return new Garbage(width, nLines, hole);
     }
-    public void setLastHole(int lastHole) {
-        this.lastHole = lastHole;
+    public Garbage generate(int nLines, int width) {
+        int hole = random.nextInt(width);
+        return new Garbage(width, nLines, hole);
     }
 }

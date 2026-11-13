@@ -28,7 +28,7 @@ public class CheeseSprintScore extends SprintScore {
         if (nLinesCleared == 0) fillGarbage();
         else if (nGarbageLinesCleared != 0) {
             this.totalLinesCleared += nGarbageLinesCleared;
-            while (pendingToFill > 0 && linesToFill < maxGarbageLines) {
+            while (pendingToFill > 0 && linesToFill + board.getGarbageHeight() < maxGarbageLines) {
                 linesToFill += nGarbageLinesCleared;
                 pendingToFill -= nGarbageLinesCleared;
             }
@@ -38,10 +38,10 @@ public class CheeseSprintScore extends SprintScore {
 
     private void fillGarbage() {
         while (linesToFill > 0) {
-            Garbage garbage = garbageGenerator.generate(1, (int)board.getWidth());
+            Garbage garbage = garbageGenerator.generateAvoidSameHole(1, (int)board.getWidth(), board.getLastHole());
             garbageQueue.queue(garbage);
+            garbageQueue.flush();
             linesToFill--;
         }
-        garbageQueue.flush();
     }
 }
