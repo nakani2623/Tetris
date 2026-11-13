@@ -85,7 +85,8 @@ public class GameEngine implements Observable {
         // board.allTetrominos.add(initialGround);
         if (autoMoveScheduler != null) 
             autoMoveScheduler.start();
-        scoreManager.onStart();
+        if (scoreManager != null)
+            scoreManager.onStart();
     }
 
     /**
