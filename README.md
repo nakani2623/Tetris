@@ -4,10 +4,13 @@ A Tetris game featuring a Java game engine and a JavaFX user interface, built wi
 
 ## Build and Run
 
-### Requirements
+### Prerequisites
 
-- JDK 17 or later
+- JDK 21 or later
 - Gradle Wrapper is included, so no separate Gradle installation is needed.
+- Linux: JavaFX 21 requires GTK 3 (version 3.8 or later) and its supporting native libraries. Most desktop Linux distributions already provide these dependencies.
+
+For Nix users, an optional shell.nix is provided to set up the Java development environment and native library paths.
 
 ### Clone the Repository
 
