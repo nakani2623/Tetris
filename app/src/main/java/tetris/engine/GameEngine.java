@@ -255,6 +255,7 @@ public class GameEngine implements Observable {
 //          ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
     void lock() {
         resetLockPolicy();
+        board.onLock();
         LineClearResult clearResult = board.clearCompleted();
         if (scoreManager != null) 
             scoreManager.onLock(clearResult.totalLinesCleared(), clearResult.garbageLinesCleared());
