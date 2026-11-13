@@ -1,16 +1,15 @@
 package tetris.engine.spinDetecter;
 
-import java.util.List;
 
 import tetris.engine.Board;
-import tetris.engine.Mino;
-import tetris.engine.Piece;
-import tetris.engine.Tetromino;
 import tetris.engine.operator.MoveDownOperator;
 import tetris.engine.operator.MoveLeftOperator;
 import tetris.engine.operator.MoveRightOperator;
 import tetris.engine.operator.MoveUpOperator;
 import tetris.engine.operator.Operator;
+import tetris.engine.piece.Mino;
+import tetris.engine.piece.Piece;
+import tetris.engine.piece.Tetromino;
 import tetris.engine.type.RotationState;
 import tetris.engine.type.SpinState;
 import tetris.utils.Point;

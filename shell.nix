@@ -1,4 +1,10 @@
-{ pkgs ? import <nixpkgs> {} }:
+{ pkgs ? let
+    localNixpkgs = builtins.tryEval <nixpkgs>;
+    source = if localNixpkgs.success then localNixpkgs.value
+      else builtins.fetchTarball {
+        url = "https://github.com/NixOS/nixpkgs/archive/2074cc672349f14240fb7ea90d509e0b643e9dd4.tar.gz";
+      };
+  in import source {} }:
 
 let
   libs = with pkgs; [
@@ -10,7 +16,7 @@ let
 in
 pkgs.mkShell {
   packages = with pkgs; [
-    jdk21 gradle
+    jdk21 gradle_9
     # you can keep openjfx here for its runtime deps even if you use Maven OpenJFX
     openjfx
   ] ++ libs;
@@ -18,4 +24,6 @@ pkgs.mkShell {
   shellHook = ''
     export LD_LIBRARY_PATH="${pkgs.lib.makeLibraryPath libs}:$LD_LIBRARY_PATH"
   '';
+  
 }
+

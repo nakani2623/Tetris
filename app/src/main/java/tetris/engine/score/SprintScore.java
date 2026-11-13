@@ -9,23 +9,19 @@ import java.util.concurrent.TimeUnit;
 import tetris.engine.observers.ScoreObserver;
 import tetris.engine.score.scoreEvent.ScoreEvent;
 import tetris.engine.score.scoreEvent.StatsEvent;
-import tetris.engine.type.SpinState;
-import tetris.engine.type.TetrominoType;
 
 public class SprintScore implements ScoreManager {
 
-    private int goalLines;
-    private static final int refreshRate_Hz = 30;
-    private int totalLinesCleared;
-    private int piecesPlaced;
-    private double startTime;
-    private double elapsedTime;
-    private double piecesPerSecond;
-    // private SpinState currentSpinState;
-    // private TetrominoType currentTetrominoType;
-    private final ScheduledExecutorService exec =
+    protected int goalLines;
+    protected static final int refreshRate_Hz = 30;
+    protected  int totalLinesCleared;
+    protected int piecesPlaced;
+    protected double startTime;
+    protected double elapsedTime;
+    protected double piecesPerSecond;
+    protected final ScheduledExecutorService exec =
         Executors.newSingleThreadScheduledExecutor();
-    private List<ScoreObserver> observers;
+    protected List<ScoreObserver> observers;
 
     public SprintScore(int goalLines) {
         this.goalLines = goalLines;
@@ -49,7 +45,7 @@ public class SprintScore implements ScoreManager {
         notifyObservers(new StatsEvent());
     }
 
-    public void onLock(int nLinesCleared) {
+    public void onLock(int nLinesCleared, int nGarbageLinesCleared) {
         this.totalLinesCleared += nLinesCleared;
         this.piecesPlaced++;
     }

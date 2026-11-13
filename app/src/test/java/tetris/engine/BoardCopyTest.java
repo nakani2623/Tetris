@@ -7,6 +7,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
+import tetris.engine.piece.Mino;
+import tetris.engine.piece.Piece;
+import tetris.engine.piece.Tetromino;
 import tetris.engine.type.TetrominoType;
 
 class BoardCopyTest {

@@ -4,6 +4,10 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.List;
 import org.junit.jupiter.api.Test;
+
+import tetris.engine.piece.Mino;
+import tetris.engine.piece.Piece;
+import tetris.engine.piece.Tetromino;
 import tetris.engine.rotator.SuperRotator;
 import tetris.engine.spinDetecter.SpinDetectUtils;
 import tetris.engine.type.Rotation;
@@ -51,7 +55,7 @@ class BoardYAxisTest {
         Piece below = new Piece(new Mino(1, 0));
         board.allTetrominos.addAll(List.of(locked, remaining, above, below));
         board.setCurrentTetromino(locked);
-        assertEquals(2, board.clearCompleted());
+        assertEquals(2, board.clearCompleted().totalLinesCleared());
         assertTrue(locked.children.isEmpty());
         assertEquals(1, remaining.children.size());
         assertEquals(2, remaining.children.get(0).getPosition().getY());

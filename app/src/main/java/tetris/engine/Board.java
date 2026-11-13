@@ -7,13 +7,20 @@ import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import tetris.engine.observers.Observable;
 import tetris.engine.observers.Observer;
-import tetris.engine.operator.MoveDownOperator;
+// import tetris.engine.operator.MoveDownOperator;
 import tetris.engine.operator.Operator;
+import tetris.engine.piece.Garbage;
+import tetris.engine.piece.Mino;
+import tetris.engine.piece.Piece;
+import tetris.engine.piece.Tetromino;
+import tetris.engine.type.LineClearResult;
 import tetris.engine.type.TetrominoType;
 import tetris.utils.Point;
+import tetris.utils.SimpleMath;
 
 /** Coordinates increase upward: floor y=0, visible top y=height-1. */
 public class Board implements Observable{
@@ -22,8 +29,10 @@ public class Board implements Observable{
     private int height;
     List<Piece> allTetrominos;
     Tetromino currentTetromino;
+    boolean isCurrTetroLocked;
     private Tetromino shadowTetromino;
-
+    private int lastGarbageHole;
+    private int garbageHeight = 0;
     private List<Observer> observers = new ArrayList<>();
 
 
@@ -31,7 +40,6 @@ public class Board implements Observable{
         this.width = width;
         this.height = height;
         allTetrominos = new ArrayList<Piece>();
-
     }
 
     public Board(Board source) {
@@ -59,7 +67,7 @@ public class Board implements Observable{
         currentTetromino = null;
         notifyObservers();
     }
-    
+
     /**
      * operates the current Tetromino with collision detection
      * operations includes: horizontal movements, rotation
@@ -99,6 +107,7 @@ public class Board implements Observable{
             return false;
         }
         currentTetromino = t;
+        isCurrTetroLocked = false;
         allTetrominos.add(currentTetromino);
         updateShadow();
         return true;
@@ -117,10 +126,13 @@ public class Board implements Observable{
 
         return centre;
     }
- 
+    
+    public void onLock() {
+        isCurrTetroLocked = true;
+    }
     void updateShadow() {
         shadowTetromino = currentTetromino.deepCopy();
-        Operator op = new MoveDownOperator();
+        // Operator op = new MoveDownOperator();
         while (!hasCollision(shadowTetromino)) {
             shadowTetromino.moveDown();
         }
@@ -186,13 +198,30 @@ public class Board implements Observable{
         }
         return false;
     }
+    /* 
+    ------------
+    - Garbage  -
+    ------------
+    */
+    public void insertgarbage(Garbage garbage) {
+        for (Piece piece : allTetrominos) {
+            if (piece == currentTetromino && isCurrTetroLocked == false) continue; // currentTetromino is locked, next "currentTetromino" no spawned, so all piece move up
+            for (int i = 0; i < garbage.getHeight(); i++) {
+                piece.moveUp(); // shift up all pieces
+            }
+        }
+        // add garbage
+        allTetrominos.add(garbage);
+        lastGarbageHole = garbage.getHole();
+        this.garbageHeight += garbage.getHeight();
+    }
     /*
     ------------
     -LINE CLEAR-
     ------------
     */
 
-    public int clearCompleted() {
+    public LineClearResult clearCompleted() {
         return checkCompletedLines(currentTetromino);
     }
     /**
@@ -202,13 +231,16 @@ public class Board implements Observable{
      * 
      * @ret int: lines cleared
      */
-    int clearLines(ArrayList<Integer> toClear, ArrayList<Piece> relatedTetrominos) { 
+    LineClearResult clearLines(ArrayList<Integer> toClear, ArrayList<Piece> relatedTetrominos) { 
+        Set<Integer> garbageLines = new HashSet<>(); // record what lines contains garbage minos
         for (Piece t : relatedTetrominos) {
             Iterator<Mino> iterator = t.children.iterator();
-
             while (iterator.hasNext()) {
                 Mino mino = iterator.next();
                 int minoHeight = (int) mino.getPosition().getY();
+                // record if garbage 
+                if (t instanceof Garbage)
+                    garbageLines.add(minoHeight);
                 // remove lines 
                 if (toClear.contains(minoHeight)) {
                     iterator.remove();
@@ -226,7 +258,10 @@ public class Board implements Observable{
                 }
             }
         }
-        return toClear.size();
+        int totalLinesCleared = toClear.size();
+        int nGarbageLinesCleared = SimpleMath.intersection(garbageLines, new HashSet<>(toClear)).size(); // to test
+        garbageHeight -= nGarbageLinesCleared;
+        return new LineClearResult(totalLinesCleared, nGarbageLinesCleared);
     }
 
     ArrayList<Integer> findLinesToClear(ArrayList<Piece> relatedTetrominos, HashSet<Double> relatedHeights) {
@@ -274,9 +309,7 @@ public class Board implements Observable{
      * lock tetromino trigger this, check for any lines to clear, if exist then clear.
      * @param lastLocked, the tetromino just locked, possible line clears should related with position of it
      */
-    int checkCompletedLines(Tetromino lastLocked) {
-  
-        //
+    LineClearResult checkCompletedLines(Tetromino lastLocked) {
         // group to lower/around/upper
         HashSet<Double> lastLockedHeights = calcSetOfRelatedHeights(lastLocked);
         ArrayList<Piece> lower = new ArrayList<Piece>();
@@ -297,15 +330,15 @@ public class Board implements Observable{
         }
         // lower: no change
         // around: clear + move down
-        int cleared = clearLines(findLinesToClear(around, lastLockedHeights), around);
-
+        LineClearResult result = clearLines(findLinesToClear(around, lastLockedHeights), around);
+        int cleared = result.totalLinesCleared();
         // upper: shift minos
         for (Piece tetromino : upper) {
             for (Mino mino : tetromino.children) {
                 mino.getPosition().setY(mino.getPosition().getY() - cleared);
             }
         }
-        return cleared;
+        return result;
     }
 
     public Tetromino getcurrentTetromino() {
@@ -331,12 +364,7 @@ public class Board implements Observable{
         return this.shadowTetromino;
     }
 
-    public double getGravity() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getGravity'");
-    } 
-
-        @Override
+    @Override
     public void addObserver(Observer observer) {
         observers.add(observer);
     }
@@ -352,4 +380,14 @@ public class Board implements Observable{
             observer.update();
         }
     }
+
+    public int getLastHole() {
+        return lastGarbageHole;
+    }
+
+    public int getGarbageHeight() {
+        return garbageHeight;
+    }
+
 }
+

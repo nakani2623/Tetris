@@ -3,6 +3,7 @@ package tetris.engine;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 
+import tetris.engine.piece.Tetromino;
 import tetris.engine.type.TetrominoType;
 import tetris.utils.Point;
 
