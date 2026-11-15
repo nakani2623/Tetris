@@ -376,6 +376,10 @@ public class GameEngine implements Observable {
     }
 
     public void setScoreManager(ScoreManager scoreManager) {
+        if (this.scoreManager != null) {
+            this.scoreManager.dispose();
+        }
+        
         this.scoreManager = scoreManager;
     }
 

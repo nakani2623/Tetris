@@ -19,7 +19,8 @@ public class AutoMoveScheduler {
     private double gravity; // move down num per sec
     private double softDropFactor;
     private boolean isSoftDropping = false;
-    private ScheduledExecutorService scheduler;
+    private ScheduledExecutorService scheduler = 
+        Executors.newSingleThreadScheduledExecutor();
     private ScheduledFuture<?> gravityTask;
     private ScheduledFuture<?> arrTask;
     private final MainThreadDispatcher dispatcher;
@@ -40,8 +41,6 @@ public class AutoMoveScheduler {
     }
 
     public void start() {
-        if (scheduler != null && !scheduler.isShutdown()) return;
-        scheduler = Executors.newSingleThreadScheduledExecutor();
         resetGravityTask(gravity);
     }
 
@@ -193,14 +192,19 @@ public class AutoMoveScheduler {
     }
 
     public void reset() {
-        gameGeneration++;
-        isSoftDropping = false;
-        DASCharges.replaceAll((direction, charge) -> 0);
-        if (arrTask != null) arrTask.cancel(false);
+        stop();
         resetGravityTask(gravity);
     }
 
     public void stop() {
+        gameGeneration++;
+        isSoftDropping = false;
+        DASCharges.replaceAll((direction, charge) -> 0);
+
+        if (arrTask != null) {
+            arrTask.cancel(false);
+            arrTask = null;
+        }
         stopGravityTask();
     }
 
