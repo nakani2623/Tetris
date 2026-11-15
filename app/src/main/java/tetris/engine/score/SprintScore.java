@@ -43,6 +43,10 @@ public class SprintScore implements ScoreManager {
         startTimer();
     }
 
+    public void stop() {
+        stopTimer();
+    }
+
     void startTimer() {
         // if (timer == null || timer.isCancelled())
             timer = exec.scheduleAtFixedRate(this::updateStats, 0, TimeUnit.SECONDS.toNanos(1) / refreshRate_Hz, TimeUnit.NANOSECONDS);
