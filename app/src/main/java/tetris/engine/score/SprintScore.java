@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import tetris.engine.observers.ScoreObserver;
@@ -21,12 +22,13 @@ public class SprintScore implements ScoreManager {
     protected double piecesPerSecond;
     protected final ScheduledExecutorService exec =
         Executors.newSingleThreadScheduledExecutor();
+    protected ScheduledFuture<?> timer;
     protected List<ScoreObserver> observers;
 
     public SprintScore(int goalLines) {
         this.goalLines = goalLines;
-        exec.scheduleAtFixedRate(this::updateStats, 0, TimeUnit.SECONDS.toNanos(1) / refreshRate_Hz, TimeUnit.NANOSECONDS);
         this.observers = new ArrayList<>();
+        reset();
     }
 
     public void reset() {
@@ -35,6 +37,22 @@ public class SprintScore implements ScoreManager {
         this.startTime = System.currentTimeMillis();
         this.elapsedTime = 0;
         this.piecesPerSecond = 0;
+
+        // restart exec
+        stopTimer();
+        startTimer();
+    }
+
+    void startTimer() {
+        // if (timer == null || timer.isCancelled())
+            timer = exec.scheduleAtFixedRate(this::updateStats, 0, TimeUnit.SECONDS.toNanos(1) / refreshRate_Hz, TimeUnit.NANOSECONDS);
+    }
+
+    void stopTimer() {
+        if (timer != null) {
+            timer.cancel(false);
+            timer = null;
+        }
     }
 
     public void updateStats() {
@@ -52,6 +70,7 @@ public class SprintScore implements ScoreManager {
 
     public boolean haveAchievedGoal() {
         if (totalLinesCleared >= goalLines) {
+            stopTimer();
             return true;
         }
         return false;
