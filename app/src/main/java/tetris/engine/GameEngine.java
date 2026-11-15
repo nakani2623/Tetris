@@ -102,6 +102,15 @@ public class GameEngine implements Observable {
         notifyObservers();
     }
 
+    private void onGameOver() {
+        if (scoreManager != null) {
+            scoreManager.stop();
+        }
+
+        if (listener != null)
+            listener.onGameOver();
+    }
+
 //  ███╗   ███╗ ██████╗ ██╗   ██╗███████╗
 //  ████╗ ████║██╔═══██╗██║   ██║██╔════╝
 //  ██╔████╔██║██║   ██║██║   ██║█████╗
@@ -157,7 +166,7 @@ public class GameEngine implements Observable {
 
         else {
             if (!board.spawn(holdTetrominoType) || (scoreManager != null && scoreManager.haveAchievedGoal())) {
-                listener.onGameOver();
+                onGameOver();
                 return;
             }
             if (autoMoveScheduler != null) autoMoveScheduler.onSpawn();
@@ -237,7 +246,7 @@ public class GameEngine implements Observable {
 
         // try spawn, if gameover, notify controller
         if (!board.spawn(currentTetrominoType) || (scoreManager != null && scoreManager.haveAchievedGoal())) {
-            listener.onGameOver();
+            onGameOver();
             return;
         }
         if (autoMoveScheduler != null) autoMoveScheduler.onSpawn();

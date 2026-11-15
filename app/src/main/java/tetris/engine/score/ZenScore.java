@@ -3,6 +3,7 @@ package tetris.engine.score;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.ArrayList;
 
@@ -28,20 +29,14 @@ public class ZenScore implements ScoreManager {
 
     private final ScheduledExecutorService exec =
         Executors.newSingleThreadScheduledExecutor();
+    protected ScheduledFuture<?> timer;
 
     private List<ScoreObserver> observers;
 
     public ZenScore() {
-        this.score = 0;
-        this.linesCleared = 0;
-        this.piecesPlaced = 0;
-        this.startTime = System.currentTimeMillis();
-        this.elapsedTime = 0;
-        this.piecesPerSecond = 0;
-        this.attackPerMinute = 0;
-
-        exec.scheduleAtFixedRate(this::updateStats, 0, TimeUnit.SECONDS.toNanos(1) / refreshRate_Hz, TimeUnit.NANOSECONDS);
         this.observers = new ArrayList<>();
+
+        reset();
     }
 
     /**
@@ -56,6 +51,25 @@ public class ZenScore implements ScoreManager {
         this.piecesPerSecond = 0;
         this.attackPerMinute = 0;
 
+        // restart exec
+        stopTimer();
+        startTimer();
+    }
+
+    public void stop() {
+        stopTimer();
+    }
+
+    void startTimer() {
+        // if (timer == null || timer.isCancelled())
+            timer = exec.scheduleAtFixedRate(this::updateStats, 0, TimeUnit.SECONDS.toNanos(1) / refreshRate_Hz, TimeUnit.NANOSECONDS);
+    }
+
+    void stopTimer() {
+        if (timer != null) {
+            timer.cancel(false);
+            timer = null;
+        }
     }
     
     public void updateStats() {
@@ -126,6 +140,8 @@ public class ZenScore implements ScoreManager {
     public void dispose() {
         exec.shutdownNow();
     }
+
+
 
     public boolean haveAchievedGoal() { return false; }
 
