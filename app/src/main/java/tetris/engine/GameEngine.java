@@ -107,6 +107,10 @@ public class GameEngine implements Observable {
             scoreManager.stop();
         }
 
+        if (autoMoveScheduler != null) {
+            autoMoveScheduler.stop();
+        }
+
         if (listener != null)
             listener.onGameOver();
     }
