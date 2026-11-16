@@ -65,6 +65,7 @@ public class Board implements Observable{
     public void reset() {
         allTetrominos = new ArrayList<Piece>();
         currentTetromino = null;
+        garbageHeight = 0;
         notifyObservers();
     }
 

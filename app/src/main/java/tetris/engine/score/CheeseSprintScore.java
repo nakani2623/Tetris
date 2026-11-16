@@ -6,9 +6,9 @@ import tetris.engine.GarbageQueue;
 import tetris.engine.piece.Garbage;
 
 public class CheeseSprintScore extends SprintScore {
-    private int maxGarbageLines = 10;
+    private final int maxGarbageLines = 10;
     private int pendingToFill = goalLines;
-    private int linesToFill = 0;
+    private int linesToFill;
     private GarbageGenerator garbageGenerator = new GarbageGenerator();
     private GarbageQueue garbageQueue;
     private Board board;
@@ -16,11 +16,22 @@ public class CheeseSprintScore extends SprintScore {
         super(goalLines);
         this.garbageQueue = queue;
         this.board = board;
+        // while (pendingToFill > 0 && linesToFill < maxGarbageLines) {
+        //     linesToFill++;
+        //     pendingToFill--;
+        // }
+    }
+
+    public void reset() {
+        super.reset();
+        linesToFill = 0;
+        pendingToFill = goalLines;
         while (pendingToFill > 0 && linesToFill < maxGarbageLines) {
             linesToFill++;
             pendingToFill--;
         }
     }
+
     public void onStart() {
         fillGarbage();
     }
@@ -28,7 +39,7 @@ public class CheeseSprintScore extends SprintScore {
         if (nLinesCleared == 0) fillGarbage();
         else if (nGarbageLinesCleared != 0) {
             this.totalLinesCleared += nGarbageLinesCleared;
-            while (pendingToFill > 0 && linesToFill + board.getGarbageHeight() < maxGarbageLines) {
+            if (pendingToFill > 0 && linesToFill + board.getGarbageHeight() < maxGarbageLines) {
                 linesToFill += nGarbageLinesCleared;
                 pendingToFill -= nGarbageLinesCleared;
             }
