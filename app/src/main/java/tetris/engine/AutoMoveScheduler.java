@@ -19,7 +19,8 @@ public class AutoMoveScheduler {
     private double gravity; // move down num per sec
     private double softDropFactor;
     private boolean isSoftDropping = false;
-    private ScheduledExecutorService scheduler;
+    private ScheduledExecutorService scheduler = 
+        Executors.newSingleThreadScheduledExecutor();
     private ScheduledFuture<?> gravityTask;
     private ScheduledFuture<?> arrTask;
     private final MainThreadDispatcher dispatcher;
@@ -40,9 +41,7 @@ public class AutoMoveScheduler {
     }
 
     public void start() {
-        if (scheduler != null && !scheduler.isShutdown()) return;
-        scheduler = Executors.newSingleThreadScheduledExecutor();
-        resetGravityTimeline(gravity);
+        resetGravityTask(gravity);
     }
 
     public void onSpawn() {
@@ -71,6 +70,7 @@ public class AutoMoveScheduler {
         applySoftDropEffect();
         // System.out.println();
     }
+
     private void applySoftDropEffect() {
         // System.out.println("sd");
         if (!isSoftDropping) 
@@ -87,8 +87,9 @@ public class AutoMoveScheduler {
             engine.moveDAS(Direction.DOWN);
             return;
         }
-        resetGravityTimeline(tempGravity);
+        resetGravityTask(tempGravity);
     }
+    
     private void handleDASEvent(){
         // System.out.println("das");
         if (ARR <= INSTANT_MOVE_THRESHOLD && arrTask != null) {
@@ -130,6 +131,7 @@ public class AutoMoveScheduler {
         }
         
     }
+    
     public void startSoftDrop() {
         isSoftDropping = true;
         applySoftDropEffect();
@@ -138,17 +140,24 @@ public class AutoMoveScheduler {
     public void endSoftDrop() {
         isSoftDropping = false;
         if (softDropFactor != Double.MAX_VALUE)
-            resetGravityTimeline(engine.getGravity());
+            resetGravityTask(engine.getGravity());
     }
 
     public void setSoftDropFactor(double softDropFactor) {
         this.softDropFactor = softDropFactor;
     }
-    public void resetGravityTimeline(double gravity){
-        if (scheduler == null || scheduler.isShutdown()) return;
+
+    private void stopGravityTask() {
         if (gravityTask != null) {
             gravityTask.cancel(false);
+            gravityTask = null;
         }
+    }
+
+    private void resetGravityTask(double gravity){
+        if (scheduler == null || scheduler.isShutdown()) return;
+        stopGravityTask();
+
         long ticket = gameGeneration;
         long periodNanos = (long) (TimeUnit.SECONDS.toNanos(1) / gravity);
         gravityTask = scheduler.scheduleAtFixedRate( () -> {
@@ -183,11 +192,20 @@ public class AutoMoveScheduler {
     }
 
     public void reset() {
+        stop();
+        resetGravityTask(gravity);
+    }
+
+    public void stop() {
         gameGeneration++;
         isSoftDropping = false;
         DASCharges.replaceAll((direction, charge) -> 0);
-        if (arrTask != null) arrTask.cancel(false);
-        resetGravityTimeline(gravity);
+
+        if (arrTask != null) {
+            arrTask.cancel(false);
+            arrTask = null;
+        }
+        stopGravityTask();
     }
 
     public void dispose() {

@@ -180,7 +180,6 @@ public class GameController implements GameOverListener {
 
     @Override 
     public void onGameOver() {
-        dispose();
         gameState = GameState.ended;
         window.onGameOver();
     }
