@@ -46,6 +46,7 @@ public class ConfigPane extends StackPane implements Observer {
     private Button returnMenu = new Button("Back");
 
     public ConfigPane(KeyBinds keyBinds) {
+        title.getStyleClass().add("menu-title");
         this.keyBinds = keyBinds;
 
         moveLeftButton = new KeyBindButton(GameKey.MOVE_LEFT, GameState.active, this.keyBinds);

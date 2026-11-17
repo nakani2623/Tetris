@@ -7,6 +7,7 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.event.EventHandler;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import tetris.controller.GameController;
 import tetris.controller.dispatch.JavaFXMainThreadDispatcher;
@@ -41,6 +42,12 @@ public class App extends Application {
     private final GameController controller = new GameController(engine, window, dispatcher);
     @Override
     public void start(Stage stage) {
+        Font font = Font.loadFont(
+                App.class.getResource("/fonts/GNF.ttf").toExternalForm(), 18
+        );
+        if (font == null) {
+            throw new IllegalStateException("Failed to load GNF font");
+        }
         engine.setLockPolicy(new DelayedLock(dispatcher, 500, 15));
         engine.setAutoMoveScheduler(new AutoMoveScheduler(1, 601, dispatcher, engine));
         // load config

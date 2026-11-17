@@ -4,6 +4,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
@@ -15,12 +16,20 @@ public class SinglePlayerPane extends StackPane {
     private Button zenButton;
     public SinglePlayerPane() {
         Label title = new Label("Single player");
+        title.getStyleClass().add("menu-title");
         sprintButton = new Button("Sprint mode");
         cheeseSprintButton = new Button("Cheese sprint");
         returnButton = new Button("Return to Menu");
         zenButton = new Button("Zen mode");
 
-        VBox content = new VBox(title, sprintButton, cheeseSprintButton, zenButton, returnButton);
+        HBox menuBar = new HBox(sprintButton, cheeseSprintButton, zenButton, returnButton);
+        menuBar.getStyleClass().add("menu-bar");
+        sprintButton.getStyleClass().addAll("menu-option", "tetromino-j");
+        cheeseSprintButton.getStyleClass().addAll("menu-option", "tetromino-o");
+        zenButton.getStyleClass().addAll("menu-option", "tetromino-s");
+        returnButton.getStyleClass().addAll("menu-option", "tetromino-l");
+
+        VBox content = new VBox(title, menuBar);
         this.getChildren().add(content);
 
         content.setAlignment(Pos.TOP_CENTER);

@@ -4,6 +4,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
@@ -14,11 +15,19 @@ public class MenuPane extends StackPane {
     private Button configButton;
     public MenuPane() {
         Label title = new Label("Tetris");
-        singlePlayerButton = new Button("Single player");
+        title.getStyleClass().add("menu-title");
+        title.setId("main-title");
+        singlePlayerButton = new Button("Single \n player");
         exitButton = new Button("Exit");
         configButton = new Button("Config");
 
-        VBox content = new VBox(title, singlePlayerButton, configButton, exitButton);
+        HBox menuBar = new HBox(singlePlayerButton, configButton, exitButton);
+        menuBar.getStyleClass().add("menu-bar");
+        singlePlayerButton.getStyleClass().addAll("menu-option", "tetromino-i");
+        configButton.getStyleClass().addAll("menu-option", "tetromino-t");
+        exitButton.getStyleClass().addAll("menu-option", "tetromino-z");
+
+        VBox content = new VBox(title, menuBar);
         this.getChildren().add(content);
 
         content.setAlignment(Pos.TOP_CENTER);
