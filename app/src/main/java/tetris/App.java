@@ -48,6 +48,12 @@ public class App extends Application {
         if (font == null) {
             throw new IllegalStateException("Failed to load GNF font");
         }
+        Font titleFont = Font.loadFont(
+                App.class.getResource("/fonts/Dedicool.ttf").toExternalForm(), 18
+        );
+        if (titleFont == null) {
+            throw new IllegalStateException("Failed to load Dedicool font");
+        }
         engine.setLockPolicy(new DelayedLock(dispatcher, 500, 15));
         engine.setAutoMoveScheduler(new AutoMoveScheduler(1, 601, dispatcher, engine));
         // load config
