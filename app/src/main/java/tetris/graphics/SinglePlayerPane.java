@@ -4,7 +4,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.layout.HBox;
+import tetris.controller.input.KeyBinds;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
@@ -14,16 +14,15 @@ public class SinglePlayerPane extends StackPane {
     private Button cheeseSprintButton;
     private Button returnButton;
     private Button zenButton;
-    public SinglePlayerPane() {
+    public SinglePlayerPane(KeyBinds bindings) {
         Label title = new Label("Single player");
         title.getStyleClass().add("menu-title");
-        sprintButton = new Button("Sprint mode");
-        cheeseSprintButton = new Button("Cheese sprint");
-        returnButton = new Button("Return to Menu");
-        zenButton = new Button("Zen mode");
+        sprintButton = new Button("Sprint");
+        cheeseSprintButton = new Button("Cheese \nsprint");
+        returnButton = new Button("Return\n to\n  Menu");
+        zenButton = new Button("Zen");
 
-        HBox menuBar = new HBox(sprintButton, cheeseSprintButton, zenButton, returnButton);
-        menuBar.getStyleClass().add("menu-bar");
+        MenuOptionBar menuBar = new MenuOptionBar(bindings, returnButton::fire, sprintButton, cheeseSprintButton, zenButton, returnButton);
         sprintButton.getStyleClass().addAll("menu-option", "tetromino-j");
         cheeseSprintButton.getStyleClass().addAll("menu-option", "tetromino-o");
         zenButton.getStyleClass().addAll("menu-option", "tetromino-s");

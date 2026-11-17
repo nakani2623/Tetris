@@ -47,6 +47,7 @@
 }
 
 #main-title {
+    -fx-font-family: "Dedicool";
     -fx-font-size: 128px;
 }
 
@@ -70,11 +71,6 @@
 
 .menu-bar .menu-option:focused {
     -menu-ink: -menu-focus;
-    -fx-opacity: 1;
-}
-
-.menu-bar .menu-option:hover {
-    -menu-ink: -menu-accent;
     -fx-opacity: 1;
 }
 
