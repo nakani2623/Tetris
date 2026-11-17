@@ -26,6 +26,9 @@ public class GameWindow {
     public GameWindow(KeyBinds keyBinds) {
         Pane initialPane = new Pane();
         scene = new Scene(initialPane, 640, 480);
+        scene.getStylesheets().add(
+                getClass().getResource("/styles/theme.css").toExternalForm()
+        );
         menuPane.setOnConfig(this::showConfig);
         menuPane.setOnSinglePlayer(this::showSinglePlayer);
         singlePlayerPane.setOnReturnMenu(this::showMenu);
@@ -35,6 +38,7 @@ public class GameWindow {
 
     public void execute(Stage stage) {
         stage.setScene(scene);
+        stage.setFullScreen(true);
         stage.show();
     }
 

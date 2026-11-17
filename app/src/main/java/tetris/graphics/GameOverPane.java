@@ -12,6 +12,7 @@ public class GameOverPane extends VBox {
         private Button returnButton;
     public GameOverPane() {
         Label title = new Label("GAME OVER!");
+        title.getStyleClass().add("menu-title");
         restartButton = new Button("Restart");
         returnButton = new Button("Return to Menu"); 
 

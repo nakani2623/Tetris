@@ -1,0 +1,91 @@
+/* Shared colors, typography, and component styles for all pages. */
+
+.root {
+    -app-text-color: #d0d0d0;
+    -fx-text-base-color: -app-text-color;
+    -fx-text-background-color: -app-text-color;
+    -fx-text-inner-color: -app-text-color;
+    -fx-font-family: "GNF";
+    -fx-background-color: #242424;
+}
+
+.menu-bar {
+    -fx-background-color: transparent;
+    -fx-alignment: center;
+    -fx-spacing: 24px;
+    -fx-padding: 16px;
+}
+
+.menu-bar .menu-option {
+    -fx-min-width: 256px;
+    -fx-pref-width: 256px;
+    -fx-min-height: 360px;
+    -fx-pref-height: 360px;
+    -fx-font-size: 36px;
+    -fx-background-radius: 12px;
+}
+
+/* Default text color for controls and standalone Text nodes. */
+* {
+    -fx-text-fill: -app-text-color;
+}
+
+.text {
+    -fx-fill: -app-text-color;
+}
+
+/* Keep button backgrounds transparent in every interaction state. */
+.button,
+.button:hover,
+.button:focused,
+.button:armed {
+    -fx-background-color: transparent;
+}
+
+.menu-title {
+    -fx-font-size: 64px;
+}
+
+#main-title {
+    -fx-font-size: 128px;
+}
+
+/* Each option uses the same palette as its tetromino. */
+.tetromino-i { -menu-accent: cyan;   -menu-muted: #829999; -menu-pressed: #59ffff; -menu-focus: #8cffff; }
+.tetromino-t { -menu-accent: purple; -menu-muted: #958295; -menu-pressed: #ac59ac; -menu-focus: #804680; }
+.tetromino-z { -menu-accent: red;    -menu-muted: #a08080; -menu-pressed: #ff5959; -menu-focus: #ff8c8c; }
+.tetromino-j { -menu-accent: blue;   -menu-muted: #828299; -menu-pressed: #5959ff; -menu-focus: #8c8cff; }
+.tetromino-o { -menu-accent: yellow; -menu-muted: #999982; -menu-pressed: #ffff59; -menu-focus: #ffff8c; }
+.tetromino-s { -menu-accent: green;  -menu-muted: #829582; -menu-pressed: #59ac59; -menu-focus: #468046; }
+.tetromino-l { -menu-accent: orange; -menu-muted: #a09280; -menu-pressed: #ffc559; -menu-focus: #ffd68c; }
+
+.menu-bar .menu-option {
+    -menu-ink: -menu-muted;
+    -fx-text-fill: -menu-ink;
+    -fx-border-color: -menu-ink;
+    -fx-border-width: 3px;
+    -fx-border-radius: 0;
+    -fx-opacity: 0.6;
+}
+
+.menu-bar .menu-option:focused {
+    -menu-ink: -menu-focus;
+    -fx-opacity: 1;
+}
+
+.menu-bar .menu-option:hover {
+    -menu-ink: -menu-accent;
+    -fx-opacity: 1;
+}
+
+/* Override the global Text fill so labels match their option's border. */
+.menu-bar .menu-option .text {
+    -fx-fill: -menu-ink;
+}
+
+/* Press feedback takes precedence over hover and keyboard focus. */
+.menu-bar .menu-option:pressed,
+.menu-bar .menu-option:armed {
+    -menu-ink: -menu-pressed;
+    -fx-opacity: 1;
+}
