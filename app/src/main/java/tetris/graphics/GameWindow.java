@@ -18,12 +18,14 @@ import tetris.graphics.gameActive.SpinClearPane;
  */
 public class GameWindow {
     private final GamePane gamePane = new GamePane();
-    private final MenuPane menuPane = new MenuPane();
-    private final SinglePlayerPane singlePlayerPane = new SinglePlayerPane();
+    private final MenuPane menuPane;
+    private final SinglePlayerPane singlePlayerPane;
     private final ConfigPane configPane ;
     private final Scene scene;
 
     public GameWindow(KeyBinds keyBinds) {
+        menuPane = new MenuPane(keyBinds);
+        singlePlayerPane = new SinglePlayerPane(keyBinds);
         Pane initialPane = new Pane();
         scene = new Scene(initialPane, 640, 480);
         scene.getStylesheets().add(
