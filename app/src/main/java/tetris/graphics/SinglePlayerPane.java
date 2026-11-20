@@ -1,10 +1,10 @@
 package tetris.graphics;
 
+import tetris.controller.input.KeyBinds;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import tetris.controller.input.KeyBinds;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
