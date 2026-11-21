@@ -1,11 +1,9 @@
 package tetris.controller;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -31,7 +29,6 @@ public class GameController implements GameOverListener {
 
     private ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
     private Map<UnifiedKey, ScheduledFuture<?>> DASChargingKeys = new HashMap<UnifiedKey, ScheduledFuture<?>>();
-    private Set<UnifiedKey> pressedKeys = new HashSet<>(); 
     private List<UnifiedKey> DASChargedKeys = new LinkedList<UnifiedKey>();
     private double DAS = 5;
 
@@ -61,7 +58,6 @@ public class GameController implements GameOverListener {
     }
 
     private void reset() {
-        pressedKeys.clear();
         engine.reset();
         window.onStart();
     }
@@ -93,10 +89,6 @@ public class GameController implements GameOverListener {
 
 
     public void handleKeyPressed(GameKey key, UnifiedKey physicalKey) {
-        if (!pressedKeys.add(physicalKey)) { // Ignore repeated KEY_DOWN events
-            return;
-        }
-
         if (key == null)
             return;
 
@@ -146,8 +138,6 @@ public class GameController implements GameOverListener {
     }
 
     public void handleKeyReleased(GameKey key, UnifiedKey physicalKey) {
-        pressedKeys.remove(physicalKey);
-
         if (gameState != GameState.active) {
             return;
         }
