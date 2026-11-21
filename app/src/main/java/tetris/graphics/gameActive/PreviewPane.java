@@ -48,8 +48,8 @@ public class PreviewPane extends StackPane {
 
 
         minoRectangle.setFill(color);
-        minoRectangle.setStroke(Color.LIGHTGRAY);
-        minoRectangle.setStrokeType(StrokeType.INSIDE);
+        // minoRectangle.setStroke(Color.LIGHTGRAY);
+        // minoRectangle.setStrokeType(StrokeType.INSIDE);
 
         return minoRectangle;
     }

@@ -36,12 +36,18 @@ application {
 }
 
 javafx {
-    version = '21.0.2'
-    modules = [ 'javafx.controls', 'javafx.fxml' ]
+    version = '27'
+    modules = [ 'javafx.controls', 'javafx.fxml', 'javafx.media' ]
 }
 
 tasks.named('test') {
     // Use JUnit Platform for unit tests.
     useJUnitPlatform()
     timeout = java.time.Duration.ofMinutes(5)
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(26)
+    }
 }

@@ -84,6 +84,7 @@ public class App extends Application {
     }
 
     private void startSinglePlayer(SinglePlayGameMode gameMode) {
+        window.setGameMode(gameMode);
         ScoreManager scoreManager;
         switch (gameMode) {
             case SPRINT:
@@ -115,6 +116,7 @@ public class App extends Application {
 
     @Override 
     public void stop() {
+        window.dispose();
         controller.dispose();
         engine.dispose();
         keyBinds.save();

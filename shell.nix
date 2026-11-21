@@ -9,14 +9,16 @@ let
     libx11 libxext libxrender libxtst libxi libxxf86vm
     mesa libGL
     fontconfig freetype
+    ffmpeg_7
   ];
 in
 pkgs.mkShell {
   packages = with pkgs; [
-    jdk21
   ] ++ libs;
 
   shellHook = ''
+    export JAVA_HOME=/usr/lib/jvm/java-26-jdk
+    export PATH="$JAVA_HOME/bin:$PATH"
     export LD_LIBRARY_PATH="${pkgs.lib.makeLibraryPath libs}:$LD_LIBRARY_PATH"
   '';
   

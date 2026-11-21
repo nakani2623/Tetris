@@ -2,7 +2,8 @@ package tetris.graphics;
 
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
+import tetris.engine.type.SinglePlayGameMode;
 import javafx.stage.Stage;
 import tetris.controller.input.KeyBinds;
 import tetris.graphics.configPage.ConfigPane;
@@ -22,12 +23,14 @@ public class GameWindow {
     private final SinglePlayerPane singlePlayerPane;
     private final ConfigPane configPane ;
     private final Scene scene;
+    private final VideoBackground background = new VideoBackground();
+    private final StackPane root = new StackPane(background);
+    private SinglePlayGameMode gameMode = SinglePlayGameMode.SPRINT;
 
     public GameWindow(KeyBinds keyBinds) {
         menuPane = new MenuPane(keyBinds);
         singlePlayerPane = new SinglePlayerPane(keyBinds);
-        Pane initialPane = new Pane();
-        scene = new Scene(initialPane, 640, 480);
+        scene = new Scene(root, 640, 480);
         scene.getStylesheets().add(
                 getClass().getResource("/styles/theme.css").toExternalForm()
         );
@@ -45,19 +48,23 @@ public class GameWindow {
     }
 
     public void showGame() {
-        showContent(gamePane);
+        showContent(gamePane, switch (gameMode) {
+            case SPRINT -> "/video/sprint_bg.mp4";
+            case CHEESE_SPRINT -> "/video/cheese_sprint_bg.mp4";
+            case ZEN -> "/video/zen_bg.mp4";
+        });
     }
 
     public void showMenu() {
-        showContent(menuPane);
+        showContent(menuPane, "/video/main_menu_bg.mp4");
     }
 
     public void showSinglePlayer() {
-        showContent(singlePlayerPane);
+        showContent(singlePlayerPane, "/video/mode_select_bg.mp4");
     }
 
     public void showConfig() {
-        showContent(configPane);
+        showContent(configPane, null);
     }
 
     public Scene getScene() {
@@ -84,8 +91,17 @@ public class GameWindow {
         return gamePane.getNextQueuePane();
     }
 
-    private void showContent(Parent content) {
-        scene.setRoot(content);
+    private void showContent(Parent content, String video) {
+        background.showVideo(video);
+        root.getChildren().setAll(background, content);
+    }
+
+    public void setGameMode(SinglePlayGameMode mode) {
+        gameMode = mode;
+    }
+
+    public void dispose() {
+        background.dispose();
     }
 
     public void setOnSprint(Runnable action) {
