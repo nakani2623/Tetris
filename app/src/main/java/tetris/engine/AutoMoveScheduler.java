@@ -11,14 +11,16 @@ import tetris.controller.dispatch.MainThreadDispatcher;
 import tetris.engine.type.Direction;
 
 public class AutoMoveScheduler {
-    private GameEngine engine;
-    // private SoftDropHandler softDropHandler;
-
-    // gameplay state & spawn
     public static double INSTANT_MOVE_THRESHOLD = 600.0; // grid per second
+
+    private GameEngine engine;
+    // gameplay state & spawn
     private double gravity; // move down num per sec
     private double softDropFactor;
+    private double autoRepeatRate;
     private boolean isSoftDropping = false;
+
+
     private ScheduledExecutorService scheduler = 
         Executors.newSingleThreadScheduledExecutor();
     private ScheduledFuture<?> gravityTask;
@@ -28,11 +30,10 @@ public class AutoMoveScheduler {
     private Map<Direction, Integer> DASCharges = new HashMap<>(
         Map.of(Direction.LEFT, 0, Direction.RIGHT, 0)
     );
-    // private double ARR = 601;
-    private double ARR;
+
     public AutoMoveScheduler(double gravity, double arr, MainThreadDispatcher dispatcher, GameEngine engine) {
         this.gravity = gravity;
-        this.ARR = arr;
+        this.autoRepeatRate = arr;
         this.engine = engine;
         if (dispatcher == null)
             this.dispatcher = task -> task.run();
@@ -52,9 +53,9 @@ public class AutoMoveScheduler {
     }
     private void applyAutoMoveEffects() {
         // System.out.println();
-        if (softDropFactor * gravity > INSTANT_MOVE_THRESHOLD && ARR > INSTANT_MOVE_THRESHOLD) { 
+        if (softDropFactor * gravity > INSTANT_MOVE_THRESHOLD && autoRepeatRate > INSTANT_MOVE_THRESHOLD) { 
             // both instant move, choose order
-            if (softDropFactor * gravity >= ARR) { // vertical first
+            if (softDropFactor * gravity >= autoRepeatRate) { // vertical first
                 applySoftDropEffect();
                 handleDASEvent();
                 return ;
@@ -91,44 +92,44 @@ public class AutoMoveScheduler {
     }
     
     private void handleDASEvent(){
-        // System.out.println("das");
-        if (ARR <= INSTANT_MOVE_THRESHOLD && arrTask != null) {
+        if (autoRepeatRate <= INSTANT_MOVE_THRESHOLD && arrTask != null) {
             // stop arr timeline
             arrTask.cancel(false);
         }
+
         // calculate das direction
         int leftDAS = DASCharges.get(Direction.LEFT);
         int rightDAS = DASCharges.get(Direction.RIGHT);
         Direction direction;
-        if (leftDAS - rightDAS == 0) { 
+        if (leftDAS == rightDAS) { 
             return; 
         } 
-        else if (leftDAS - rightDAS > 0) { direction = Direction.LEFT; }
+        else if (leftDAS > rightDAS) { direction = Direction.LEFT; }
         else { direction = Direction.RIGHT; }
 
-        if (ARR > INSTANT_MOVE_THRESHOLD ) { // ->0 ARR
+        if (autoRepeatRate > INSTANT_MOVE_THRESHOLD ) { // ->0 ARR
             try {
                 engine.moveDAS(direction);
             } catch (Throwable e) {
                 e.printStackTrace();
             }
+
+            return;
         }
-        else { // non-zero ARR
-            // instantly move one step
-            engine.move(direction);
-            // applySoftDropEffect();
-            long periodNanos = (long) (TimeUnit.SECONDS.toNanos(1) / ARR);
-            if (scheduler == null || scheduler.isShutdown()) 
-                return;
-            long ticket = gameGeneration;
-            arrTask = scheduler.scheduleAtFixedRate( () -> {
-                dispatcher.dispatch(() -> {
-                    if (ticket != gameGeneration) // ignore a task from last game before reset
-                        return;
-                    engine.move(direction);
-                });
-            }, periodNanos, periodNanos, TimeUnit.NANOSECONDS);
-        }
+
+        // non-zero ARR
+        if (scheduler == null || scheduler.isShutdown()) 
+            return;
+
+        long periodNanos = (long) (TimeUnit.SECONDS.toNanos(1) / autoRepeatRate);
+        long ticket = gameGeneration;
+        arrTask = scheduler.scheduleAtFixedRate( () -> {
+            dispatcher.dispatch(() -> {
+                if (ticket != gameGeneration) // ignore a task from last game before reset
+                    return;
+                engine.move(direction);
+            });
+        }, 0, periodNanos, TimeUnit.NANOSECONDS);
         
     }
     
@@ -183,8 +184,8 @@ public class AutoMoveScheduler {
         this.gravity = gravity;
     }
 
-    public void setARR(double ARR) {
-        this.ARR = ARR;
+    public void setAutoRepeatRate(double autoRepeatRate) {
+        this.autoRepeatRate = autoRepeatRate;
     } 
 
     public double getGravity() {

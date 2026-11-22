@@ -348,7 +348,7 @@ public class GameEngine implements Observable {
     public void setARR(double ARR) {
         if (autoMoveScheduler == null) 
             return;
-        autoMoveScheduler.setARR(ARR);
+        autoMoveScheduler.setAutoRepeatRate(ARR);
     }
 
     public void setGameOverListener(GameOverListener listener) {

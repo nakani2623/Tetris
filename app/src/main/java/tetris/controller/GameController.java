@@ -27,7 +27,7 @@ public class GameController implements GameOverListener {
     private MainThreadDispatcher dispatcher;
 
     private ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
-    private Map<GameKey, ScheduledFuture<?>> DASChargingKeys = new HashMap<GameKey, ScheduledFuture<?>>();
+    private Map<GameKey, ScheduledFuture<?>> scheduledDASMoves = new HashMap<GameKey, ScheduledFuture<?>>();
     private List<GameKey> DASChargedKeys = new LinkedList<GameKey>();
     private double DAS = 5;
 
@@ -67,15 +67,15 @@ public class GameController implements GameOverListener {
             dispatcher.dispatch(() -> {
                 engine.chargeDAS(direction);
                 DASChargedKeys.add(key);
-                DASChargingKeys.remove(key);
+                scheduledDASMoves.remove(key);
             });
         }, delayNanos, TimeUnit.NANOSECONDS);
 
-        DASChargingKeys.put(key, chargeDAS);
+        scheduledDASMoves.put(key, chargeDAS);
     }
     private void endCharging(GameKey key, Direction direction) {
-        if (DASChargingKeys.containsKey(key)) {
-            this.DASChargingKeys.get(key).cancel(false);
+        if (scheduledDASMoves.containsKey(key)) {
+            this.scheduledDASMoves.get(key).cancel(false);
         }
 
         if (DASChargedKeys.contains(key)) {
