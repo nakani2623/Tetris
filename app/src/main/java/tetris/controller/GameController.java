@@ -72,8 +72,8 @@ public class GameController implements GameOverListener {
                 DASChargingKeys.remove(key);
             });
         }, delayNanos, TimeUnit.NANOSECONDS);
-        DASChargingKeys.put(key, chargeDAS);
 
+        DASChargingKeys.put(key, chargeDAS);
     }
     private void endCharging(UnifiedKey key, Direction direction) {
         if (DASChargingKeys.containsKey(key)) {
@@ -85,6 +85,10 @@ public class GameController implements GameOverListener {
             DASChargedKeys.remove(key);
         }
         
+    }
+
+    public void recordKeyEvent() {
+
     }
 
 
@@ -104,11 +108,16 @@ public class GameController implements GameOverListener {
         }
 
         switch (key) {
-            case MOVE_LEFT ->
-                horizontalMovePressed(physicalKey, Direction.LEFT);
+                
+            case MOVE_LEFT -> {
+                engine.move(Direction.LEFT);
+                startCharging(physicalKey, Direction.LEFT);
+            }
 
-            case MOVE_RIGHT ->
-                horizontalMovePressed(physicalKey, Direction.RIGHT);
+            case MOVE_RIGHT -> {
+                engine.move(Direction.RIGHT);
+                startCharging(physicalKey, Direction.RIGHT);
+            }
 
             case HARDDROP ->
                 engine.hardDrop();
@@ -150,10 +159,10 @@ public class GameController implements GameOverListener {
                 engine.endSoftDrop();
 
             case MOVE_LEFT ->
-                horizontalMoveReleased(physicalKey, Direction.LEFT);
+                endCharging(physicalKey, Direction.LEFT);
 
             case MOVE_RIGHT ->
-                horizontalMoveReleased(physicalKey, Direction.RIGHT);
+                endCharging(physicalKey, Direction.RIGHT);
 
             default -> {}
         }
@@ -174,40 +183,7 @@ public class GameController implements GameOverListener {
         window.onGameOver();
     }
 
-    /**
-     * @param direction only accept LEFT or RIGHT
-     * called when binded "<-"/"->" pressed
-     * start/end das and arr timeline
-     * operate engine by move/moveDAS
-     */
-    public void horizontalMovePressed(UnifiedKey key, Direction direction){
-        horizontalMove(direction);
-        startCharging(key, direction);
-    }
-
-    /**
-     * @param direction only accept LEFT or RIGHT
-     * called when binded "<-"/"->" released
-     * end das timeline
-     * operate engine by move/moveDAS
-     */
-    public void horizontalMoveReleased(UnifiedKey key, Direction direction){
-        // end charging/ remove charged
-        endCharging(key, direction);
-    }
-
-    /** 
-     * controller call this function to move tetromino,
-     * it let engine move than check softdrop event
-    */
-    private void horizontalMove(Direction direction) {
-        engine.move(direction);
-        // check if needed to repeat softdrop event
-        // handleSoftDropEvent();
-    }
-
     public GameState getGameState() {
         return gameState;
     }
-
 }
