@@ -113,9 +113,9 @@ public class App extends Application {
             GameKey gameKey = keyBinds.map(uKey, controller.getGameState());
 
             if (event.getEventType() == KeyEvent.KEY_PRESSED) {
-                controller.handleKeyPressed(gameKey, uKey);
+                controller.handleKeyPressed(gameKey);
             } else {
-                controller.handleKeyReleased(gameKey, uKey);
+                controller.handleKeyReleased(gameKey);
             }
         };
 
