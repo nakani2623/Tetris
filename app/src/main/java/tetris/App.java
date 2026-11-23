@@ -39,20 +39,16 @@ public class App extends Application {
     private final GameWindow window = new GameWindow(keyBinds);
     private MainThreadDispatcher dispatcher = new JavaFXMainThreadDispatcher();
     private final GameController controller = new GameController(engine, window, dispatcher);
+    private ReplayRecorder recorder;
+
+    
     @Override
     public void start(Stage stage) {
         engine.setLockPolicy(new DelayedLock(dispatcher, 500, 15));
         engine.setAutoMoveScheduler(new AutoMoveScheduler(1, 601, dispatcher, engine));
         // load config
+        enableRecording();
         addKeyboardControl();
-
-        // set game mode
-        // engine.setScoreManager(new ZenScore());
-        // engine.setScoreManager(new SprintScore(10));
-        // engine.setScoreManager(new CheeseSprintScore(10));
-
-        
-
 
         engine.setSoftDropFactor(601);
         engine.setGameOverListener(controller);
@@ -112,6 +108,14 @@ public class App extends Application {
             UnifiedKey uKey = JavaFXKeyboardAdapter.toUnifiedKey(event.getCode());
             GameKey gameKey = keyBinds.map(uKey, controller.getGameState());
 
+            if (recorder != null) {
+                if (event.getEventType() == KeyEvent.KEY_PRESSED) {
+                    recorder.record(gameKey, true);
+                } else {
+                    recorder.record(gameKey, false);;
+                }
+            }
+
             if (event.getEventType() == KeyEvent.KEY_PRESSED) {
                 controller.handleKeyPressed(gameKey);
             } else {
@@ -122,5 +126,10 @@ public class App extends Application {
         window.getScene().addEventHandler(KeyEvent.KEY_PRESSED, keyEventHandler);
         window.getScene().addEventHandler(KeyEvent.KEY_RELEASED, keyEventHandler);
 
+    }
+
+    public void enableRecording() {
+        recorder = new ReplayRecorder();
+        controller.setReplyRecorder(recorder);
     }
 }

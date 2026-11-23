@@ -9,6 +9,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import tetris.ReplayRecorder;
 import tetris.controller.dispatch.MainThreadDispatcher;
 import tetris.engine.GameEngine;
 import tetris.engine.type.Direction;
@@ -32,6 +33,7 @@ public class GameController implements GameOverListener {
     private double DAS = 5;
 
     private GameState gameState;
+    private ReplayRecorder recorder;
 
     public GameController(GameEngine engine, GameWindow window, MainThreadDispatcher dispatcher) {
         this.engine = engine;
@@ -40,6 +42,9 @@ public class GameController implements GameOverListener {
     }
 
     public void start() {
+        if (recorder != null)
+            recorder.start();
+
         gameState = GameState.active;
         engine.start();
         window.showGame();
@@ -143,9 +148,17 @@ public class GameController implements GameOverListener {
     public void onGameOver() {
         gameState = GameState.ended;
         window.onGameOver();
+
+        if (recorder != null) {
+            recorder.stop();
+        }
     }
 
     public GameState getGameState() {
         return gameState;
+    }
+
+    public void setReplyRecorder(ReplayRecorder recorder) {
+        this.recorder = recorder;
     }
 }
