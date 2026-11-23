@@ -10,6 +10,7 @@ public class ReplayRecorder {
 
     private List<ReplayEvent> activeRecording;
     private List<ReplayEvent> lastRecording;
+    private long lastDurationNanos;
 
     public ReplayRecorder() {
         lastRecording = List.of();
@@ -22,7 +23,11 @@ public class ReplayRecorder {
     }   
 
     public void stop() {
+        if (!active)
+            return;
+
         active = false;
+        lastDurationNanos = System.nanoTime() - startedAtNanos;
         lastRecording = List.copyOf(activeRecording);
         activeRecording = null;
     }
@@ -37,11 +42,11 @@ public class ReplayRecorder {
     }
 
     public List<ReplayEvent> export() {
-        if (active) {
-            System.err.println("WARNING: Recorder suppose to be stopped first before exporting");
-        }
-        
         return lastRecording;
+    }
+
+    public long getLastDurationNanos() {
+        return lastDurationNanos;
     }
 
     record ReplayEvent(long elapsedNanos, GameKey key, boolean pressed) {}

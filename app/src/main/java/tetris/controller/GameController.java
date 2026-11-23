@@ -31,9 +31,11 @@ public class GameController implements GameOverListener {
     private Map<GameKey, ScheduledFuture<?>> scheduledDASMoves = new HashMap<GameKey, ScheduledFuture<?>>();
     private List<GameKey> DASChargedKeys = new LinkedList<GameKey>();
     private double DAS = 5;
+    private long roundGeneration;
 
     private GameState gameState;
     private ReplayRecorder recorder;
+    private boolean replaying;
 
     public GameController(GameEngine engine, GameWindow window, MainThreadDispatcher dispatcher) {
         this.engine = engine;
@@ -42,9 +44,14 @@ public class GameController implements GameOverListener {
     }
 
     public void start() {
+        replaying = false;
         if (recorder != null)
             recorder.start();
 
+        startRound();
+    }
+
+    private void startRound() {
         gameState = GameState.active;
         engine.start();
         window.showGame();
@@ -54,25 +61,57 @@ public class GameController implements GameOverListener {
         reset();
         start();
     }
+
+    public long startReplay() {
+        reset();
+        replaying = true;
+        long startedAtNanos = System.nanoTime();
+        startRound();
+        return startedAtNanos;
+    }
+
+    public void finishReplay() {
+        replaying = false;
+        gameState = GameState.ended;
+        clearDAS();
+        engine.stop();
+        window.onReplayFinished();
+    }
     
     public void showMenu() {
         reset();
+        replaying = false;
         gameState = GameState.inMenu;
         window.showMenu();
     }
 
     private void reset() {
+        if (recorder != null)
+            recorder.stop();
+        clearDAS();
         engine.reset();
         window.onStart();
     }
 
+    private void clearDAS() {
+        roundGeneration++;
+        scheduledDASMoves.values().forEach(task -> task.cancel(false));
+        scheduledDASMoves.clear();
+        DASChargedKeys.clear();
+    }
+
     private void startCharging(GameKey key, Direction direction) {
+        if (gameState != GameState.active)
+            return;
+        long generation = roundGeneration;
         long delayNanos = (long) (DAS * TimeUnit.SECONDS.toNanos(1) / 60.0);
         ScheduledFuture<?> chargeDAS = scheduler.schedule(() -> {
             dispatcher.dispatch(() -> {
-                engine.chargeDAS(direction);
-                DASChargedKeys.add(key);
+                if (generation != roundGeneration)
+                    return;
                 scheduledDASMoves.remove(key);
+                DASChargedKeys.add(key);
+                engine.chargeDAS(direction);
             });
         }, delayNanos, TimeUnit.NANOSECONDS);
 
@@ -140,6 +179,7 @@ public class GameController implements GameOverListener {
     }
     
     public void dispose() {
+        clearDAS();
         scheduler.shutdown();
         engine.dispose();
     }
@@ -147,10 +187,13 @@ public class GameController implements GameOverListener {
     @Override 
     public void onGameOver() {
         gameState = GameState.ended;
-        window.onGameOver();
+        clearDAS();
 
         if (recorder != null) {
             recorder.stop();
+        }
+        if (!replaying) {
+            window.onGameOver();
         }
     }
 

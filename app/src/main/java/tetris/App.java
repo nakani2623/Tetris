@@ -3,9 +3,11 @@
  */
 package tetris;
 
+import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.event.EventHandler;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
 import tetris.controller.GameController;
@@ -40,8 +42,7 @@ public class App extends Application {
     private MainThreadDispatcher dispatcher = new JavaFXMainThreadDispatcher();
     private final GameController controller = new GameController(engine, window, dispatcher);
     private ReplayRecorder recorder;
-
-    
+    private AnimationTimer replayTimer;
     @Override
     public void start(Stage stage) {
         engine.setLockPolicy(new DelayedLock(dispatcher, 500, 15));
@@ -60,6 +61,7 @@ public class App extends Application {
         window.setOnExit(Platform::exit);
         window.setOnReturn(controller::showMenu);
         window.setOnRestart(controller::restart);
+        window.setOnReplay(this::playLastRecording);
 
         
         // gameEngine.loop();
@@ -98,34 +100,71 @@ public class App extends Application {
 
     @Override 
     public void stop() {
+        stopReplayTimer();
         controller.dispose();
-        engine.dispose();
         keyBinds.save();
     }
 
     public void addKeyboardControl() {
         EventHandler<KeyEvent> keyEventHandler = (event) -> {
+            if (replayTimer != null) {
+                if (event.getEventType() == KeyEvent.KEY_PRESSED && event.getCode() == KeyCode.ESCAPE) {
+                    stopReplayTimer();
+                    controller.showMenu();
+                }
+                event.consume();
+                return;
+            }
+
             UnifiedKey uKey = JavaFXKeyboardAdapter.toUnifiedKey(event.getCode());
             GameKey gameKey = keyBinds.map(uKey, controller.getGameState());
+            if (gameKey == null)
+                return;
 
-            if (recorder != null) {
-                if (event.getEventType() == KeyEvent.KEY_PRESSED) {
-                    recorder.record(gameKey, true);
-                } else {
-                    recorder.record(gameKey, false);;
-                }
-            }
+            boolean pressed = event.getEventType() == KeyEvent.KEY_PRESSED;
+            if (recorder != null)
+                recorder.record(gameKey, pressed);
 
-            if (event.getEventType() == KeyEvent.KEY_PRESSED) {
-                controller.handleKeyPressed(gameKey);
-            } else {
-                controller.handleKeyReleased(gameKey);
-            }
+            applyInput(gameKey, pressed);
         };
 
         window.getScene().addEventHandler(KeyEvent.KEY_PRESSED, keyEventHandler);
         window.getScene().addEventHandler(KeyEvent.KEY_RELEASED, keyEventHandler);
 
+    }
+
+    private void applyInput(GameKey key, boolean pressed) {
+        if (pressed)
+            controller.handleKeyPressed(key);
+        else
+            controller.handleKeyReleased(key);
+    }
+
+    private void playLastRecording() {
+        long durationNanos = recorder.getLastDurationNanos();
+        if (replayTimer != null || durationNanos == 0)
+            return;
+
+        var player = new ReplayPlayer(recorder.export(), durationNanos);
+        long startedAtNanos = controller.startReplay();
+        replayTimer = new AnimationTimer() {
+            @Override
+            public void handle(long now) {
+                long elapsedNanos = System.nanoTime() - startedAtNanos;
+                if (player.advanceTo(elapsedNanos, event -> applyInput(event.key(), event.pressed()))) {
+                    stopReplayTimer();
+                    controller.finishReplay();
+                }
+            }
+        };
+        replayTimer.start();
+    }
+
+    private void stopReplayTimer() {
+        if (replayTimer != null) {
+            replayTimer.stop();
+            replayTimer = null;
+        }
     }
 
     public void enableRecording() {

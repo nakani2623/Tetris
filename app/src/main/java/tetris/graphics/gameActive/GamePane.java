@@ -37,7 +37,8 @@ public class GamePane extends StackPane {
         hideGameOver();
     }
 
-    public void showGameOver() {
+    public void showGameOver(String title) {
+        gameOverModal.setTitle(title);
         gameOverModal.setVisible(true);
     }
 
@@ -48,6 +49,10 @@ public class GamePane extends StackPane {
 
     public void setOnRestart(Runnable action) {
         gameOverModal.setOnRestart(action);
+    }
+
+    public void setOnReplay(Runnable action) {
+        gameOverModal.setOnReplay(action);
     }
 
     public void setOnReturn(Runnable action) {
