@@ -3,16 +3,16 @@ package tetris;
 import java.util.List;
 import java.util.function.Consumer;
 
-import tetris.ReplayRecorder.ReplayEvent;
+import tetris.Replay.ReplayEvent;
 
 final class ReplayPlayer {
     private final List<ReplayEvent> events;
     private final long durationNanos;
     private int nextEvent;
 
-    ReplayPlayer(List<ReplayEvent> events, long durationNanos) {
-        this.events = events;
-        this.durationNanos = durationNanos;
+    ReplayPlayer(Replay replay) {
+        this.events = replay.events();
+        this.durationNanos = replay.durationNanos();
     }
 
     boolean advanceTo(long elapsedNanos, Consumer<ReplayEvent> applyInput) {

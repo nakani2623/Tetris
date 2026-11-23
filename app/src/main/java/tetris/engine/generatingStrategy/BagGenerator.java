@@ -5,11 +5,18 @@ import tetris.engine.type.TetrominoType;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 
 /**
  * Tetromino generator
  */
 public class BagGenerator implements TetrominoGenerator {
+    private Random bagRandom = new Random();
+
+    @Override
+    public void setSeed(long seed) {
+        bagRandom.setSeed(seed);
+    }
 
     /**
      * Generates 1 bag of Tetrominos
@@ -22,7 +29,7 @@ public class BagGenerator implements TetrominoGenerator {
             tetrominos.add(type);
         }
 
-        Collections.shuffle(tetrominos);
+        Collections.shuffle(tetrominos, bagRandom);
         return tetrominos;
     }
 }

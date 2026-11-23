@@ -141,12 +141,13 @@ public class App extends Application {
     }
 
     private void playLastRecording() {
-        long durationNanos = recorder.getLastDurationNanos();
-        if (replayTimer != null || durationNanos == 0)
+        var recording = recorder.export();
+        if (replayTimer != null || recording.isEmpty())
             return;
 
-        var player = new ReplayPlayer(recorder.export(), durationNanos);
-        long startedAtNanos = controller.startReplay();
+        Replay replay = recording.get();
+        var player = new ReplayPlayer(replay);
+        long startedAtNanos = controller.startReplay(replay.seed());
         replayTimer = new AnimationTimer() {
             @Override
             public void handle(long now) {

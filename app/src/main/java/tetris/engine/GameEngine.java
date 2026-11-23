@@ -91,6 +91,12 @@ public class GameEngine implements Observable {
             scoreManager.onStart();
     }
 
+    /** Starts the game with a fresh piece sequence for the given seed. */
+    public void start(long seed) {
+        nextQueue.reset(seed);
+        start();
+    }
+
     /**
      * Reset the board state into initial
      */

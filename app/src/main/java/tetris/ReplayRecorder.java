@@ -1,55 +1,45 @@
 package tetris;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
+import tetris.Replay.ReplayEvent;
 import tetris.engine.type.Input.GameKey;
 
 public class ReplayRecorder {
     private long startedAtNanos;
-    private boolean active;
+    private long seed;
 
     private List<ReplayEvent> activeRecording;
-    private List<ReplayEvent> lastRecording;
-    private long lastDurationNanos;
+    private Replay lastReplay;
 
-    public ReplayRecorder() {
-        lastRecording = List.of();
-    }
-
-    public void start() {
+    public void start(long seed) {
+        this.seed = seed;
         startedAtNanos = System.nanoTime();
         activeRecording = new ArrayList<>();
-        active = true;
-    }   
+    }
 
     public void stop() {
-        if (!active)
+        if (activeRecording == null)
             return;
 
-        active = false;
-        lastDurationNanos = System.nanoTime() - startedAtNanos;
-        lastRecording = List.copyOf(activeRecording);
+        long durationNanos = System.nanoTime() - startedAtNanos;
+        lastReplay = new Replay(seed, durationNanos, activeRecording);
         activeRecording = null;
     }
 
     public void record(GameKey key, boolean pressed) {
-        if (!active) 
+        if (activeRecording == null)
             return;
 
         long elapsedNanos = System.nanoTime() - startedAtNanos;
-        ReplayEvent re = new ReplayEvent(elapsedNanos, key, pressed);
-        activeRecording.add(re);
+        activeRecording.add(new ReplayEvent(elapsedNanos, key, pressed));
     }
 
-    public List<ReplayEvent> export() {
-        return lastRecording;
+    public Optional<Replay> export() {
+        return Optional.ofNullable(lastReplay);
     }
-
-    public long getLastDurationNanos() {
-        return lastDurationNanos;
-    }
-
-    record ReplayEvent(long elapsedNanos, GameKey key, boolean pressed) {}
 }
 
 

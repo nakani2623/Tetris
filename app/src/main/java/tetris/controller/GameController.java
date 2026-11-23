@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
 import tetris.ReplayRecorder;
@@ -45,15 +46,16 @@ public class GameController implements GameOverListener {
 
     public void start() {
         replaying = false;
+        long seed = ThreadLocalRandom.current().nextLong();
         if (recorder != null)
-            recorder.start();
+            recorder.start(seed);
 
-        startRound();
+        startRound(seed);
     }
 
-    private void startRound() {
+    private void startRound(long seed) {
         gameState = GameState.active;
-        engine.start();
+        engine.start(seed);
         window.showGame();
     }
 
@@ -62,11 +64,11 @@ public class GameController implements GameOverListener {
         start();
     }
 
-    public long startReplay() {
+    public long startReplay(long seed) {
         reset();
         replaying = true;
         long startedAtNanos = System.nanoTime();
-        startRound();
+        startRound(seed);
         return startedAtNanos;
     }
 
