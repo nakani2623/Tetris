@@ -15,6 +15,7 @@ import tetris.controller.dispatch.JavaFXMainThreadDispatcher;
 import tetris.controller.dispatch.MainThreadDispatcher;
 import tetris.controller.input.JavaFXKeyboardAdapter;
 import tetris.controller.input.KeyBinds;
+import tetris.engine.CheeseSprintGarbagePolicy;
 import tetris.engine.GameEngine;
 import tetris.engine.GarbageQueue;
 import tetris.engine.DelayedLock;
@@ -70,6 +71,7 @@ public class App extends Application {
 
     private void startSinglePlayer(SinglePlayGameMode gameMode) {
         ScoreManager scoreManager;
+        GarbageQueue garbageQueue = null;
         switch (gameMode) {
             case SPRINT:
                 scoreManager = new SprintScore(10);
@@ -77,16 +79,20 @@ public class App extends Application {
             case ZEN:
                 scoreManager = new ZenScore();
                 break;
-            case CHEESE_SPRINT:
-                engine.setGarbageQueue(new GarbageQueue(engine.getBoard()));
-                scoreManager = new CheeseSprintScore(15, engine.getBoard(), engine.getGarbageQueue());
+            case CHEESE_SPRINT: {
+                int goalLines = 15;
+                var risePolicy = new CheeseSprintGarbagePolicy(goalLines, 10);
+                garbageQueue = new GarbageQueue(engine.getBoard(), risePolicy);
+                scoreManager = new CheeseSprintScore(goalLines);
                 break;
+            }
             default:
                 scoreManager = new ZenScore();
                 break;
         }
 
         // engine.getScoreManager().dispose();
+        engine.setGarbageQueue(garbageQueue);
         engine.setScoreManager(scoreManager);
         new StatsDisplayManager(scoreManager, window.getScorePane());
         new SpinClearDisplayManager(scoreManager, window.getSpinClearPane());

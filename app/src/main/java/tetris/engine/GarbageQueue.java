@@ -4,20 +4,36 @@ import java.util.LinkedList;
 import java.util.List;
 
 import tetris.engine.piece.Garbage;
+import tetris.engine.type.LineClearResult;
 
-public class GarbageQueue { 
+public class GarbageQueue {
+    private final Board board;
+    private final GarbageRisePolicy risePolicy;
+    private final List<Garbage> garbageQueue = new LinkedList<>();
+    private final GarbageGenerator generator = new GarbageGenerator();
 
-    private Board board;
-    private List<Garbage> garbageQueue = new LinkedList<>();
-
-    public GarbageQueue(Board board) {
+    public GarbageQueue(Board board, GarbageRisePolicy risePolicy) {
         this.board = board;
+        this.risePolicy = risePolicy;
     }
-    public void queue(Garbage garbage) {garbageQueue.addLast(garbage);}
-    public void flush() {
-        for (Garbage garbage : garbageQueue) {
+
+    public void onRoundStart() {
+        garbageQueue.clear();
+        fill(risePolicy.onRoundStart());
+    }
+
+    public void onLock(LineClearResult result) {
+        fill(risePolicy.onLock(result, board.getGarbageHeight()));
+    }
+
+    private void fill(int lines) {
+        for (int i = 0; i < lines; i++) {
+            Garbage garbage = generator.generateAvoidSameHole(1, (int)board.getWidth(), board.getLastHole());
             board.insertgarbage(garbage);
         }
-        garbageQueue.clear();
+    }
+
+    public void setSeed(long seed) {
+        generator.setSeed(seed);
     }
 }

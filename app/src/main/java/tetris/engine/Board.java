@@ -216,15 +216,12 @@ public class Board implements Observable{
         lastGarbageHole = garbage.getHole();
         this.garbageHeight += garbage.getHeight();
     }
+
     /*
     ------------
     -LINE CLEAR-
     ------------
     */
-
-    public LineClearResult clearCompleted() {
-        return checkCompletedLines(currentTetromino);
-    }
     /**
      * clear specified lines, update board
      * @param toClear: heights of lines to clear, e.g to clear bot 4 lines, to clear = [0, 1, 2, 3]
@@ -310,7 +307,7 @@ public class Board implements Observable{
      * lock tetromino trigger this, check for any lines to clear, if exist then clear.
      * @param lastLocked, the tetromino just locked, possible line clears should related with position of it
      */
-    LineClearResult checkCompletedLines(Tetromino lastLocked) {
+    public LineClearResult checkCompletedLines(Tetromino lastLocked) {
         // group to lower/around/upper
         HashSet<Double> lastLockedHeights = calcSetOfRelatedHeights(lastLocked);
         ArrayList<Piece> lower = new ArrayList<Piece>();
@@ -340,6 +337,10 @@ public class Board implements Observable{
             }
         }
         return result;
+    }
+
+    public LineClearResult clearCompleted() {
+        return checkCompletedLines(currentTetromino);
     }
 
     public Tetromino getcurrentTetromino() {

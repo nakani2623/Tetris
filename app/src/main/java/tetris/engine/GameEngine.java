@@ -82,13 +82,13 @@ public class GameEngine implements Observable {
         spawn();
         if (!started)
             return;
-        // board.allTetrominos.add(new Piece(new Mino(0, 0)));
-        // Piece initialGround = new Piece(List.of(new Mino(0, 1), new Mino(1, 1), new Mino(3, 0)));
-        // board.allTetrominos.add(initialGround);
+
         if (autoMoveScheduler != null) 
             autoMoveScheduler.start();
         if (scoreManager != null)
             scoreManager.onStart();
+        if (garbageQueue != null)
+            garbageQueue.onRoundStart();
     }
 
     /** Starts the game with a fresh piece sequence for the given seed. */
@@ -282,9 +282,15 @@ public class GameEngine implements Observable {
     void lock() {
         resetLockPolicy();
         board.onLock();
+
         LineClearResult clearResult = board.clearCompleted();
-        if (scoreManager != null) 
+        if (scoreManager != null) {
             scoreManager.onLock(clearResult);
+        }
+        if (garbageQueue != null) {
+            garbageQueue.onLock(clearResult);
+        }
+
         spawn();
     }
     public void hardDrop() {
