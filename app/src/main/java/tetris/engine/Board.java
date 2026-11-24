@@ -31,7 +31,6 @@ public class Board implements Observable{
     Tetromino currentTetromino;
     boolean isCurrTetroLocked;
     private Tetromino shadowTetromino;
-    private int lastGarbageHole;
     private int garbageHeight = 0;
     private List<Observer> observers = new ArrayList<>();
 
@@ -213,7 +212,6 @@ public class Board implements Observable{
         }
         // add garbage
         allTetrominos.add(garbage);
-        lastGarbageHole = garbage.getHole();
         this.garbageHeight += garbage.getHeight();
     }
 
@@ -381,10 +379,6 @@ public class Board implements Observable{
         for (Observer observer : observers) {
             observer.update();
         }
-    }
-
-    public int getLastHole() {
-        return lastGarbageHole;
     }
 
     public int getGarbageHeight() {

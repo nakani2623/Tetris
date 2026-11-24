@@ -94,6 +94,10 @@ public class GameEngine implements Observable {
     /** Starts the game with a fresh piece sequence for the given seed. */
     public void start(long seed) {
         nextQueue.reset(seed);
+        if (garbageQueue != null) {
+            garbageQueue.setSeed(seed);
+        }
+
         start();
     }
 

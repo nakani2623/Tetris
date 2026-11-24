@@ -19,6 +19,7 @@ public class GarbageQueue {
 
     public void onRoundStart() {
         garbageQueue.clear();
+        generator.resetHoleHistory();
         fill(risePolicy.onRoundStart());
     }
 
@@ -28,7 +29,7 @@ public class GarbageQueue {
 
     private void fill(int lines) {
         for (int i = 0; i < lines; i++) {
-            Garbage garbage = generator.generateAvoidSameHole(1, (int)board.getWidth(), board.getLastHole());
+            Garbage garbage = generator.generateAvoidSameHole(1, (int)board.getWidth());
             board.insertgarbage(garbage);
         }
     }
