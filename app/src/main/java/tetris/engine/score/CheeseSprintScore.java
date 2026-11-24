@@ -4,6 +4,7 @@ import tetris.engine.Board;
 import tetris.engine.GarbageGenerator;
 import tetris.engine.GarbageQueue;
 import tetris.engine.piece.Garbage;
+import tetris.engine.type.LineClearResult;
 
 public class CheeseSprintScore extends SprintScore {
     private final int maxGarbageLines = 10;
@@ -35,7 +36,10 @@ public class CheeseSprintScore extends SprintScore {
     public void onStart() {
         fillGarbage();
     }
-    public void onLock(int nLinesCleared, int nGarbageLinesCleared) {
+    @Override
+    public void onLock(LineClearResult result) {
+        int nLinesCleared = result.totalLinesCleared();
+        int nGarbageLinesCleared = result.garbageLinesCleared();
         if (nLinesCleared == 0) fillGarbage();
         else if (nGarbageLinesCleared != 0) {
             this.totalLinesCleared += nGarbageLinesCleared;

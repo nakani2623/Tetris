@@ -284,7 +284,7 @@ public class GameEngine implements Observable {
         board.onLock();
         LineClearResult clearResult = board.clearCompleted();
         if (scoreManager != null) 
-            scoreManager.onLock(clearResult.totalLinesCleared(), clearResult.garbageLinesCleared());
+            scoreManager.onLock(clearResult);
         spawn();
     }
     public void hardDrop() {

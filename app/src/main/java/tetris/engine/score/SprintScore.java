@@ -10,6 +10,7 @@ import java.util.concurrent.TimeUnit;
 import tetris.engine.observers.ScoreObserver;
 import tetris.engine.score.scoreEvent.ScoreEvent;
 import tetris.engine.score.scoreEvent.StatsEvent;
+import tetris.engine.type.LineClearResult;
 
 public class SprintScore implements ScoreManager {
 
@@ -67,8 +68,8 @@ public class SprintScore implements ScoreManager {
         notifyObservers(new StatsEvent());
     }
 
-    public void onLock(int nLinesCleared, int nGarbageLinesCleared) {
-        this.totalLinesCleared += nLinesCleared;
+    public void onLock(LineClearResult result) {
+        this.totalLinesCleared += result.totalLinesCleared();
         this.piecesPlaced++;
     }
 

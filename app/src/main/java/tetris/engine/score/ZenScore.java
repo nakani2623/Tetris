@@ -11,6 +11,7 @@ import tetris.engine.observers.ScoreObserver;
 import tetris.engine.score.scoreEvent.ScoreEvent;
 import tetris.engine.score.scoreEvent.SpinClearEvent;
 import tetris.engine.score.scoreEvent.StatsEvent;
+import tetris.engine.type.LineClearResult;
 import tetris.engine.type.SpinState;
 import tetris.engine.type.TetrominoType;
 
@@ -91,7 +92,8 @@ public class ZenScore implements ScoreManager {
         currentTetrominoType = tetrominoType;
     }
 
-    public void onLock(int linesCleared, int garbageCleared) {
+    public void onLock(LineClearResult result) {
+        int linesCleared = result.totalLinesCleared();
         if (linesCleared != 0 || spinState != SpinState.NOT_SPIN) {
             notifyObservers(new SpinClearEvent(linesCleared, spinState, currentTetrominoType));
         }
