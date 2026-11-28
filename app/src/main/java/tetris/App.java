@@ -3,9 +3,11 @@
  */
 package tetris;
 
+import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.event.EventHandler;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
 import tetris.controller.GameController;
@@ -13,6 +15,7 @@ import tetris.controller.dispatch.JavaFXMainThreadDispatcher;
 import tetris.controller.dispatch.MainThreadDispatcher;
 import tetris.controller.input.JavaFXKeyboardAdapter;
 import tetris.controller.input.KeyBinds;
+import tetris.engine.CheeseSprintGarbagePolicy;
 import tetris.engine.GameEngine;
 import tetris.engine.GarbageQueue;
 import tetris.engine.DelayedLock;
@@ -39,20 +42,15 @@ public class App extends Application {
     private final GameWindow window = new GameWindow(keyBinds);
     private MainThreadDispatcher dispatcher = new JavaFXMainThreadDispatcher();
     private final GameController controller = new GameController(engine, window, dispatcher);
+    private ReplayRecorder recorder;
+    private AnimationTimer replayTimer;
     @Override
     public void start(Stage stage) {
         engine.setLockPolicy(new DelayedLock(dispatcher, 500, 15));
         engine.setAutoMoveScheduler(new AutoMoveScheduler(1, 601, dispatcher, engine));
         // load config
+        enableRecording();
         addKeyboardControl();
-
-        // set game mode
-        // engine.setScoreManager(new ZenScore());
-        // engine.setScoreManager(new SprintScore(10));
-        // engine.setScoreManager(new CheeseSprintScore(10));
-
-        
-
 
         engine.setSoftDropFactor(601);
         engine.setGameOverListener(controller);
@@ -64,6 +62,7 @@ public class App extends Application {
         window.setOnExit(Platform::exit);
         window.setOnReturn(controller::showMenu);
         window.setOnRestart(controller::restart);
+        window.setOnReplay(this::playLastRecording);
 
         
         // gameEngine.loop();
@@ -72,6 +71,7 @@ public class App extends Application {
 
     private void startSinglePlayer(SinglePlayGameMode gameMode) {
         ScoreManager scoreManager;
+        GarbageQueue garbageQueue = null;
         switch (gameMode) {
             case SPRINT:
                 scoreManager = new SprintScore(10);
@@ -79,16 +79,20 @@ public class App extends Application {
             case ZEN:
                 scoreManager = new ZenScore();
                 break;
-            case CHEESE_SPRINT:
-                engine.setGarbageQueue(new GarbageQueue(engine.getBoard()));
-                scoreManager = new CheeseSprintScore(15, engine.getBoard(), engine.getGarbageQueue());
+            case CHEESE_SPRINT: {
+                int goalLines = 15;
+                var risePolicy = new CheeseSprintGarbagePolicy(goalLines, 10);
+                garbageQueue = new GarbageQueue(engine.getBoard(), risePolicy);
+                scoreManager = new CheeseSprintScore(goalLines);
                 break;
+            }
             default:
                 scoreManager = new ZenScore();
                 break;
         }
 
         // engine.getScoreManager().dispose();
+        engine.setGarbageQueue(garbageQueue);
         engine.setScoreManager(scoreManager);
         new StatsDisplayManager(scoreManager, window.getScorePane());
         new SpinClearDisplayManager(scoreManager, window.getSpinClearPane());
@@ -102,25 +106,76 @@ public class App extends Application {
 
     @Override 
     public void stop() {
+        stopReplayTimer();
         controller.dispose();
-        engine.dispose();
         keyBinds.save();
     }
 
     public void addKeyboardControl() {
         EventHandler<KeyEvent> keyEventHandler = (event) -> {
+            if (replayTimer != null) {
+                if (event.getEventType() == KeyEvent.KEY_PRESSED && event.getCode() == KeyCode.ESCAPE) {
+                    stopReplayTimer();
+                    controller.showMenu();
+                }
+                event.consume();
+                return;
+            }
+
             UnifiedKey uKey = JavaFXKeyboardAdapter.toUnifiedKey(event.getCode());
             GameKey gameKey = keyBinds.map(uKey, controller.getGameState());
+            if (gameKey == null)
+                return;
 
-            if (event.getEventType() == KeyEvent.KEY_PRESSED) {
-                controller.handleKeyPressed(gameKey, uKey);
-            } else {
-                controller.handleKeyReleased(gameKey, uKey);
-            }
+            boolean pressed = event.getEventType() == KeyEvent.KEY_PRESSED;
+            if (recorder != null)
+                recorder.record(gameKey, pressed);
+
+            applyInput(gameKey, pressed);
         };
 
         window.getScene().addEventHandler(KeyEvent.KEY_PRESSED, keyEventHandler);
         window.getScene().addEventHandler(KeyEvent.KEY_RELEASED, keyEventHandler);
 
+    }
+
+    private void applyInput(GameKey key, boolean pressed) {
+        if (pressed)
+            controller.handleKeyPressed(key);
+        else
+            controller.handleKeyReleased(key);
+    }
+
+    private void playLastRecording() {
+        var recording = recorder.export();
+        if (replayTimer != null || recording.isEmpty())
+            return;
+
+        Replay replay = recording.get();
+        var player = new ReplayPlayer(replay);
+        long startedAtNanos = controller.startReplay(replay.seed());
+        replayTimer = new AnimationTimer() {
+            @Override
+            public void handle(long now) {
+                long elapsedNanos = System.nanoTime() - startedAtNanos;
+                if (player.advanceTo(elapsedNanos, event -> applyInput(event.key(), event.pressed()))) {
+                    stopReplayTimer();
+                    controller.finishReplay();
+                }
+            }
+        };
+        replayTimer.start();
+    }
+
+    private void stopReplayTimer() {
+        if (replayTimer != null) {
+            replayTimer.stop();
+            replayTimer = null;
+        }
+    }
+
+    public void enableRecording() {
+        recorder = new ReplayRecorder();
+        controller.setReplyRecorder(recorder);
     }
 }

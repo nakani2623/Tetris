@@ -1,22 +1,21 @@
 package tetris.controller;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
+import tetris.ReplayRecorder;
 import tetris.controller.dispatch.MainThreadDispatcher;
 import tetris.engine.GameEngine;
 import tetris.engine.type.Direction;
 import tetris.engine.type.GameState;
 import tetris.engine.type.Rotation;
-import tetris.engine.type.UnifiedKey;
 import tetris.engine.type.Input.GameKey;
 import tetris.graphics.GameWindow;
 
@@ -30,12 +29,14 @@ public class GameController implements GameOverListener {
     private MainThreadDispatcher dispatcher;
 
     private ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
-    private Map<UnifiedKey, ScheduledFuture<?>> DASChargingKeys = new HashMap<UnifiedKey, ScheduledFuture<?>>();
-    private Set<UnifiedKey> pressedKeys = new HashSet<>(); 
-    private List<UnifiedKey> DASChargedKeys = new LinkedList<UnifiedKey>();
+    private Map<GameKey, ScheduledFuture<?>> scheduledDASMoves = new HashMap<GameKey, ScheduledFuture<?>>();
+    private List<GameKey> DASChargedKeys = new LinkedList<GameKey>();
     private double DAS = 5;
+    private long roundGeneration;
 
     private GameState gameState;
+    private ReplayRecorder recorder;
+    private boolean replaying;
 
     public GameController(GameEngine engine, GameWindow window, MainThreadDispatcher dispatcher) {
         this.engine = engine;
@@ -44,8 +45,17 @@ public class GameController implements GameOverListener {
     }
 
     public void start() {
+        replaying = false;
+        long seed = ThreadLocalRandom.current().nextLong();
+        if (recorder != null)
+            recorder.start(seed);
+
+        startRound(seed);
+    }
+
+    private void startRound(long seed) {
         gameState = GameState.active;
-        engine.start();
+        engine.start(seed);
         window.showGame();
     }
 
@@ -53,35 +63,65 @@ public class GameController implements GameOverListener {
         reset();
         start();
     }
+
+    public long startReplay(long seed) {
+        reset();
+        replaying = true;
+        long startedAtNanos = System.nanoTime();
+        startRound(seed);
+        return startedAtNanos;
+    }
+
+    public void finishReplay() {
+        replaying = false;
+        gameState = GameState.ended;
+        clearDAS();
+        engine.stop();
+        window.onReplayFinished();
+    }
     
     public void showMenu() {
         reset();
+        replaying = false;
         gameState = GameState.inMenu;
         window.showMenu();
     }
 
     private void reset() {
-        pressedKeys.clear();
+        if (recorder != null)
+            recorder.stop();
+        clearDAS();
         engine.reset();
         window.onStart();
     }
 
-    private void startCharging(UnifiedKey key, Direction direction) {
+    private void clearDAS() {
+        roundGeneration++;
+        scheduledDASMoves.values().forEach(task -> task.cancel(false));
+        scheduledDASMoves.clear();
+        DASChargedKeys.clear();
+    }
+
+    private void startCharging(GameKey key, Direction direction) {
+        if (gameState != GameState.active)
+            return;
+        long generation = roundGeneration;
         long delayNanos = (long) (DAS * TimeUnit.SECONDS.toNanos(1) / 60.0);
         ScheduledFuture<?> chargeDAS = scheduler.schedule(() -> {
             dispatcher.dispatch(() -> {
-                engine.chargeDAS(direction);
+                if (generation != roundGeneration)
+                    return;
+                scheduledDASMoves.remove(key);
                 DASChargedKeys.add(key);
-                // handleDASEvent();
-                DASChargingKeys.remove(key);
+                engine.chargeDAS(direction);
             });
         }, delayNanos, TimeUnit.NANOSECONDS);
-        DASChargingKeys.put(key, chargeDAS);
 
+        scheduledDASMoves.put(key, chargeDAS);
     }
-    private void endCharging(UnifiedKey key, Direction direction) {
-        if (DASChargingKeys.containsKey(key)) {
-            this.DASChargingKeys.get(key).cancel(false);
+    private void endCharging(GameKey key, Direction direction) {
+        if (scheduledDASMoves.containsKey(key)) {
+            this.scheduledDASMoves.get(key).cancel(false);
         }
 
         if (DASChargedKeys.contains(key)) {
@@ -91,13 +131,13 @@ public class GameController implements GameOverListener {
         
     }
 
+    public void recordKeyEvent() {
 
-    public void handleKeyPressed(GameKey key, UnifiedKey physicalKey) {
-        if (!pressedKeys.add(physicalKey)) { // Ignore repeated KEY_DOWN events
-            return;
-        }
+    }
 
-        if (key == null)
+
+    public void handleKeyPressed(GameKey key) {
+        if (key == null || gameState != GameState.active)
             return;
 
         if (gameState == GameState.ended) {
@@ -107,73 +147,41 @@ public class GameController implements GameOverListener {
             return;
         }
 
-        if (gameState != GameState.active) {
-            return;
+        switch (key) {    
+            case MOVE_LEFT -> {
+                engine.move(Direction.LEFT);
+                startCharging(key, Direction.LEFT);
+            }
+            case MOVE_RIGHT -> {
+                engine.move(Direction.RIGHT);
+                startCharging(key, Direction.RIGHT);
+            }
+
+            case HARDDROP -> engine.hardDrop();
+            case SOFTDROP -> engine.startSoftDrop();
+            case HOLD -> engine.hold();
+            case ROTATE_CCW -> engine.rotate(Rotation.COUNTER_CLOCKWISE);
+            case ROTATE_CW -> engine.rotate(Rotation.CLOCKWISE);
+            case ROTATE_180 -> engine.rotate(Rotation.R_180);         
+            case RESTART -> System.out.println("Can't handle this input: NOT IMPLEMENTED");
         }
 
-        switch (key) {
-            case MOVE_LEFT ->
-                horizontalMovePressed(physicalKey, Direction.LEFT);
-
-            case MOVE_RIGHT ->
-                horizontalMovePressed(physicalKey, Direction.RIGHT);
-
-            case HARDDROP ->
-                engine.hardDrop();
-
-            case SOFTDROP ->
-                engine.startSoftDrop();
-
-            case HOLD ->
-                engine.hold();
-
-            case ROTATE_CCW ->
-                engine.rotate(Rotation.COUNTER_CLOCKWISE);
-
-            case ROTATE_CW ->
-                engine.rotate(Rotation.CLOCKWISE);
-
-            case ROTATE_180 ->
-                engine.rotate(Rotation.R_180);
-            
-            case RESTART ->
-                System.out.println("Can't handle this input: NOT IMPLEMENTED");
-        }
-
-        // Must execute after each newly pressed key
-        // handleDASEvent();
-        // handleSoftDropEvent();
     }
 
-    public void handleKeyReleased(GameKey key, UnifiedKey physicalKey) {
-        pressedKeys.remove(physicalKey);
-
-        if (gameState != GameState.active) {
-            return;
-        }
-
-        if (key == null)
+    public void handleKeyReleased(GameKey key) {
+        if (key == null || gameState != GameState.active)
             return;
 
         switch (key) {
-            case SOFTDROP ->
-                engine.endSoftDrop();
-
-            case MOVE_LEFT ->
-                horizontalMoveReleased(physicalKey, Direction.LEFT);
-
-            case MOVE_RIGHT ->
-                horizontalMoveReleased(physicalKey, Direction.RIGHT);
-
+            case SOFTDROP -> engine.endSoftDrop();
+            case MOVE_LEFT -> endCharging(key, Direction.LEFT);
+            case MOVE_RIGHT -> endCharging(key, Direction.RIGHT);
             default -> {}
         }
     }
-
-    // public void setSoftDropFactor(double softDropFactor) {
-    //     this.softDropFactor = softDropFactor;
-    // }
     
     public void dispose() {
+        clearDAS();
         scheduler.shutdown();
         engine.dispose();
     }
@@ -181,43 +189,21 @@ public class GameController implements GameOverListener {
     @Override 
     public void onGameOver() {
         gameState = GameState.ended;
-        window.onGameOver();
-    }
+        clearDAS();
 
-    /**
-     * @param direction only accept LEFT or RIGHT
-     * called when binded "<-"/"->" pressed
-     * start/end das and arr timeline
-     * operate engine by move/moveDAS
-     */
-    public void horizontalMovePressed(UnifiedKey key, Direction direction){
-        horizontalMove(direction);
-        startCharging(key, direction);
-    }
-
-    /**
-     * @param direction only accept LEFT or RIGHT
-     * called when binded "<-"/"->" released
-     * end das timeline
-     * operate engine by move/moveDAS
-     */
-    public void horizontalMoveReleased(UnifiedKey key, Direction direction){
-        // end charging/ remove charged
-        endCharging(key, direction);
-    }
-
-    /** 
-     * controller call this function to move tetromino,
-     * it let engine move than check softdrop event
-    */
-    private void horizontalMove(Direction direction) {
-        engine.move(direction);
-        // check if needed to repeat softdrop event
-        // handleSoftDropEvent();
+        if (recorder != null) {
+            recorder.stop();
+        }
+        if (!replaying) {
+            window.onGameOver();
+        }
     }
 
     public GameState getGameState() {
         return gameState;
     }
 
+    public void setReplyRecorder(ReplayRecorder recorder) {
+        this.recorder = recorder;
+    }
 }

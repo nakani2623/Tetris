@@ -8,13 +8,12 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 
 public class GameOverPane extends VBox {
-        private Button restartButton;
-        private Button returnButton;
-    public GameOverPane() {
-        Label title = new Label("GAME OVER!");
-        restartButton = new Button("Restart");
-        returnButton = new Button("Return to Menu"); 
+    private final Label title = new Label();
+    private final Button restartButton = new Button("Restart");
+    private final Button replayButton = new Button("Play Last Replay");
+    private final Button returnButton = new Button("Return to Menu");
 
+    public GameOverPane() {
         setAlignment(Pos.TOP_CENTER);
         setFillWidth(false);
         setMaxSize(
@@ -26,7 +25,15 @@ public class GameOverPane extends VBox {
         
         setStyle("-fx-border-color: gray; -fx-background-color: -fx-background;");
 
-        this.getChildren().addAll(title, restartButton, returnButton);
+        this.getChildren().addAll(title, restartButton, replayButton, returnButton);
+    }
+
+    public void setTitle(String text) {
+        title.setText(text);
+    }
+
+    public void setOnReplay(Runnable action) {
+        replayButton.setOnAction(event -> action.run());
     }
 
     public void setOnRestart(Runnable action) {

@@ -14,7 +14,7 @@ import tetris.engine.type.TetrominoType;
 public class NextQueue implements Observable {
         // next queue / generate piece
     private Queue<TetrominoType> nextQueue = new LinkedList<TetrominoType>();
-    private TetrominoGenerator tetrominoGenerator;
+    private final TetrominoGenerator tetrominoGenerator;
     private int displaySize;
     private List<Observer> observers = new ArrayList<>();
     public NextQueue() {
@@ -37,6 +37,11 @@ public class NextQueue implements Observable {
 
     public void reset() {
         nextQueue.clear();
+    }
+
+    void reset(long seed) {
+        reset();
+        tetrominoGenerator.setSeed(seed);
     }
 
     public List<TetrominoType> getNextQueue() {

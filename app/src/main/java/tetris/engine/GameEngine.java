@@ -80,13 +80,25 @@ public class GameEngine implements Observable {
     public void start() {
         started = true;
         spawn();
-        // board.allTetrominos.add(new Piece(new Mino(0, 0)));
-        // Piece initialGround = new Piece(List.of(new Mino(0, 1), new Mino(1, 1), new Mino(3, 0)));
-        // board.allTetrominos.add(initialGround);
+        if (!started)
+            return;
+
         if (autoMoveScheduler != null) 
             autoMoveScheduler.start();
         if (scoreManager != null)
             scoreManager.onStart();
+        if (garbageQueue != null)
+            garbageQueue.onRoundStart();
+    }
+
+    /** Starts the game with a fresh piece sequence for the given seed. */
+    public void start(long seed) {
+        nextQueue.reset(seed);
+        if (garbageQueue != null) {
+            garbageQueue.setSeed(seed);
+        }
+
+        start();
     }
 
     /**
@@ -103,6 +115,14 @@ public class GameEngine implements Observable {
     }
 
     private void onGameOver() {
+        stop();
+        if (listener != null)
+            listener.onGameOver();
+    }
+
+    public void stop() {
+        started = false;
+        resetLockPolicy();
         if (scoreManager != null) {
             scoreManager.stop();
         }
@@ -110,9 +130,6 @@ public class GameEngine implements Observable {
         if (autoMoveScheduler != null) {
             autoMoveScheduler.stop();
         }
-
-        if (listener != null)
-            listener.onGameOver();
     }
 
 //  ███╗   ███╗ ██████╗ ██╗   ██╗███████╗
@@ -269,9 +286,15 @@ public class GameEngine implements Observable {
     void lock() {
         resetLockPolicy();
         board.onLock();
+
         LineClearResult clearResult = board.clearCompleted();
-        if (scoreManager != null) 
-            scoreManager.onLock(clearResult.totalLinesCleared(), clearResult.garbageLinesCleared());
+        if (scoreManager != null) {
+            scoreManager.onLock(clearResult);
+        }
+        if (garbageQueue != null) {
+            garbageQueue.onLock(clearResult);
+        }
+
         spawn();
     }
     public void hardDrop() {
@@ -348,7 +371,7 @@ public class GameEngine implements Observable {
     public void setARR(double ARR) {
         if (autoMoveScheduler == null) 
             return;
-        autoMoveScheduler.setARR(ARR);
+        autoMoveScheduler.setAutoRepeatRate(ARR);
     }
 
     public void setGameOverListener(GameOverListener listener) {

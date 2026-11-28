@@ -102,12 +102,20 @@ public class GameWindow {
         gamePane.setOnRestart(action);
     }
 
+    public void setOnReplay(Runnable action) {
+        gamePane.setOnReplay(action);
+    }
+
     public void setOnReturn(Runnable action) {
         gamePane.setOnReturn(action);
     }
 
     public void onGameOver() {
-        gamePane.showGameOver();
+        gamePane.showGameOver("GAME OVER!");
+    }
+
+    public void onReplayFinished() {
+        gamePane.showGameOver("Replay Finished");
     }
 
     public void onStart() {
